@@ -1,8 +1,7 @@
 import React, {useState} from 'react';
 import {StyleSheet,  View, TextInput, Button} from 'react-native';
 import MapView, {Polyline, Marker} from 'react-native-maps';
-import axios from 'axios';
-
+import { calculateRoute, geoCoding } from './OpenRouteService';
 const App = () => {
   const [showMap, setShowMap] = useState(false);
   const [originName, setOriginName] = useState('');
@@ -10,40 +9,30 @@ const App = () => {
   const [origin, setOrigin] = useState({});
   const [destination, setDestination] = useState({});
   const [route, setRoute] = useState([]);
-  const apiKey = '5b3ce3597851110001cf624890104ad5d8c9453d90c93dcd210dc008';
-
-  const calculateRoute = async (start, end) => {
-    const response = await axios.get(
-      `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${start}&end=${end}`,
-    );
-    setRoute(
-      response.data.features[0].geometry.coordinates.map(coord => ({
-        latitude: coord[1],
-        longitude: coord[0],
-      })),
-    );
-  };
-
-  const geoCoding = async name => {
-    const response = await axios.get(
-      `https://api.openrouteservice.org/geocode/search?api_key=${apiKey}&text=${name}`,
-    );
-    const location = response.data.features[0].geometry.coordinates;
-    return {latitude: location[1], longitude: location[0]};
-  };
 
   const findRoute = async () => {
-    const originCoords = await geoCoding(originName);
-    const destinationCoords = await geoCoding(destinationName);
+    try {
+      const originCoords = await geoCoding(originName);
+      const destinationCoords = await geoCoding(destinationName);
 
-    setOrigin(originCoords);
-    setDestination(destinationCoords);
+      setOrigin(originCoords);
+      setDestination(destinationCoords);
 
-    const start = `${originCoords.longitude},${originCoords.latitude}`;
-    const end = `${destinationCoords.longitude},${destinationCoords.latitude}`;
+      const start = `${originCoords.longitude},${originCoords.latitude}`;
+      const end = `${destinationCoords.longitude},${destinationCoords.latitude}`;
 
-    await calculateRoute(start, end);
-    setShowMap(true);
+      const response = await calculateRoute(start, end);
+      setRoute(
+        response.features[0].geometry.coordinates.map(coord => ({
+          latitude: coord[1],
+          longitude: coord[0],
+        }))
+      );
+
+      setShowMap(true);
+    } catch (error) {
+      console.error("Error finding route:", error);
+    }
   };
 
   return (
