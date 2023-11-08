@@ -1,18 +1,27 @@
 class User {
-  constructor(email, password) {
+  constructor(email, password, authService) {
     this.email = email;
     this.password = password;
+    this.authService = authService; // Inyectamos la dependencia del servicio de autenticación
   }
 
   async register() {
-    // Aquí iría la lógica para revisar validez de contraseña
-    // Aquí iría la lógica para registrar un usuario en Firebase
-    return 
+    // Aquí falta añadir lógica adicional para validar el password (minimo 6 carac incluyendo 2 num)
+    try {
+      const result = await this.authService.createUserWithEmailAndPassword(this.email, this.password);
+      return result;
+    } catch (error) {
+      throw new Error('RegistrationFailed', error);
+    }
   }
 
   async login() {
-    // Aquí iría la lógica para iniciar sesión en Firebase
-    return 
+    try {
+      const result = await this.authService.signInWithEmailAndPassword(this.email, this.password);
+      return result;
+    } catch (error) {
+      throw new Error('InvalidLoginException', error);
+    }
   }
 }
 
