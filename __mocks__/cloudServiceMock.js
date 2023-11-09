@@ -30,6 +30,7 @@ mockAddDoc.mockImplementation((collection, data) => {
   // Comprobamos si los datos del nuevo vehículo coinciden con el vehículo existente
   if (
     collection === 'vehicles' &&
+    data.creator === existingVehicle.creator &&
     data.brand === existingVehicle.brand &&
     data.model === existingVehicle.model &&
     data.year === existingVehicle.year &&
@@ -41,7 +42,8 @@ mockAddDoc.mockImplementation((collection, data) => {
   // Comprobamos si el toponimo del nuevo punto de interés ya existe en la base de datos
   if (
     collection === 'interestPoints' &&
-    data.name === existingInterestPoint.name 
+    data.name === existingInterestPoint.name &&
+    data.creator === existingInterestPoint.creator
   ) {
     return Promise.reject(new Error('DuplicateInterestPointException'));
   }

@@ -1,3 +1,3 @@
-import firebase from "./firebase";
+import firebaseInstance from "./firebase";
 
-export default firebase;
+export default firebaseInstance;
