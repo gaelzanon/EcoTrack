@@ -34,7 +34,12 @@ class UserController {
 
   async login(user) {
     // Valida la contraseña antes de intentar loggear al usuario
-    
+    if (!this.validarEmail(user.email)) {
+      throw new Error('InvalidEmailException')
+    }
+    if (!this.validarPassword(user.password)) {
+      throw new Error('InvalidPasswordException')
+    }
     try {
       const result = await this.authService.signInWithEmailAndPassword(
         user.email,
