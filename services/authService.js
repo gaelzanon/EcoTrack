@@ -5,7 +5,16 @@ import {Alert} from 'react-native';
 import {
   signInWithEmailAndPassword,
   signOut,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  sendEmailVerification,
 } from 'firebase/auth';
+import {
+  addDoc,
+  collection,
+  addDoc,
+} from 'firebase/firestore'
 class AuthService {
   constructor() {
     this.auth = firebaseInstance.auth;
@@ -17,9 +26,29 @@ class AuthService {
     const isConnected = netInfo.isConnected;
     if (isConnected) {
       try {
-        return 1;
+        const res = await createUserWithEmailAndPassword(
+          this.auth,
+          email,
+          password,
+        );
+
+        const user = res.user;
+
+        await addDoc(collection(this.db, 'users'), {
+          uid: user.uid,
+          email,
+          username: username,
+          vehiclesStored: 0,
+          rutesStored: 0,
+          pointsStored: 0,
+          updatedAt: new Date().getTime(),
+        });
+
+        await sendEmailVerification(user);
+        await signOut(this.auth);
+        Alert.alert('Registered successfully, please verify your email.');
       } catch (error) {
-        // Manejo de errores específicos de Firebase o lógica adicional
+        // Manejo de errores específicos de Firebase
         throw error;
       }
     } else {
@@ -39,6 +68,7 @@ class AuthService {
           password,
         );
 
+        //Si no está verificado el correo, se lo indicamos y no le dejamos loggearse
         const userLocal = userCredential.user;
         if (!userLocal.emailVerified) {
           await signOut(this.auth);
@@ -47,9 +77,10 @@ class AuthService {
         }
         
         // Otras operaciones necesarias después del inicio de sesión
-        // await AsyncStorage.setItem('user', JSON.stringify(userLocal));
+        //Si esta verificado le logeamos y guardamos el perfil en la base de datos local
+        await AsyncStorage.setItem('user', JSON.stringify(userLocal));
       } catch (error) {
-        // Manejo de errores específicos de Firebase o lógica adicional
+        // Manejo de errores específicos de Firebase
         throw error;
       }
     } else {

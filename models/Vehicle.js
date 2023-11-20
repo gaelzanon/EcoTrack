@@ -1,10 +1,11 @@
 class Vehicle {
-  constructor(creator, brand, model, year, averageConsumption) {
+  constructor(creator, brand, model, year, averageConsumption, plate) {
     this.creator = creator;
     this.brand = brand;
     this.model = model;
     this.year = year;
     this.averageConsumption = averageConsumption;
+    this.plate = plate;
   }
 
 }
