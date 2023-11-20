@@ -12,9 +12,15 @@ class UserController {
 
     return longitudValida && tieneDosNumeros;
   }
+
   async register(user) {
     // Valida la contraseña antes de intentar registrar al usuario
-    
+    if (!this.validarEmail(user.email)) {
+      throw new Error('InvalidEmailException')
+    }
+    if (!this.validarPassword(user.password)) {
+      throw new Error('InvalidPasswordException')
+    }
     try {
       const result = await this.authService.createUserWithEmailAndPassword(
         user.email,
@@ -24,7 +30,6 @@ class UserController {
     } catch (error) {
       throw error;
     }
-    
   }
 
   async login(user) {
@@ -44,7 +49,6 @@ class UserController {
     } catch (error) {
       throw error;
     }
-    
   }
 }
 
