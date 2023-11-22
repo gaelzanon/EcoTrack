@@ -19,7 +19,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
-  const { user } = useAsyncStorage();
+  const { user, setUser } = useAsyncStorage();
 
   useEffect(() => {
     if (user) {
@@ -29,12 +29,16 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      await userController.login({email, password});
+      
       // Manejar el éxito del login
+      setUser(await userController.login({email, password}))
       navigation.navigate('Home');
     } catch (error) {
       let message = 'An error occurred. Please try again.';
       switch (error.code) {
+        case 'NoInetConection':
+          message = 'You need internet to login.';
+          break;
         case 'InvalidEmailException':
           message = 'The email address is invalid.';
           break;
