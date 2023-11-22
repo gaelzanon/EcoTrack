@@ -34,7 +34,6 @@ class AuthService {
         await addDoc(collection(this.db, 'users'), {
           uid: user.uid,
           email,
-          username: email,
           vehiclesStored: 0,
           rutesStored: 0,
           pointsStored: 0,

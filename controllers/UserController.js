@@ -16,10 +16,15 @@ class UserController {
   async register(user) {
     // Valida la contraseña antes de intentar registrar al usuario
     if (!this.validarEmail(user.email)) {
-      throw new Error('InvalidEmailException')
+      
+      const error = new Error('InvalidEmailException');
+      error.code = 'InvalidEmailException';
+      throw error;
     }
     if (!this.validarPassword(user.password)) {
-      throw new Error('InvalidPasswordException')
+      const error = new Error('InvalidPasswordException');
+      error.code = 'InvalidPasswordException';
+      throw error;
     }
     try {
       const result = await this.authService.createUserWithEmailAndPassword(
