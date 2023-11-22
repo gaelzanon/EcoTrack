@@ -26,6 +26,13 @@ const Login = () => {
     } catch (error) {
       let message = 'An error occurred. Please try again.';
       switch (error.code) {
+        case 'InvalidEmailException':
+          message = 'The email address is invalid.';
+          break;
+        case 'InvalidPasswordException':
+          message =
+            'The password is invalid. It must be a string with at least six characters.';
+          break;
         case 'auth/invalid-email':
           message = 'The email address is invalid.';
           break;
