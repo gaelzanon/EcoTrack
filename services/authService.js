@@ -3,8 +3,6 @@ import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Alert} from 'react-native';
 import {
-  signInWithEmailAndPassword,
-  signOut,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
@@ -13,7 +11,6 @@ import {
 import {
   addDoc,
   collection,
-  addDoc,
 } from 'firebase/firestore'
 class AuthService {
   constructor() {
