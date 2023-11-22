@@ -1,7 +1,7 @@
 // VehicleControllerContext.js
 import React, { createContext, useContext } from 'react';
 import VehicleController from '../controllers/VehicleController';
-import authService from '../services/authService';
+import cloudService from '../services/cloudService';
 
 // Crear el contexto
 const VehicleControllerContext = createContext(null);
@@ -9,7 +9,8 @@ const VehicleControllerContext = createContext(null);
 // Crear un proveedor para el contexto
 export const VehicleControllerProvider = ({ children }) => {
   
-  //TODO: Crear una instancia de VehicleController
+  //Crear una instancia de VehicleController
+  const vehicleController = new VehicleController(cloudService)
 
   return (
     <VehicleControllerContext.Provider value={vehicleController}>
