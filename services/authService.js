@@ -3,17 +3,12 @@ import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Alert} from 'react-native';
 import {
-  signInWithEmailAndPassword,
-  signOut,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
   sendEmailVerification,
 } from 'firebase/auth';
 import {
   addDoc,
   collection,
-  addDoc,
 } from 'firebase/firestore'
 class AuthService {
   constructor() {
@@ -37,7 +32,6 @@ class AuthService {
         await addDoc(collection(this.db, 'users'), {
           uid: user.uid,
           email,
-          username: username,
           vehiclesStored: 0,
           rutesStored: 0,
           pointsStored: 0,
