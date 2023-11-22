@@ -13,14 +13,14 @@ class CloudService {
     const isConnected = netInfo.isConnected;
     if (isConnected) {
       try {
-        //Hay internet
-        //Add vehiculo a firestore y a la base de datos local si vehicle.plate no está ya en base de datos local (esta es la que ira por delante)
         let vehicles = await AsyncStorage.getItem('vehicles');
         vehicles = vehicles ? JSON.parse(vehicles) : [];
 
         if (!vehicles.some(v => v.plate === vehicle.plate)) {
-          await addDoc(collection(this.db, "vehicles"), vehicle);
-          vehicles.push(vehicle);
+          // Convierte el objeto a un formato que Firestore pueda entender
+          const vehicleData = { ...vehicle };
+          await addDoc(collection(this.db, "vehicles"), vehicleData);
+          vehicles.push(vehicleData);
           await AsyncStorage.setItem('vehicles', JSON.stringify(vehicles));
         }
       } catch (error) {
@@ -44,20 +44,20 @@ class CloudService {
     const isConnected = netInfo.isConnected;
     if (isConnected) {
       try {
-        //Hay Internet 
-        //Add el punto de interes a firestore y base de datos local si el interestPoint.name no está ya en base de datos local (esta es la que ira por delante)
         let interestPoints = await AsyncStorage.getItem('interestPoints');
         interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
 
         if (!interestPoints.some(ip => ip.name === interestPoint.name)) {
-          await addDoc(collection(this.db, "interestPoints"), interestPoint);
-          interestPoints.push(interestPoint);
+          // Convierte el objeto a un formato que Firestore pueda entender
+          const interestPointData = { ...interestPoint };
+          await addDoc(collection(this.db, "interestPoints"), interestPointData);
+          interestPoints.push(interestPointData);
           await AsyncStorage.setItem('interestPoints', JSON.stringify(interestPoints));
         }
       } catch (error) {
         throw error;
       }
-    } else {
+    }  else {
       //No hay internet
       //Add el punto de interes solo a base de datos local si el interestPoint.name no está ya 
       let interestPoints = await AsyncStorage.getItem('interestPoints');

@@ -41,6 +41,7 @@ const AddInterestPoint = () => {
       await interestPointController.registerInterestPoint(newInterestPoint);
       Alert.alert('Interest Point Added', 'Your interest point has been successfully added.');
       // Navegar a otra pantalla o actualizar la vista si es necesario
+      navigation.navigate('Home');
     } catch (error) {
       let errorMessage = 'Failed to add interest point.';
       if (error instanceof Error && error.message === 'InvalidCoordinatesException') {

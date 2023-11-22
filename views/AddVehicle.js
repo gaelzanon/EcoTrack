@@ -44,6 +44,7 @@ const AddVehicle = () => {
       await vehicleController.registerVehicle(newVehicle);
       Alert.alert('Vehicle Added', 'Your vehicle has been successfully added.');
       // Navegar a otra pantalla o actualizar la vista si es necesario
+      navigation.navigate('Home');
     } catch (error) {
       let errorMessage = 'Failed to add vehicle.';
       if (error instanceof Error && error.message === 'YearNotValidException') {

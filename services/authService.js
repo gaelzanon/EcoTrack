@@ -5,6 +5,8 @@ import {Alert} from 'react-native';
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  signOut,
+  signInWithEmailAndPassword
 } from 'firebase/auth';
 import {
   addDoc,
@@ -32,10 +34,6 @@ class AuthService {
         await addDoc(collection(this.db, 'users'), {
           uid: user.uid,
           email,
-          vehiclesStored: 0,
-          rutesStored: 0,
-          pointsStored: 0,
-          updatedAt: new Date().getTime(),
         });
 
         await sendEmailVerification(user);

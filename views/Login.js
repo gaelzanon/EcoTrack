@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -11,18 +11,27 @@ import {TextInput} from 'react-native-paper';
 import globalStyles from '../styles';
 import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useUserController} from '../contexts/UserControllerContext';
+import { useUserController } from '../contexts/UserControllerContext';
+import { useAsyncStorage } from '../contexts/AsyncStorageContext';
 const Login = () => {
   const navigation = useNavigation();
   const userController = useUserController();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
+  const { user } = useAsyncStorage();
+
+  useEffect(() => {
+    if (user) {
+      navigation.navigate('Home');
+    }
+  }, [user]);
 
   const handleLogin = async () => {
     try {
       await userController.login({email, password});
       // Manejar el éxito del login
+      navigation.navigate('Home');
     } catch (error) {
       let message = 'An error occurred. Please try again.';
       switch (error.code) {
