@@ -3,8 +3,16 @@ class VehicleController {
     this.cloudService = cloudService;
   }
 
+  validarAnoVehiculo(ano) {
+    const anoActual = new Date().getFullYear();
+    return ano >= 1990 && ano <= anoActual;
+  }
+
   async registerVehicle(vehicle) {
-    // Aquí iría la validación del vehículo antes de intentar registrar
+    // Validación del vehículo antes de intentar registrar
+    if (!this.validarAnoVehiculo(vehicle.year)) {
+      throw new Error("YearNotValidException");
+    }
 
     try {
       // Usamos cloudService para añadir un vehículo a la colección 'vehicles'
@@ -13,7 +21,6 @@ class VehicleController {
     } catch (error) {
       throw error;
     }
-    
   }
 
   // Otros métodos del controlador como borrar, actualizar, obtener vehículos, etc.
