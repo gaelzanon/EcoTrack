@@ -1,8 +1,9 @@
 import 'react-native-gesture-handler';
 import React, { useRef, useEffect } from 'react';
+import {BackHandler} from 'react-native'
 import {createStackNavigator} from '@react-navigation/stack';
 import {PaperProvider, DefaultTheme} from 'react-native-paper';
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer } from '@react-navigation/native';
 import globalStyles from './styles';
 //Views
 import Login from './views/Login';
@@ -17,8 +18,25 @@ import { InterestPointControllerProvider } from './contexts/InterestPointControl
 import { useAsyncStorage } from './contexts/AsyncStorageContext';
 const App = () => {
   const Stack = createStackNavigator();
-  const navigationRef = useRef();
+  const navigationRef = useRef(null);
   const { user } = useAsyncStorage();
+
+  useEffect(() => {
+    // Esto es para que no volvamos a login si pulsamos hacia atras en Home
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        if (
+          navigationRef.current &&
+          navigationRef.current.getCurrentRoute().name === 'Home'
+        ) {
+          return true;
+        }
+      }
+    );
+
+    return () => backHandler.remove(); 
+  }, []);
   const theme = {
     ...DefaultTheme, // Usa el DefaultTheme como base
     colors: {
