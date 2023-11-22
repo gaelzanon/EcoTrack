@@ -8,11 +8,11 @@ import globalStyles from './styles';
 import Login from './views/Login';
 import Register from './views/Register';
 import AddVehicle from './views/AddVehicle';
-
+import AddInterestPoint from './views/AddInterestPoint';
 //Contexts
 import {UserControllerProvider} from './contexts/UserControllerContext';
 import {VehicleControllerProvider} from './contexts/VehicleControllerContext';
-
+import {InterestPointControllerProvider} from './contexts/InterestPointControllerContext';
 const App = () => {
   const Stack = createStackNavigator();
   const theme = {
@@ -27,36 +27,43 @@ const App = () => {
   };
 
   return (
-    <VehicleControllerProvider>
-      <UserControllerProvider>
-        <PaperProvider theme={theme}>
-          <NavigationContainer>
-            <Stack.Navigator
-              screenOptions={{
-                headerStyle: {...globalStyles.black},
-                headerTintColor: globalStyles.white.backgroundColor,
-                animationEnabled: false, // Deshabilita la animación de transición
-              }}>
-              <Stack.Screen
-                name="Login"
-                component={Login}
-                options={{headerShown: false}}
-              />
-              <Stack.Screen
-                name="Register"
-                component={Register}
-                options={{headerShown: false}}
-              />
-              <Stack.Screen
-                name="AddVehicle"
-                component={AddVehicle}
-                options={{headerShown: false}}
-              />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </PaperProvider>
-      </UserControllerProvider>
-    </VehicleControllerProvider>
+    <InterestPointControllerProvider>
+      <VehicleControllerProvider>
+        <UserControllerProvider>
+          <PaperProvider theme={theme}>
+            <NavigationContainer>
+              <Stack.Navigator
+                screenOptions={{
+                  headerStyle: {...globalStyles.black},
+                  headerTintColor: globalStyles.white.backgroundColor,
+                  animationEnabled: false, // Deshabilita la animación de transición
+                }}>
+                <Stack.Screen
+                  name="Login"
+                  component={Login}
+                  options={{headerShown: false}}
+                />
+                <Stack.Screen
+                  name="Register"
+                  component={Register}
+                  options={{headerShown: false}}
+                />
+                <Stack.Screen
+                  name="AddVehicle"
+                  component={AddVehicle}
+                  options={{headerShown: false}}
+                />
+                <Stack.Screen
+                  name="AddInterestPoint"
+                  component={AddInterestPoint}
+                  options={{headerShown: false}}
+                />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </PaperProvider>
+        </UserControllerProvider>
+      </VehicleControllerProvider>
+    </InterestPointControllerProvider>
   );
 };
 
