@@ -7,8 +7,9 @@ import {
   sendEmailVerification,
   signOut,
   signInWithEmailAndPassword,
+  deleteUser
 } from 'firebase/auth';
-import {addDoc, collection, doc} from 'firebase/firestore';
+import {addDoc, collection} from 'firebase/firestore';
 class AuthService {
   constructor(env) {
     this.auth = firebaseInstance.auth;
@@ -16,8 +17,9 @@ class AuthService {
     this.env = env; // 'test' o 'production'
   }
   get usersCollection() {
-    return collection(doc(this.db, this.env), 'users');
+    return collection(this.db, `${this.env}_users`);
   }
+
   async createUserWithEmailAndPassword(email, password) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
@@ -39,6 +41,7 @@ class AuthService {
         await sendEmailVerification(user);
         await signOut(this.auth);
         Alert.alert('Registered successfully, please verify your email.');
+        return user
       } catch (error) {
         // Manejo de errores específicos de Firebase
         throw error;
@@ -65,8 +68,9 @@ class AuthService {
         const userLocal = userCredential.user;
         if (!userLocal.emailVerified) {
           await signOut(this.auth);
-          Alert.alert('Please verify your email.');
-          return;
+          const error = new Error('NoVerificatedUser');
+          error.code = 'NoVerificatedUser';
+          throw error;
         }
 
         // Otras operaciones necesarias después del inicio de sesión
@@ -83,6 +87,7 @@ class AuthService {
       throw error;
     }
   }
+
 }
 
 export default AuthService;

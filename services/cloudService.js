@@ -1,7 +1,7 @@
 import firebaseInstance from '../firebase';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {addDoc, collection, doc} from 'firebase/firestore';
+import {addDoc, collection, getDocs, deleteDoc} from 'firebase/firestore';
 
 class CloudService {
   constructor(env) {
@@ -9,12 +9,13 @@ class CloudService {
     this.env = env; // 'test' o 'production'
   }
   get vehiclesCollection() {
-    return collection(doc(this.db, this.env), 'vehicles');
+    return collection(this.db, `${this.env}_vehicles`);
   }
 
   get interestPointsCollection() {
-    return collection(doc(this.db, this.env), 'interestPoints');
+    return collection(this.db, `${this.env}_interestPoints`);
   }
+
 
   async addVehicle(vehicle) {
     const netInfo = await NetInfo.fetch();
@@ -27,9 +28,10 @@ class CloudService {
         if (!vehicles.some(v => v.plate === vehicle.plate)) {
           // Convierte el objeto a un formato que Firestore pueda entender
           const vehicleData = {...vehicle};
-          await addDoc(this.vehiclesCollection, vehicleData);
+          const docRef = await addDoc(this.vehiclesCollection, vehicleData);
           vehicles.push(vehicleData);
           await AsyncStorage.setItem('vehicles', JSON.stringify(vehicles));
+          return docRef
         } else {
           const error = new Error('DuplicateVehicleException');
           error.code = 'DuplicateVehicleException';
@@ -58,20 +60,21 @@ class CloudService {
   async addInterestPoint(interestPoint) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
+    
     if (isConnected) {
       try {
         let interestPoints = await AsyncStorage.getItem('interestPoints');
         interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
-
         if (!interestPoints.some(ip => ip.name === interestPoint.name)) {
           // Convierte el objeto a un formato que Firestore pueda entender
           const interestPointData = {...interestPoint};
-          await addDoc(this.interestPointsCollection, interestPointData);
+          const docRef = await addDoc(this.interestPointsCollection, interestPointData);
           interestPoints.push(interestPointData);
           await AsyncStorage.setItem(
             'interestPoints',
             JSON.stringify(interestPoints),
           );
+          return docRef
         } else {
           const error = new Error('DuplicateInterestPointException');
           error.code = 'DuplicateInterestPointException';
@@ -92,6 +95,7 @@ class CloudService {
           'interestPoints',
           JSON.stringify(interestPoints),
         );
+        return 
       } else {
         const error = new Error('DuplicateInterestPointException');
         error.code = 'DuplicateInterestPointException';
@@ -102,7 +106,7 @@ class CloudService {
 
   async clearCollection(collectionName) {
     if (this.env === 'test') {
-      const querySnapshot = await getDocs(collection(this.db, collectionName));
+      const querySnapshot = await getDocs(collection(this.db, `test_${collectionName}`));
       const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
       await Promise.all(deletePromises);
     }

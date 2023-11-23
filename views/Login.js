@@ -36,6 +36,9 @@ const Login = () => {
     } catch (error) {
       let message = 'An error occurred. Please try again.';
       switch (error.code) {
+        case 'NoVerificatedUser':
+          message = 'Please verify your email.';
+          break;
         case 'NoInetConection':
           message = 'You need internet to login.';
           break;
