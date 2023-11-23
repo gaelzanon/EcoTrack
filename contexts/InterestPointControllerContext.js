@@ -9,7 +9,7 @@ const InterestPointControllerContext = createContext(null);
 // Crear un proveedor para el contexto
 export const InterestPointControllerProvider = ({ children }) => {
   // Crear una instancia de InterestPointController
-  const interestPointController = new InterestPointController(cloudService);
+  const interestPointController = new InterestPointController(cloudService('production'));
 
   return (
     <InterestPointControllerContext.Provider value={interestPointController}>

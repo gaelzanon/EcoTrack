@@ -9,7 +9,7 @@ const UserControllerContext = createContext(null);
 // Crear un proveedor para el contexto
 export const UserControllerProvider = ({ children }) => {
   // Crear una instancia de UserController
-  const userController = new UserController(authService);
+  const userController = new UserController(authService('production'));
 
   return (
     <UserControllerContext.Provider value={userController}>
