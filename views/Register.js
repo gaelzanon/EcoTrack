@@ -27,6 +27,9 @@ const Register = () => {
     } catch (error) {
       let message = 'An error occurred. Please try again.';
       switch (error.code) {
+        case 'NoInetConection':
+          message = 'You need internet to register.';
+          break;
         case 'InvalidEmailException':
           message = 'The email address is invalid.';
           break;

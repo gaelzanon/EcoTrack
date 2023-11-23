@@ -25,35 +25,51 @@ const AddVehicle = () => {
   const {user} = useAsyncStorage(); // Obtener el usuario del contexto de AsyncStorage
 
   const handleAddVehicle = async () => {
-    try {
-      const userEmail = user ? user.email : null; // Usa el email del usuario como ID del creador
-      if (!userEmail) {
-        Alert.alert('Error', 'User information not found.');
-        return;
-      }
+    if (
+      brand === '' ||
+      model === '' ||
+      year === '' ||
+      averageConsumption === '' ||
+      plate === ''
+    ) {
+      Alert.alert('Please fill in all parameters.');
+    } else {
+      try {
+        const userEmail = user ? user.email : null; // Usa el email del usuario como ID del creador
+        if (!userEmail) {
+          Alert.alert('Error', 'User information not found.');
+          return;
+        }
 
-      const newVehicle = new Vehicle(
-        userEmail,
-        brand,
-        model,
-        parseInt(year),
-        parseFloat(averageConsumption),
-        plate,
-      );
+        const newVehicle = new Vehicle(
+          userEmail,
+          brand,
+          model,
+          parseInt(year),
+          parseFloat(averageConsumption),
+          plate,
+        );
 
-      await vehicleController.registerVehicle(newVehicle);
-      Alert.alert('Vehicle Added', 'Your vehicle has been successfully added.');
-      // Navegar a otra pantalla o actualizar la vista si es necesario
-      navigation.navigate('Home');
-    } catch (error) {
-      let errorMessage = 'Failed to add vehicle.';
-      if (error instanceof Error && error.message === 'YearNotValidException') {
-        errorMessage = 'The year of the vehicle is not valid.';
-      } else if (error.code) {
-        // Aquí manejaremos errores específicos de Firebase si es necesario
-        errorMessage = `Firebase error: ${error.message}`;
+        await vehicleController.registerVehicle(newVehicle);
+        Alert.alert(
+          'Vehicle Added',
+          'Your vehicle has been successfully added.',
+        );
+        // Navegar a otra pantalla o actualizar la vista si es necesario
+        navigation.navigate('Home');
+      } catch (error) {
+        let errorMessage = 'Failed to add vehicle.';
+        if (
+          error instanceof Error &&
+          error.message === 'YearNotValidException'
+        ) {
+          errorMessage = 'The year of the vehicle is not valid.';
+        } else if (error.code) {
+          // Aquí manejaremos errores específicos de Firebase si es necesario
+          errorMessage = `Firebase error: ${error.message}`;
+        }
+        Alert.alert('Error', errorMessage);
       }
-      Alert.alert('Error', errorMessage);
     }
   };
 
@@ -87,6 +103,7 @@ const AddVehicle = () => {
           style={styles.input}
           value={year}
           onChangeText={text => setYear(text)}
+          keyboardType='numeric'
         />
 
         <TextInput
@@ -96,6 +113,7 @@ const AddVehicle = () => {
           style={styles.input}
           value={averageConsumption}
           onChangeText={text => setAverageConsumption(text)}
+          keyboardType='numeric'
         />
 
         <TextInput

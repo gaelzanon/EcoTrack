@@ -1,7 +1,7 @@
 import firebaseInstance from '../firebase';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Alert} from 'react-native';
+import { Alert } from 'react-native';
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
@@ -44,7 +44,9 @@ class AuthService {
         throw error;
       }
     } else {
-      Alert.alert('You need internet connection to log in.');
+      const error = new Error('NoInetConection');
+      error.code = 'NoInetConection';
+      throw error;
     }
   }
 
@@ -71,12 +73,15 @@ class AuthService {
         // Otras operaciones necesarias después del inicio de sesión
         //Si esta verificado le logeamos y guardamos el perfil en la base de datos local
         await AsyncStorage.setItem('user', JSON.stringify(userLocal));
+        return userLocal
       } catch (error) {
         // Manejo de errores específicos de Firebase
         throw error;
       }
     } else {
-      Alert.alert('You need internet connection to register.');
+      const error = new Error('NoInetConection');
+      error.code = 'NoInetConection';
+      throw error;
     }
   }
 }

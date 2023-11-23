@@ -1,10 +1,10 @@
 // AsyncStorageContext.js
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {createContext, useContext, useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AsyncStorageContext = createContext(null);
 
-export const AsyncStorageProvider = ({ children }) => {
+export const AsyncStorageProvider = ({children}) => {
   const [user, setUser] = useState(null);
   const [vehicles, setVehicles] = useState(null);
   const [interestPoints, setInterestPoints] = useState(null);
@@ -17,7 +17,8 @@ export const AsyncStorageProvider = ({ children }) => {
 
       if (storedUser) setUser(JSON.parse(storedUser));
       if (storedVehicles) setVehicles(JSON.parse(storedVehicles));
-      if (storedInterestPoints) setInterestPoints(JSON.parse(storedInterestPoints));
+      if (storedInterestPoints)
+        setInterestPoints(JSON.parse(storedInterestPoints));
     } catch (error) {
       console.error('Failed to load data from AsyncStorage:', error);
     }
@@ -29,20 +30,17 @@ export const AsyncStorageProvider = ({ children }) => {
 
   const value = {
     user,
-    setUser: (userData) => {
-      AsyncStorage.setItem('user', JSON.stringify(userData));
+    setUser: userData => {
       setUser(userData);
     },
     vehicles,
-    setVehicles: (vehicleData) => {
-      AsyncStorage.setItem('vehicles', JSON.stringify(vehicleData));
+    setVehicles: vehicleData => {
       setVehicles(vehicleData);
     },
     interestPoints,
-    setInterestPoints: (interestPointData) => {
-      AsyncStorage.setItem('interestPoints', JSON.stringify(interestPointData));
+    setInterestPoints: interestPointData => {
       setInterestPoints(interestPointData);
-    }
+    },
   };
 
   return (

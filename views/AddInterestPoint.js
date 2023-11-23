@@ -12,45 +12,55 @@ import globalStyles from '../styles';
 import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useAsyncStorage} from '../contexts/AsyncStorageContext';
-import { useInterestPointController } from '../contexts/InterestPointControllerContext';
+import {useInterestPointController} from '../contexts/InterestPointControllerContext';
 import InterestPoint from '../models/InterestPoint';
 const AddInterestPoint = () => {
   const navigation = useNavigation();
   const interestPointController = useInterestPointController();
-  const { user } = useAsyncStorage(); // Obtener el usuario del contexto de AsyncStorage
+  const {user} = useAsyncStorage(); // Obtener el usuario del contexto de AsyncStorage
 
   const [name, setName] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 
   const handleAddInterestPoint = async () => {
-    try {
-      const userEmail = user ? user.email : null;
-      if (!userEmail) {
-        Alert.alert('Error', 'User information not found.');
-        return;
-      }
+    if (name === '' || latitude === '' || longitude === '') {
+      Alert.alert('Please fill in all the parameters');
+    } else {
+      try {
+        const userEmail = user ? user.email : null;
+        if (!userEmail) {
+          Alert.alert('Error', 'User information not found.');
+          return;
+        }
 
-      const newInterestPoint = new InterestPoint(
-        userEmail,
-        name,
-        parseFloat(latitude),
-        parseFloat(longitude),
-      );
+        const newInterestPoint = new InterestPoint(
+          userEmail,
+          name,
+          parseFloat(latitude),
+          parseFloat(longitude),
+        );
 
-      await interestPointController.registerInterestPoint(newInterestPoint);
-      Alert.alert('Interest Point Added', 'Your interest point has been successfully added.');
-      // Navegar a otra pantalla o actualizar la vista si es necesario
-      navigation.navigate('Home');
-    } catch (error) {
-      let errorMessage = 'Failed to add interest point.';
-      if (error instanceof Error && error.message === 'InvalidCoordinatesException') {
-        errorMessage = 'The coordinates of the interest point are not valid.';
-      } else if (error.code) {
-        // Aquí manejaremos errores específicos de Firebase si es necesario
-        errorMessage = `Firebase error: ${error.message}`;
+        await interestPointController.registerInterestPoint(newInterestPoint);
+        Alert.alert(
+          'Interest Point Added',
+          'Your interest point has been successfully added.',
+        );
+        // Navegar a otra pantalla o actualizar la vista si es necesario
+        navigation.navigate('Home');
+      } catch (error) {
+        let errorMessage = 'Failed to add interest point.';
+        if (
+          error instanceof Error &&
+          error.message === 'InvalidCoordinatesException'
+        ) {
+          errorMessage = 'The coordinates of the interest point are not valid.';
+        } else if (error.code) {
+          // Aquí manejaremos errores específicos de Firebase si es necesario
+          errorMessage = `Firebase error: ${error.message}`;
+        }
+        Alert.alert('Error', errorMessage);
       }
-      Alert.alert('Error', errorMessage);
     }
   };
 
@@ -75,6 +85,7 @@ const AddInterestPoint = () => {
           style={styles.input}
           value={latitude}
           onChangeText={text => setLatitude(text)}
+          keyboardType='numeric'
         />
 
         <TextInput
@@ -84,10 +95,15 @@ const AddInterestPoint = () => {
           style={styles.input}
           value={longitude}
           onChangeText={text => setLongitude(text)}
+          keyboardType='numeric'
         />
 
         <Pressable
-          style={[styles.button, globalStyles.secondary, {marginTop: 0, marginBottom: 30}]}
+          style={[
+            styles.button,
+            globalStyles.secondary,
+            {marginTop: 0, marginBottom: 30},
+          ]}
           onPress={handleAddInterestPoint}>
           <Text style={styles.buttonText}>CREATE INTEREST POINT</Text>
         </Pressable>
