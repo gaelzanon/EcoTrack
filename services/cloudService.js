@@ -108,5 +108,5 @@ class CloudService {
     }
   }
 }
-const cloudService = new CloudService();
-export default cloudService;
+
+export default CloudService;
