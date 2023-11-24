@@ -1,13 +1,12 @@
 import firebaseInstance from '../firebase';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Alert} from 'react-native';
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
   signOut,
   signInWithEmailAndPassword,
-  deleteUser
+  deleteUser,
 } from 'firebase/auth';
 import {addDoc, collection} from 'firebase/firestore';
 class AuthService {
@@ -37,11 +36,11 @@ class AuthService {
           uid: user.uid,
           email,
         });
-
+        /*
         await sendEmailVerification(user);
         await signOut(this.auth);
-        Alert.alert('Registered successfully, please verify your email.');
-        return user
+        */
+        return user;
       } catch (error) {
         // Manejo de errores específicos de Firebase
         throw error;
@@ -64,17 +63,17 @@ class AuthService {
           password,
         );
 
-        //Si no está verificado el correo, se lo indicamos y no le dejamos loggearse
         const userLocal = userCredential.user;
+        /*
         if (!userLocal.emailVerified) {
           await signOut(this.auth);
           const error = new Error('NoVerificatedUser');
           error.code = 'NoVerificatedUser';
           throw error;
         }
-
+        */
         // Otras operaciones necesarias después del inicio de sesión
-        //Si esta verificado le logeamos y guardamos el perfil en la base de datos local
+        //Logeamos y guardamos el perfil en la base de datos local
         await AsyncStorage.setItem('user', JSON.stringify(userLocal));
         return userLocal;
       } catch (error) {
@@ -88,6 +87,11 @@ class AuthService {
     }
   }
 
+  async deleteUser() {
+    if (this.auth.currentUser) {
+      await deleteUser(this.auth.currentUser);
+    }
+  }
 }
 
 export default AuthService;
