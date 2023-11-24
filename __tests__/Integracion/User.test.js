@@ -1,6 +1,6 @@
-import User from '../models/User';
-import authServiceMock from '../__mocks__/authServiceMock';
-import UserController from '../controllers/UserController';
+import User from '../../models/User';
+import authServiceMock from '../../__mocks__/authServiceMock';
+import UserController from '../../controllers/UserController';
 
 const userController = new UserController(authServiceMock);
 

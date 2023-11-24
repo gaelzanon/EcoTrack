@@ -22,7 +22,8 @@ const Register = () => {
 
   const handleRegister = async () => {
     try {
-      await userController.register({email, password});
+      await userController.register({ email, password });
+      Alert.alert('Registered successfully.');
       navigation.navigate('Login');
     } catch (error) {
       let message = 'An error occurred. Please try again.';

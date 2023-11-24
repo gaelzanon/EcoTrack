@@ -1,6 +1,6 @@
-import Vehicle from '../models/Vehicle';
-import cloudServiceMock from '../__mocks__/cloudServiceMock';
-import VehicleController from '../controllers/VehicleController';
+import Vehicle from '../../models/Vehicle';
+import cloudServiceMock from '../../__mocks__/cloudServiceMock';
+import VehicleController from '../../controllers/VehicleController';
 
 const vehicleController = new VehicleController(cloudServiceMock);
 

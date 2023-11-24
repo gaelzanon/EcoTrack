@@ -10,7 +10,8 @@ const VehicleControllerContext = createContext(null);
 export const VehicleControllerProvider = ({ children }) => {
   
   //Crear una instancia de VehicleController
-  const vehicleController = new VehicleController(cloudService)
+  const cloudProduction = new cloudService('production')
+  const vehicleController = new VehicleController(cloudProduction)
 
   return (
     <VehicleControllerContext.Provider value={vehicleController}>
