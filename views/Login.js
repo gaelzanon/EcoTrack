@@ -11,16 +11,18 @@ import {TextInput} from 'react-native-paper';
 import globalStyles from '../styles';
 import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useUserController } from '../contexts/UserControllerContext';
-import { useAsyncStorage } from '../contexts/AsyncStorageContext';
+import {useUserController} from '../contexts/UserControllerContext';
+import {useAsyncStorage} from '../contexts/AsyncStorageContext';
+import FormularioLoginFactory from '../patrones/FactoryMethod/FormularioLoginFactory';
 const Login = () => {
   const navigation = useNavigation();
   const userController = useUserController();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
-  const { user, setUser } = useAsyncStorage();
-
+  const {user, setUser} = useAsyncStorage();
+  const formularioLoginFactory = new FormularioLoginFactory();
+  const formularioLogin = formularioLoginFactory.crearFormulario();
   useEffect(() => {
     if (user) {
       navigation.navigate('Home');
@@ -29,9 +31,8 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      
-      // Manejar el éxito del login
-      setUser(await userController.login({email, password}))
+      formularioLogin.rellenarDatos({email, password});
+      setUser(await userController.login(formularioLogin.datosFormulario));
       navigation.navigate('Home');
     } catch (error) {
       let message = 'An error occurred. Please try again.';
@@ -43,11 +44,11 @@ const Login = () => {
           message = 'You need internet to login.';
           break;
         case 'InvalidEmailException':
-          message = 'The email address is invalid.';
+          message = 'The email address  is invalid.';
           break;
-        case 'InvalidPasswordException':
+        case 'InvalidPassException':
           message =
-            'The password is invalid. It must be a string with at least six characters.';
+            'The password is invalid, it should be at least 6 characters with two numbers.';
           break;
         case 'auth/invalid-email':
           message = 'The email address is invalid.';
@@ -87,39 +88,22 @@ const Login = () => {
           value={email}
           onChangeText={text => setEmail(text)}
         />
-        <View
-          style={{
-            flexDirection: 'row',
-          }}>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <TextInput
-            secureTextEntry={showPass ? false : true}
+            secureTextEntry={!showPass}
             cursorColor="black"
             mode="flat"
             label="Password"
-            style={[styles.input, {width: '85%', marginBottom: 10}]}
+            style={[styles.input, {flex: 1}]}
             value={password}
-            onChangeText={text => setPassword(text)}
+            onChangeText={setPassword}
           />
-
           <Pressable
-            style={[
-              styles.button,
-              globalStyles.fullblack,
-              {
-                marginTop: 0,
-                alignContent: 'center',
-                justifyContent: 'center',
-                width: '12%',
-                marginLeft: 10,
-                marginBottom: 10,
-              },
-            ]}
-            onPress={() => {
-              setShowPass(!showPass);
-            }}>
+            onPress={() => setShowPass(!showPass)}
+            style={{marginLeft: 10}}>
             <MaterialCommunityIcons
               name={showPass ? 'eye-off' : 'eye'}
-              size={20}
+              size={24}
               color={globalStyles.white.backgroundColor}
             />
           </Pressable>

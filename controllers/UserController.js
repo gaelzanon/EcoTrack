@@ -1,60 +1,42 @@
+import ContextoFormulario from '../patrones/Strategy/ContextoFormulario';
+import ValidacionLogin from '../patrones/Strategy/ValidacionLogin';
+import ValidacionRegistro from '../patrones/Strategy/ValidacionRegistro';
+
 class UserController {
   constructor(authService) {
     this.authService = authService;
-  }
-  validarEmail(email) {
-    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    return regex.test(email);
-  }
-  validarPassword(password) {
-    const longitudValida = password.length >= 6;
-    const tieneDosNumeros = (password.match(/\d/g) || []).length >= 2;
-
-    return longitudValida && tieneDosNumeros;
+    this.contextoFormulario = new ContextoFormulario();
   }
 
-  async register(user) {
-    // Valida la contraseña antes de intentar registrar al usuario
-    if (!this.validarEmail(user.email)) {
-      const error = new Error('InvalidEmailException');
-      error.code = 'InvalidEmailException';
-      throw error;
-    }
-    if (!this.validarPassword(user.password)) {
-      const error = new Error('InvalidPasswordException');
-      error.code = 'InvalidPasswordException';
-      throw error;
-    }
+  async register(formularioRegistro) {
+    this.contextoFormulario.setEstrategiaValidacion(new ValidacionRegistro());
     try {
+      this.contextoFormulario.validarFormulario(formularioRegistro);
+
       const result = await this.authService.createUserWithEmailAndPassword(
-        user.email,
-        user.password,
+        formularioRegistro.email,
+        formularioRegistro.user,
+        formularioRegistro.password1,
       );
       return result;
     } catch (error) {
+      // Reenviar la excepción tal como se recibe
       throw error;
     }
   }
 
-  async login(user) {
-    // Valida la contraseña antes de intentar loggear al usuario
-    if (!this.validarEmail(user.email)) {
-      const error = new Error('InvalidEmailException');
-      error.code = 'InvalidEmailException';
-      throw error;
-    }
-    if (!this.validarPassword(user.password)) {
-      const error = new Error('InvalidPasswordException');
-      error.code = 'InvalidPasswordException';
-      throw error;
-    }
+  async login(formularioLogin) {
+    this.contextoFormulario.setEstrategiaValidacion(new ValidacionLogin());
     try {
+      this.contextoFormulario.validarFormulario(formularioLogin);
+
       const result = await this.authService.signInWithEmailAndPassword(
-        user.email,
-        user.password,
+        formularioLogin.email,
+        formularioLogin.password,
       );
       return result;
     } catch (error) {
+      // Reenviar la excepción tal como se recibe
       throw error;
     }
   }
