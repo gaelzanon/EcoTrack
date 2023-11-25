@@ -10,10 +10,11 @@ import {
 import {TextInput} from 'react-native-paper';
 import globalStyles from '../styles';
 import {useNavigation} from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useVehicleController} from '../contexts/VehicleControllerContext';
 import {useAsyncStorage} from '../contexts/AsyncStorageContext';
 import Vehicle from '../models/Vehicle';
+import {Picker} from '@react-native-picker/picker';
+
 const AddVehicle = () => {
   const navigation = useNavigation();
   const vehicleController = useVehicleController();
@@ -22,6 +23,8 @@ const AddVehicle = () => {
   const [year, setYear] = useState('');
   const [averageConsumption, setAverageConsumption] = useState('');
   const [plate, setPlate] = useState('');
+  const [type, setType] = useState('bike');
+
   const {user} = useAsyncStorage(); // Obtener el usuario del contexto de AsyncStorage
 
   const handleAddVehicle = async () => {
@@ -48,6 +51,7 @@ const AddVehicle = () => {
           parseInt(year),
           parseFloat(averageConsumption),
           plate,
+          type,
         );
 
         await vehicleController.registerVehicle(newVehicle);
@@ -103,7 +107,7 @@ const AddVehicle = () => {
           style={styles.input}
           value={year}
           onChangeText={text => setYear(text)}
-          keyboardType='numeric'
+          keyboardType="numeric"
         />
 
         <TextInput
@@ -113,7 +117,7 @@ const AddVehicle = () => {
           style={styles.input}
           value={averageConsumption}
           onChangeText={text => setAverageConsumption(text)}
-          keyboardType='numeric'
+          keyboardType="numeric"
         />
 
         <TextInput
@@ -124,7 +128,17 @@ const AddVehicle = () => {
           value={plate}
           onChangeText={text => setPlate(text)}
         />
-
+        <Text style={styles.label}>Vehicle Type</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={type}
+            onValueChange={(itemValue, itemIndex) => setType(itemValue)}>
+            <Picker.Item label="Bike" value="bike" />
+            <Picker.Item label="Electric" value="electric" />
+            <Picker.Item label="Gasoline" value="gasoline" />
+            <Picker.Item label="Diesel" value="diesel" />
+          </Picker>
+        </View>
         <Pressable
           style={[
             styles.button,
@@ -166,5 +180,16 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: 'black',
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 16,
+    color: 'black',
+    marginBottom: 5,
+  },
+  
 });
 export default AddVehicle;

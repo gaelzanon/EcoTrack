@@ -1,10 +1,12 @@
 import 'react-native-gesture-handler';
-import React, { useRef, useEffect } from 'react';
-import {BackHandler} from 'react-native'
+import React, {useRef, useEffect} from 'react';
+import {BackHandler} from 'react-native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {PaperProvider, DefaultTheme} from 'react-native-paper';
-import {NavigationContainer } from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native';
 import globalStyles from './styles';
+import RNBootSplash from 'react-native-bootsplash';
+
 //Views
 import Login from './views/Login';
 import Register from './views/Register';
@@ -14,12 +16,18 @@ import Home from './views/Home';
 //Contexts
 import {UserControllerProvider} from './contexts/UserControllerContext';
 import {VehicleControllerProvider} from './contexts/VehicleControllerContext';
-import { InterestPointControllerProvider } from './contexts/InterestPointControllerContext';
-import { useAsyncStorage } from './contexts/AsyncStorageContext';
+import {InterestPointControllerProvider} from './contexts/InterestPointControllerContext';
+import {useAsyncStorage} from './contexts/AsyncStorageContext';
 const App = () => {
   const Stack = createStackNavigator();
   const navigationRef = useRef(null);
-  const { user } = useAsyncStorage();
+  const {user, loaded} = useAsyncStorage();
+
+  useEffect(() => {
+    if (loaded) {
+      RNBootSplash.hide({fade: true, duration: 500});
+    }
+  }, [loaded]);
 
   useEffect(() => {
     // Esto es para que no volvamos a login si pulsamos hacia atras en Home
@@ -32,10 +40,10 @@ const App = () => {
         ) {
           return true;
         }
-      }
+      },
     );
 
-    return () => backHandler.remove(); 
+    return () => backHandler.remove();
   }, []);
   const theme = {
     ...DefaultTheme, // Usa el DefaultTheme como base
@@ -54,7 +62,7 @@ const App = () => {
       navigationRef.current?.navigate('Home');
     }
   }, [user]);
-  
+
   return (
     <PaperProvider theme={theme}>
       <InterestPointControllerProvider>
