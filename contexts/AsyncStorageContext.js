@@ -55,12 +55,6 @@ export const AsyncStorageProvider = ({children}) => {
     const { firebaseVehicles, firebaseInterestPoints } = await getFirebaseData();
     
     const db = firebaseInstance.db;
-    console.log('local:' )
-
-    console.log(localInterestPoints)
-    console.log('firebase:')
-
-    console.log(firebaseInterestPoints)
     // Sincronizar Vehículos
     for (const localVehicle of localVehicles) {
       const firebaseVehicle = firebaseVehicles.find(v => v.plate === localVehicle.plate);
