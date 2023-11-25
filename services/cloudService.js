@@ -16,7 +16,23 @@ class CloudService {
     return collection(this.db, `${this.env}_interestPoints`);
   }
 
-
+  async existsInFirebase(collection, queryFn) {
+    const querySnapshot = await getDocs(collection);
+    return querySnapshot.docs.some(queryFn);
+  }
+  
+  async vehicleExists(creator, plate) {
+    return this.existsInFirebase(this.vehiclesCollection, doc =>
+      doc.data().creator === creator && doc.data().plate === plate,
+    );
+  }
+  
+  async interestPointExists(creator, name) {
+    return this.existsInFirebase(this.interestPointsCollection, doc =>
+      doc.data().creator === creator && doc.data().name === name,
+    );
+  }
+  
   async addVehicle(vehicle) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
@@ -24,8 +40,8 @@ class CloudService {
       try {
         let vehicles = await AsyncStorage.getItem('vehicles');
         vehicles = vehicles ? JSON.parse(vehicles) : [];
-
-        if (!vehicles.some(v => v.plate === vehicle.plate)) {
+        const existsInFirebase = await this.vehicleExists(vehicle.creator, vehicle.plate);
+        if (!vehicles.some(v => v.plate === vehicle.plate) && !existsInFirebase) {
           // Convierte el objeto a un formato que Firestore pueda entender
           const vehicleData = {...vehicle};
           const docRef = await addDoc(this.vehiclesCollection, vehicleData);
@@ -56,7 +72,7 @@ class CloudService {
       }
     }
   }
-
+  
   async addInterestPoint(interestPoint) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
@@ -65,7 +81,8 @@ class CloudService {
       try {
         let interestPoints = await AsyncStorage.getItem('interestPoints');
         interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
-        if (!interestPoints.some(ip => ip.name === interestPoint.name)) {
+        const existsInFirebase = await this.interestPointExists(interestPoint.creator, interestPoint.name);
+        if (!interestPoints.some(ip => ip.name === interestPoint.name) && !existsInFirebase) {
           // Convierte el objeto a un formato que Firestore pueda entender
           const interestPointData = {...interestPoint};
           const docRef = await addDoc(this.interestPointsCollection, interestPointData);

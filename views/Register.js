@@ -12,17 +12,28 @@ import globalStyles from '../styles';
 import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useUserController} from '../contexts/UserControllerContext';
-
+import FormularioRegistroFactory from '../patrones/FactoryMethod/FormularioRegistroFactory';
 const Register = () => {
   const navigation = useNavigation();
   const userController = useUserController();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [password2, setPassword2] = useState('');
   const [showPass, setShowPass] = useState(false);
+  const [showPass2, setShowPass2] = useState(false);
+  const [user, setUser] = useState('');
 
+  const formularioRegistroFactory = new FormularioRegistroFactory();
+  const formularioRegistro = formularioRegistroFactory.crearFormulario();
   const handleRegister = async () => {
     try {
-      await userController.register({ email, password });
+      formularioRegistro.rellenarDatos({
+        user,
+        email,
+        password1: password,
+        password2,
+      });
+      await userController.register(formularioRegistro.datosFormulario);
       Alert.alert('Registered successfully.');
       navigation.navigate('Login');
     } catch (error) {
@@ -31,12 +42,19 @@ const Register = () => {
         case 'NoInetConection':
           message = 'You need internet to register.';
           break;
-        case 'InvalidEmailException':
-          message = 'The email address is invalid.';
+        case 'NotSamePassException':
+          message = 'The passwords dont match, please check them.';
           break;
-        case 'InvalidPasswordException':
+        case 'InvalidEmailException':
+          message = 'The email address  is invalid.';
+          break;
+        case 'InvalidPassException':
           message =
-            'The password is invalid. It must be a string with at least six characters.';
+            'The password is invalid, it should be at least 6 characters with two numbers.';
+          break;
+        case 'InvalidUsernameException':
+          message =
+            'The username should at leat be 4 characters long.';
           break;
         case 'auth/email-already-in-use':
           message = 'The provided email is already in use by an existing user.';
@@ -56,73 +74,76 @@ const Register = () => {
     <ScrollView style={[globalStyles.primary, {flex: 1, padding: 20}]}>
       <View>
         <Text style={globalStyles.mainText}>Register</Text>
+
+        <TextInput
+          cursorColor="black"
+          mode="flat"
+          label="User"
+          style={styles.input}
+          value={user}
+          onChangeText={setUser}
+        />
+
         <TextInput
           cursorColor="black"
           mode="flat"
           label="Email"
           style={styles.input}
           value={email}
-          onChangeText={text => setEmail(text)}
+          onChangeText={setEmail}
         />
 
-        <View
-          style={{
-            flexDirection: 'row',
-          }}>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <TextInput
-            secureTextEntry={showPass ? false : true}
+            secureTextEntry={!showPass}
             cursorColor="black"
             mode="flat"
             label="Password"
-            style={[styles.input, {width: '85%', marginBottom: 10}]}
+            style={[styles.input, {flex: 1}]}
             value={password}
-            onChangeText={text => setPassword(text)}
+            onChangeText={setPassword}
           />
-
           <Pressable
-            style={[
-              styles.button,
-              globalStyles.fullblack,
-              {
-                marginTop: 0,
-                alignContent: 'center',
-                justifyContent: 'center',
-                width: '12%',
-                marginLeft: 10,
-                marginBottom: 10,
-              },
-            ]}
-            onPress={() => {
-              setShowPass(!showPass);
-            }}>
+            onPress={() => setShowPass(!showPass)}
+            style={{marginLeft: 10}}>
             <MaterialCommunityIcons
               name={showPass ? 'eye-off' : 'eye'}
-              size={20}
+              size={24}
               color={globalStyles.white.backgroundColor}
             />
           </Pressable>
         </View>
 
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <TextInput
+            secureTextEntry={!showPass2}
+            cursorColor="black"
+            mode="flat"
+            label="Confirm Password"
+            style={[styles.input, {flex: 1}]}
+            value={password2}
+            onChangeText={setPassword2}
+          />
+          <Pressable
+            onPress={() => setShowPass2(!showPass2)}
+            style={{marginLeft: 10}}>
+            <MaterialCommunityIcons
+              name={showPass2 ? 'eye-off' : 'eye'}
+              size={24}
+              color={globalStyles.white.backgroundColor}
+            />
+          </Pressable>
+        </View>
 
         <Pressable
-          style={[
-            styles.button,
-            globalStyles.secondary,
-            {marginTop: 0, marginBottom: 30},
-          ]}
+          style={[styles.button, globalStyles.secondary, {marginBottom: 30}]}
           onPress={handleRegister}>
           <Text style={styles.buttonText}>REGISTER</Text>
         </Pressable>
 
         <Pressable
-          style={[
-            styles.button,
-            globalStyles.fullblack,
-            {marginTop: 0, marginBottom: 30},
-          ]}
-          onPress={() => {
-            navigation.navigate('Login');
-          }}>
+          style={[styles.button, globalStyles.fullblack, {marginBottom: 30}]}
+          onPress={() => navigation.navigate('Login')}>
           <Text style={{color: 'white', fontWeight: 'bold'}}>
             Already have an account? Click here to log in.
           </Text>

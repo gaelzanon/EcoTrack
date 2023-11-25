@@ -7,7 +7,8 @@ const existingVehicle = {
   model: 'Corolla',
   year: 2020,
   averageConsumption: 5,
-  plate: '8171MSL'
+  plate: '8171MSL',
+  type: 'gasoline'
 };
 const existingInterestPoint = {
   creator: 'usuario@gmail.com',

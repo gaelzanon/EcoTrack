@@ -19,7 +19,7 @@ class AuthService {
     return collection(this.db, `${this.env}_users`);
   }
 
-  async createUserWithEmailAndPassword(email, password) {
+  async createUserWithEmailAndPassword(email, username, password) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
     if (isConnected) {
@@ -34,6 +34,7 @@ class AuthService {
 
         await addDoc(this.usersCollection, {
           uid: user.uid,
+          username,
           email,
         });
         /*
