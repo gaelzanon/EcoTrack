@@ -40,6 +40,22 @@ class UserController {
       throw error;
     }
   }
+
+  async deleteUser(username) {
+    //TODO: Consultar base de datos según nombre usuario enviado
+
+    //TODO: Eliminar cuenta
+    return null;
+
+    try {
+
+      const result = await this.authService.deleteUser();
+      return result;
+    } catch (error) {
+      // Reenviar la excepción tal como se recibe
+      throw error;
+    }
+  }
 }
 
 export default UserController;
