@@ -45,3 +45,34 @@ describe('HU5: Como usuario quiero poder dar de alta un lugar de interés usando
     await expect(interestPointController.registerInterestPoint(interestPoint)).rejects.toThrow('InvalidCoordinatesException');
   });
 });
+
+describe('HU6: Como usuario quiero poder dar de alta un lugar de interés usando su topónimo', () => {
+  it('E1: Se crea el lugar correctamente con un topónimo válido', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint = new InterestPoint(creatorEmail, 'Villarreal', 'Villarreal');
+    await expect(interestPointController.registerInterestPointToponym(interestPoint)).resolves.toBeTruthy()
+    expect(AsyncStorage.getItem).toBeCalledWith('interestPoints');
+    expect(AsyncStorage.setItem).toBeCalled();
+  });
+
+  it('E2: No se crea el lugar si el topónimo ya está dado de alta (por el mismo usuario)', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint = new InterestPoint(creatorEmail, 'Castellón de la Plana', 'Castellón de la Plana');
+    
+    // Configura el mock de AsyncStorage para simular que ya existe el punto de interés
+    AsyncStorage.getItem.mockResolvedValue(JSON.stringify([interestPoint]));
+
+    // Intenta agregar el mismo punto de interés
+    await expect(interestPointController.registerInterestPointToponym(interestPoint)).rejects.toThrow('DuplicateInterestPointException');
+
+    // Verifica que se haya llamado a getItem y setItem correctamente
+    expect(AsyncStorage.getItem).toBeCalledWith('interestPoints');
+    expect(AsyncStorage.setItem).not.toBeCalled();
+  });
+    
+  it('E3: No se crea el lugar si el topónimo no es válido', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint = new InterestPoint(creatorEmail, 'Plutón', 'TopónimoInválido');
+    await expect(interestPointController.registerInterestPointToponym(interestPoint)).rejects.toThrow('InvalidToponymException');
+  });
+});
