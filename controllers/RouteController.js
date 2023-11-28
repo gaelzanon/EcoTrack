@@ -5,6 +5,15 @@ export default class RouteController {
     }
 
     async getRoute(route) {
-        return null;
+        if (!route.origin || !route.destiny) {
+            throw new Error('InvalidInterestPointException');
+        }
+        try {
+            const journey = await this.rutaService.obtenerRuta(route.origin, route.destiny, route.mode, route.vehicle);
+            return journey;
+        } catch (error) {
+            
+            throw error;
+        }
     }
 }
