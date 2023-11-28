@@ -4,9 +4,10 @@ import Vehicle from '../../models/Vehicle';
 import InterestPoint from '../../models/InterestPoint';
 import cloudService from '../../services/cloudService';
 import AsyncStorage from '@react-native-async-storage/async-storage/jest/async-storage-mock';
-
+import GoogleDirectionsServiceAdapter from '../../patrones/Adapter/GoogleDirectionsServiceAdapter';
 const CloudService = new cloudService('test');
-const routeController = new RouteController(CloudService);
+const routeService = new GoogleDirectionsServiceAdapter();
+const routeController = new RouteController(CloudService, routeService);
 
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
@@ -18,9 +19,9 @@ describe('HU13: Como usuario, dados dos lugares de interés y un método de movi
       const interestPoint1 = new InterestPoint(creatorEmail, 'Villarreal', 39.9333300, -0.1000000);
       const interestPoint2 = new InterestPoint(creatorEmail, 'Castellón de la Plana', 39.98567, -0.04935);
       const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'gasoline');
-      const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle);
+      const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'fastest');
   
-      await expect(routeController.getRoute(route.origin, route.destiny, route.vehicle)).resolves.toBeTruthy();
+      await expect(routeController.getRoute(route)).resolves.toBeTruthy();
 
     });
   
@@ -29,9 +30,9 @@ describe('HU13: Como usuario, dados dos lugares de interés y un método de movi
       const interestPoint1 = new InterestPoint(creatorEmail, 'Villarreal', 39.9333300, -0.1000000);
       const interestPoint2 = null
       const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'gasoline');
-      const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle);
+      const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'shortest');
   
-      await expect(routeController.getRoute(route.origin, route.destiny, route.vehicle)).rejects.toThrow(
+      await expect(routeController.getRoute(route)).rejects.toThrow(
         'InvalidInterestPointException',
       );
     });
@@ -41,9 +42,9 @@ describe('HU13: Como usuario, dados dos lugares de interés y un método de movi
       const interestPoint1 = new InterestPoint(creatorEmail, 'Villarreal', 39.9333300, -0.1000000);
       const interestPoint2 = new InterestPoint(creatorEmail, 'Las Palmas de Gran Canaria', 28.09973, -15.41343);
       const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'gasoline');
-      const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle);
+      const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'cheapest');
     
-      await expect(routeController.getRoute(route.origin, route.destiny, route.vehicle)).rejects.toThrow(
+      await expect(routeController.getRoute(route)).rejects.toThrow(
           'RouteNotAvailableException',
       );
     });

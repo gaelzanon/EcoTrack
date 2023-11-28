@@ -1,12 +1,10 @@
-class RouteController {
-    constructor(cloudService) {
+export default class RouteController {
+    constructor(cloudService, routeService) {
         this.cloudService = cloudService;
+        this.rutaService = routeService;
     }
 
-    getRoute(origin, destiny, vehicle) {
+    async getRoute(route) {
         return null;
     }
-
 }
-
-export default RouteController;
