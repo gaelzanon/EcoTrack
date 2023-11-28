@@ -17,7 +17,7 @@ import InterestPoint from '../models/InterestPoint';
 const AddInterestPoint = () => {
   const navigation = useNavigation();
   const interestPointController = useInterestPointController();
-  const {user} = useAsyncStorage(); // Obtener el usuario del contexto de AsyncStorage
+  const {user, interestPoints, setInterestPoints} = useAsyncStorage(); // Obtener el usuario del contexto de AsyncStorage
 
   const [name, setName] = useState('');
   const [latitude, setLatitude] = useState('');
@@ -41,7 +41,8 @@ const AddInterestPoint = () => {
           parseFloat(longitude),
         );
 
-        await interestPointController.registerInterestPoint(newInterestPoint);
+        const point = await interestPointController.registerInterestPoint(newInterestPoint);
+        setInterestPoints(interestPoints? [...interestPoints, point]:[point] )
         Alert.alert(
           'Interest Point Added',
           'Your interest point has been successfully added.',
@@ -55,11 +56,12 @@ const AddInterestPoint = () => {
           error.message === 'InvalidCoordinatesException'
         ) {
           errorMessage = 'The coordinates of the interest point are not valid.';
-        } else if (error.code) {
-          // Aquí manejaremos errores específicos de Firebase si es necesario
-          errorMessage = `Firebase error: ${error.message}`;
+        } else if (error.code === 'DuplicateInterestPointException') {
+          errorMessage = 'You already have an interest point with that name registered';
+
         }
         Alert.alert('Error', errorMessage);
+        console.log(error)
       }
     }
   };

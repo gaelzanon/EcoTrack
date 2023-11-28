@@ -5,7 +5,7 @@ export default class RouteController {
     }
 
     async getRoute(route) {
-        if (!route.origin || !route.destiny) {
+        if (route.origin.name === '' || route.destiny.name === '') {
             throw new Error('InvalidInterestPointException');
         }
         try {

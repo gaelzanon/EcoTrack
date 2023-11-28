@@ -9,14 +9,21 @@ export default class GoogleDirectionsServiceAdapter extends RutaService {
   }
 
   async obtenerRuta(origin, destiny, mode, vehicle) {
+    
     try {
       const vehicleType = this.getVehicleType(vehicle.type);
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/directions/json`,
         {
           params: {
-            origin: `${origin.latitude},${origin.longitude}`,
-            destination: `${destiny.latitude},${destiny.longitude}`,
+            origin:
+              origin.latitude === undefined && origin.longitude === undefined
+                ? origin.name
+                : `${origin.latitude},${origin.longitude}`,
+            destination:
+              destiny.latitude === undefined && destiny.longitude === undefined
+                ? destiny.name
+                : `${destiny.latitude},${destiny.longitude}`,
             mode: vehicleType,
             alternatives: true,
             avoid: 'ferries', //aunque este esto puesto , si la unica ruta disponible incluye ferries la va a devolver igual
@@ -34,7 +41,7 @@ export default class GoogleDirectionsServiceAdapter extends RutaService {
   getVehicleType(vehicleType) {
     // Transforma el tipo de vehículo al formato esperado por la API de Google Maps
     switch (vehicleType) {
-      case 'electronic':
+      case 'electric':
       case 'gasoline':
       case 'diesel':
         return 'driving';
@@ -48,30 +55,45 @@ export default class GoogleDirectionsServiceAdapter extends RutaService {
   }
 
   formatRouteResponse(data) {
-    // Formatea la respuesta de la API de Google Maps al formato deseado
+    // Verifica si la respuesta es válida
     if (data.status !== 'OK' || !data.routes.length) {
       throw new Error('RouteNotAvailableException');
     }
 
-    // Verificar solo la primera ruta
     const firstRoute = data.routes[0];
+
+    // Verifica si hay transbordadores en la ruta
     const hasFerry = firstRoute.legs.some(leg =>
       leg.steps.some(step => step.maneuver === 'ferry'),
     );
 
     if (hasFerry) {
-        throw new Error('RouteNotAvailableException');
+      throw new Error('RouteNotAvailableException');
     }
 
-    const route = data.routes[0];
-    const leg = route.legs[0];
+    // Extrae las coordenadas de la ruta
+    let coordinates = [];
+    firstRoute.legs.forEach(leg => {
+      leg.steps.forEach((step, index) => {
+        // Solo agrega la posición de inicio en el primer paso
+        if (index === 0) {
+          coordinates.push({
+            latitude: step.start_location.lat,
+            longitude: step.start_location.lng,
+          });
+        }
+        // Agrega la posición de fin de cada paso
+        coordinates.push({
+          latitude: step.end_location.lat,
+          longitude: step.end_location.lng,
+        });
+      });
+    });
+
     return {
-      distance: leg.distance.text,
-      duration: leg.duration.text,
-      coordinates: leg.steps.map(step => ({
-        start: step.start_location,
-        end: step.end_location,
-      })),
+      distance: firstRoute.legs[0].distance.text,
+      duration: firstRoute.legs[0].duration.text,
+      coordinates,
     };
   }
 }

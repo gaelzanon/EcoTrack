@@ -33,6 +33,7 @@ class CloudService {
     );
   }
   
+
   async addVehicle(vehicle) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
@@ -44,10 +45,10 @@ class CloudService {
         if (!vehicles.some(v => v.plate === vehicle.plate) && !existsInFirebase) {
           // Convierte el objeto a un formato que Firestore pueda entender
           const vehicleData = {...vehicle};
-          const docRef = await addDoc(this.vehiclesCollection, vehicleData);
+          await addDoc(this.vehiclesCollection, vehicleData);
           vehicles.push(vehicleData);
           await AsyncStorage.setItem('vehicles', JSON.stringify(vehicles));
-          return docRef
+          return vehicle
         } else {
           const error = new Error('DuplicateVehicleException');
           error.code = 'DuplicateVehicleException';
@@ -85,13 +86,13 @@ class CloudService {
         if (!interestPoints.some(ip => ip.name === interestPoint.name) && !existsInFirebase) {
           // Convierte el objeto a un formato que Firestore pueda entender
           const interestPointData = {...interestPoint};
-          const docRef = await addDoc(this.interestPointsCollection, interestPointData);
+          await addDoc(this.interestPointsCollection, interestPointData);
           interestPoints.push(interestPointData);
           await AsyncStorage.setItem(
             'interestPoints',
             JSON.stringify(interestPoints),
           );
-          return docRef
+          return interestPoint
         } else {
           const error = new Error('DuplicateInterestPointException');
           error.code = 'DuplicateInterestPointException';

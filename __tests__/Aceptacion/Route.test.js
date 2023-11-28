@@ -24,7 +24,7 @@ describe('HU13: Como usuario, dados dos lugares de interés y un método de movi
     it('E2: Uno de los lugares no existe', async () => {
       const creatorEmail = 'usuario@gmail.com';
       const interestPoint1 = new InterestPoint(creatorEmail, 'Villarreal', 39.9333300, -0.1000000);
-      const interestPoint2 = null
+      const interestPoint2 = new InterestPoint(creatorEmail, '', undefined, undefined)
       const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'gasoline');
       const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'shortest');
   
