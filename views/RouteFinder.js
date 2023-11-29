@@ -89,7 +89,7 @@ const RouteFinder = () => {
       let message = 'An error occurred. Please try again.';
       switch (error.code) {
         case 'NoInetConection':
-          message = 'You need internet to login.';
+          message = 'You need internet to get routes.';
           break;
         case 'InvalidInterestPointException':
           message = 'There is an invalid interest point.';
