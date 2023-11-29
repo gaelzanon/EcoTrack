@@ -8,92 +8,131 @@ export default class GoogleDirectionsServiceAdapter extends RutaService {
     this.apiKey = Config.GOOGLE_MAPS_API_KEY;
   }
 
-  async obtenerRuta(origin, destiny, mode, vehicle) {
-    
+  async obtenerRuta(origin, destination, mode, vehicle) {
     try {
-      const vehicleType = this.getVehicleType(vehicle.type);
-      const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/directions/json`,
+      // Construye los objetos Waypoint para origin y destination
+      const waypointOrigin = this.buildWaypoint(origin);
+      const waypointDestination = this.buildWaypoint(destination);
+  
+      // Configura el tipo de vehículo
+      const travelMode = this.getTravelMode(vehicle.type);
+  
+      // Realiza la solicitud a la API de Google Maps directions
+      const response = await axios.post(
+        `https://routes.googleapis.com/directions/v2:computeRoutes`,
+        {
+          origin: waypointOrigin,
+          destination: waypointDestination,
+          travelMode: travelMode,
+          computeAlternativeRoutes: true,
+          polylineQuality:'HIGH_QUALITY'
+        },
         {
           params: {
-            origin:
-              origin.latitude === undefined && origin.longitude === undefined
-                ? origin.name
-                : `${origin.latitude},${origin.longitude}`,
-            destination:
-              destiny.latitude === undefined && destiny.longitude === undefined
-                ? destiny.name
-                : `${destiny.latitude},${destiny.longitude}`,
-            mode: vehicleType,
-            alternatives: true,
-            avoid: 'ferries', //aunque este esto puesto , si la unica ruta disponible incluye ferries la va a devolver igual
             key: this.apiKey,
           },
-        },
+          headers: {
+            'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline',
+          },
+        }
       );
-
+  
       return this.formatRouteResponse(response.data);
     } catch (error) {
       throw error;
     }
   }
-
-  getVehicleType(vehicleType) {
-    // Transforma el tipo de vehículo al formato esperado por la API de Google Maps
+  
+  // Método para construir un objeto Waypoint
+  buildWaypoint(location) {
+    if (location.latitude !== undefined && location.longitude !== undefined) {
+      return {
+        location: {
+          latLng: {
+            latitude: location.latitude,
+            longitude: location.longitude
+          }
+        }
+      };
+    } else  {
+      return { address: location.name };
+    }
+  }
+  
+  // Método para determinar el modo de viaje
+  getTravelMode(vehicleType) {
     switch (vehicleType) {
       case 'electric':
       case 'gasoline':
       case 'diesel':
-        return 'driving';
+        return 'DRIVE';
       case 'bike':
-        return 'bicycling';
+        return 'BICYCLE';
       case 'walking':
-        return 'walking';
+        return 'WALK';
       default:
-        return 'driving';
+        return 'DRIVE';
     }
   }
+  
+  
 
   formatRouteResponse(data) {
     // Verifica si la respuesta es válida
-    if (data.status !== 'OK' || !data.routes.length) {
+    if (!data.routes || data.routes.length === 0) {
       throw new Error('RouteNotAvailableException');
     }
-
+  
+    // Toma la primera ruta (la más recomendada)
     const firstRoute = data.routes[0];
-
-    // Verifica si hay transbordadores en la ruta
-    const hasFerry = firstRoute.legs.some(leg =>
-      leg.steps.some(step => step.maneuver === 'ferry'),
-    );
-
-    if (hasFerry) {
-      throw new Error('RouteNotAvailableException');
-    }
-
-    // Extrae las coordenadas de la ruta
-    let coordinates = [];
-    firstRoute.legs.forEach(leg => {
-      leg.steps.forEach((step, index) => {
-        // Solo agrega la posición de inicio en el primer paso
-        if (index === 0) {
-          coordinates.push({
-            latitude: step.start_location.lat,
-            longitude: step.start_location.lng,
-          });
-        }
-        // Agrega la posición de fin de cada paso
-        coordinates.push({
-          latitude: step.end_location.lat,
-          longitude: step.end_location.lng,
-        });
-      });
-    });
-
-    return {
-      distance: firstRoute.legs[0].distance.text,
-      duration: firstRoute.legs[0].duration.text,
-      coordinates,
+  
+    // Decodifica la polyline. 
+    const decodedPolyline = this.decodePolyline(firstRoute.polyline.encodedPolyline);
+  
+    // Construye el objeto de respuesta
+    const response = {
+      distance: firstRoute.distanceMeters, // Distancia en metros
+      duration: firstRoute.duration, // Duración en segundos
+      coordinates: decodedPolyline // Coordenadas de la ruta
     };
+  
+    return response;
   }
+  
+  // Método para decodificar una polyline codificada de Google Maps
+  decodePolyline(encoded) {
+    if (!encoded) {
+      return [];
+    }
+  
+    const poly = [];
+    let index = 0, len = encoded.length;
+    let lat = 0, lng = 0;
+  
+    while (index < len) {
+      let b, shift = 0, result = 0;
+      do {
+        b = encoded.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+  
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+  
+      poly.push({latitude: (lat / 1E5), longitude: (lng / 1E5)});
+    }
+  
+    return poly;
+  }
+  
 }
