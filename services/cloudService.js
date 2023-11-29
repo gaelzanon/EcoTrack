@@ -16,11 +16,21 @@ class CloudService {
     return collection(this.db, `${this.env}_interestPoints`);
   }
 
+  get usersCollection() {
+    return collection(this.db, `${this.env}_users`);
+  }
+
   async existsInFirebase(collection, queryFn) {
     const querySnapshot = await getDocs(collection);
     return querySnapshot.docs.some(queryFn);
   }
 
+  async userExists(email) {
+    return this.existsInFirebase(
+      this.usersCollection,
+      doc => doc.data().email === email,
+    );
+  }
   async vehicleExists(creator, plate) {
     return this.existsInFirebase(
       this.vehiclesCollection,
@@ -33,6 +43,35 @@ class CloudService {
       this.interestPointsCollection,
       doc => doc.data().creator === creator && doc.data().name === name,
     );
+  }
+
+  async deleteUserInfo(email) {
+    //Eliminar todos los vehículos del usuario
+    const vehicleQuerySnapshot = await getDocs(this.vehiclesCollection);
+    const vehicleDeletePromises = vehicleQuerySnapshot.docs
+      .filter(doc => doc.data().creator === email)
+      .map(doc => deleteDoc(doc.ref));
+    await Promise.all(vehicleDeletePromises);
+
+    //Eliminar todos los puntos de interés del usuario
+    const interestPointQuerySnapshot = await getDocs(
+      this.interestPointsCollection,
+    );
+    const interestPointDeletePromises = interestPointQuerySnapshot.docs
+      .filter(doc => doc.data().creator === email)
+      .map(doc => deleteDoc(doc.ref));
+    await Promise.all(interestPointDeletePromises);
+
+    //Eliminar el usuario
+    const userQuerySnapshot = await getDocs(this.usersCollection);
+    const userDoc = userQuerySnapshot.docs.find(
+      doc => doc.data().email === email,
+    );
+    if (userDoc) {
+      await deleteDoc(userDoc.ref);
+    }
+
+    return true;
   }
 
   async addVehicle(vehicle) {

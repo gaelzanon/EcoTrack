@@ -3,8 +3,9 @@ import ValidacionLogin from '../patrones/Strategy/ValidacionLogin';
 import ValidacionRegistro from '../patrones/Strategy/ValidacionRegistro';
 
 class UserController {
-  constructor(authService) {
+  constructor(authService, cloudService) {
     this.authService = authService;
+    this.cloudService = cloudService;
     this.contextoFormulario = new ContextoFormulario();
   }
 
@@ -41,16 +42,19 @@ class UserController {
     }
   }
 
-  async deleteUser(username) {
-    //TODO: Consultar base de datos según nombre usuario enviado
-
-    //TODO: Eliminar cuenta
-    return null;
+  async deleteUser(email) {
+    //Consultar base de datos según email  enviado
+    const existe = await this.cloudService.userExists(email);
+    if (!existe) {
+      const error = new Error('UserNotFoundException');
+      error.code = 'UserNotFoundException';
+      throw error;
+    }
 
     try {
-
-      const result = await this.authService.deleteUser();
-      return result;
+      const resultAuth = await this.authService.deleteUser();
+      const resultDatabase = await this.cloudService.deleteUserInfo(email);
+      return resultAuth && resultDatabase;
     } catch (error) {
       // Reenviar la excepción tal como se recibe
       throw error;
