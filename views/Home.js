@@ -14,6 +14,10 @@ const Home = () => {
     navigation.navigate('AddInterestPoint');
   };
 
+  const handleNavigateToRouteFinder = () => {
+    navigation.navigate('RouteFinder');
+  };
+
   return (
     <ScrollView style={[globalStyles.primary, {flex: 1, padding: 20}]}>
       <View>
@@ -29,6 +33,12 @@ const Home = () => {
           style={[styles.button, globalStyles.secondary]}
           onPress={handleNavigateToAddInterestPoint}>
           <Text style={styles.buttonText}>Add Interest Point</Text>
+        </Pressable>
+
+        <Pressable
+          style={[styles.button, globalStyles.secondary]}
+          onPress={handleNavigateToRouteFinder}>
+          <Text style={styles.buttonText}>Find a Route</Text>
         </Pressable>
       </View>
     </ScrollView>
