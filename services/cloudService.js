@@ -70,7 +70,10 @@ class CloudService {
     if (userDoc) {
       await deleteDoc(userDoc.ref);
     }
-
+    //Eliminar almacenamiento local
+    await AsyncStorage.removeItem('user')
+    await AsyncStorage.removeItem('vehicles')
+    await AsyncStorage.removeItem('interestPoints')
     return true;
   }
 
