@@ -88,6 +88,9 @@ const RouteFinder = () => {
     } catch (error) {
       let message = 'An error occurred. Please try again.';
       switch (error.code) {
+        case 'NoInetConection':
+          message = 'You need internet to login.';
+          break;
         case 'InvalidInterestPointException':
           message = 'There is an invalid interest point.';
           break;
@@ -125,8 +128,17 @@ const RouteFinder = () => {
             />
           </MapView>
           <View
-            style={[globalStyles.black, {position: 'absolute', bottom: 0, width:'100%'}]}>
-            <Text style={[styles.label, {color:globalStyles.white.backgroundColor}]}>Test</Text>
+            style={[
+              globalStyles.black,
+              {position: 'absolute', bottom: 0, width: '100%'},
+            ]}>
+            <Text
+              style={[
+                styles.label,
+                {color: globalStyles.white.backgroundColor},
+              ]}>
+              Test
+            </Text>
           </View>
         </>
       ) : (
