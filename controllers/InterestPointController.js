@@ -1,6 +1,7 @@
 class InterestPointController {
-  constructor(cloudService) {
+  constructor(cloudService, geocodingService) {
     this.cloudService = cloudService;
+    this.geocodingService = geocodingService;
   }
 
   validarCoordenadas(latitud, longitud) {
@@ -9,15 +10,12 @@ class InterestPointController {
     return esLatitudValida && esLongitudValida;
   }
 
-  validarToponimo(interestPoint) {
-    // Comprobar topónimo
-    return null;
-  }
-
   async registerInterestPoint(interestPoint) {
     // Validación del punto de interés antes de intentar registrar
-    if (!this.validarCoordenadas(interestPoint.latitude, interestPoint.longitude)) {
-      throw new Error("InvalidCoordinatesException");
+    if (
+      !this.validarCoordenadas(interestPoint.latitude, interestPoint.longitude)
+    ) {
+      throw new Error('InvalidCoordinatesException');
     }
 
     try {
@@ -31,14 +29,17 @@ class InterestPointController {
 
   async registerInterestPointToponym(interestPoint) {
     // Validación del punto de interés antes de intentar registrar
-    if (!this.validarToponimo(interestPoint)) {
-      // throw new Error("InvalidToponymException");
-      return null;
+    if (interestPoint.name === '' || interestPoint.name.length < 4) {
+      const error = new Error('InvalidToponymException');
+      error.code = 'InvalidToponymException';
+      throw error;
     }
 
     try {
+      const coords = await this.geocodingService(interestPoint.name)
+      const newIp = {...interestPoint, latitude:coords.latitude, longitude:coords.longitude}
       // Usamos cloudService para añadir un punto de interés a la colección 'interestPoints'
-      const docRef = await this.cloudService.addInterestPoint(interestPoint);
+      const docRef = await this.cloudService.addInterestPoint(newIp);
       return docRef;
     } catch (error) {
       throw error;
