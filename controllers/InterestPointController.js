@@ -36,7 +36,7 @@ class InterestPointController {
     }
 
     try {
-      const coords = await this.geocodingService(interestPoint.name)
+      const coords = await this.geocodingService.obtenerCoordenadas(interestPoint.name)
       const newIp = {...interestPoint, latitude:coords.latitude, longitude:coords.longitude}
       // Usamos cloudService para añadir un punto de interés a la colección 'interestPoints'
       const docRef = await this.cloudService.addInterestPoint(newIp);
