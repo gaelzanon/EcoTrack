@@ -49,7 +49,6 @@ const RouteFinder = () => {
   const [useCustomDestiny, setuseCustomDestiny] = useState(false);
 
   const findRoute = async () => {
-    
     try {
       // Decide si usar puntos de interés personalizados o toponímicos
       const origin = useCustomOrigin
@@ -87,45 +86,66 @@ const RouteFinder = () => {
       setRouteCoordinates(journey.coordinates);
       setShowMap(true);
     } catch (error) {
-      console.error('Error finding route:', error);
-      Alert.alert('Error', 'There wasnt a route found');
+      let message = 'An error occurred. Please try again.';
+      switch (error.code) {
+        case 'InvalidInterestPointException':
+          message = 'There is an invalid interest point.';
+          break;
+        case 'RouteNotAvailableException':
+          message = `There wansn't a route found.`;
+          break;
+        default:
+          console.log(error);
+          break;
+      }
+      Alert.alert('Error', message);
     }
   };
 
   return (
     <View style={[globalStyles.primary, {flex: 1, padding: 20}]}>
       {showMap ? (
-        <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: routeCoordinates[0]?.latitude,
-            longitude: routeCoordinates[0]?.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}>
-          <Marker coordinate={routeCoordinates[0]} />
-          <Marker coordinate={routeCoordinates[routeCoordinates.length - 1]} />
-          <Polyline
-            coordinates={routeCoordinates}
-            strokeColor="#000"
-            strokeWidth={3}
-          />
-        </MapView>
+        <>
+          <MapView
+            style={styles.map}
+            initialRegion={{
+              latitude: routeCoordinates[0]?.latitude,
+              longitude: routeCoordinates[0]?.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}>
+            <Marker coordinate={routeCoordinates[0]} />
+            <Marker
+              coordinate={routeCoordinates[routeCoordinates.length - 1]}
+            />
+            <Polyline
+              coordinates={routeCoordinates}
+              strokeColor="#000"
+              strokeWidth={3}
+            />
+          </MapView>
+          <View
+            style={[globalStyles.black, {position: 'absolute', bottom: 0, width:'100%'}]}>
+            <Text style={[styles.label, {color:globalStyles.white.backgroundColor}]}>Test</Text>
+          </View>
+        </>
       ) : (
         <>
           <Text style={styles.label}>Vehicle</Text>
+          {vehicles && (
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={selectedVehicleOption}
+                onValueChange={(itemValue, itemIndex) => {
+                  setSelectedVehicleOption(itemValue);
+                  setUseCustomVehicle(itemValue === 'custom');
+                }}>
+                <Picker.Item label="Own" value="custom" />
+                <Picker.Item label="Generic" value="generic" />
+              </Picker>
+            </View>
+          )}
 
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={selectedVehicleOption}
-              onValueChange={(itemValue, itemIndex) => {
-                setSelectedVehicleOption(itemValue);
-                setUseCustomVehicle(itemValue !== 'custom');
-              }}>
-              <Picker.Item label="Own" value="custom" />
-              <Picker.Item label="Generic" value="generic" />
-            </Picker>
-          </View>
           {selectedVehicleOption === 'custom' ? (
             <>
               {vehicles && vehicles.length > 0 ? (
@@ -160,17 +180,20 @@ const RouteFinder = () => {
             </Picker>
           )}
           <Text style={styles.label}>Origin</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={selectedOriginOption}
-              onValueChange={(itemValue, itemIndex) => {
-                setSelectedOriginOption(itemValue);
-                setuseCustomOrigin(itemValue !== 'custom');
-              }}>
-              <Picker.Item label="Toponymic" value="custom" />
-              <Picker.Item label="Own" value="generic" />
-            </Picker>
-          </View>
+          {interestPoints && (
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={selectedOriginOption}
+                onValueChange={(itemValue, itemIndex) => {
+                  setSelectedOriginOption(itemValue);
+                  setuseCustomOrigin(itemValue !== 'custom');
+                }}>
+                <Picker.Item label="Toponymic" value="custom" />
+                <Picker.Item label="Own" value="own" />
+              </Picker>
+            </View>
+          )}
+
           {selectedOriginOption === 'custom' ? (
             <TextInput
               cursorColor="black"
@@ -202,17 +225,20 @@ const RouteFinder = () => {
             </>
           )}
           <Text style={styles.label}>Destination</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={selectedDestinationOption}
-              onValueChange={(itemValue, itemIndex) => {
-                setSelectedDestinationOption(itemValue);
-                setuseCustomDestiny(itemValue !== 'custom');
-              }}>
-              <Picker.Item label="Toponymic" value="custom" />
-              <Picker.Item label="Own" value="generic" />
-            </Picker>
-          </View>
+          {interestPoints && (
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={selectedDestinationOption}
+                onValueChange={(itemValue, itemIndex) => {
+                  setSelectedDestinationOption(itemValue);
+                  setuseCustomDestiny(itemValue !== 'custom');
+                }}>
+                <Picker.Item label="Toponymic" value="custom" />
+                <Picker.Item label="Own" value="own" />
+              </Picker>
+            </View>
+          )}
+
           {selectedDestinationOption === 'custom' ? (
             <TextInput
               cursorColor="black"

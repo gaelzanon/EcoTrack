@@ -80,7 +80,9 @@ export default class GoogleDirectionsServiceAdapter extends RutaService {
   formatRouteResponse(data) {
     // Verifica si la respuesta es válida
     if (!data.routes || data.routes.length === 0) {
-      throw new Error('RouteNotAvailableException');
+      const error = new Error('RouteNotAvailableException');
+      error.code = 'RouteNotAvailableException';
+      throw error;
     }
   
     // Toma la primera ruta (la más recomendada)
