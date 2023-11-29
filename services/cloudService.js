@@ -46,35 +46,43 @@ class CloudService {
   }
 
   async deleteUserInfo(email) {
-    //Eliminar todos los vehículos del usuario
-    const vehicleQuerySnapshot = await getDocs(this.vehiclesCollection);
-    const vehicleDeletePromises = vehicleQuerySnapshot.docs
-      .filter(doc => doc.data().creator === email)
-      .map(doc => deleteDoc(doc.ref));
-    await Promise.all(vehicleDeletePromises);
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+    if (isConnected) {
+      //Eliminar todos los vehículos del usuario
+      const vehicleQuerySnapshot = await getDocs(this.vehiclesCollection);
+      const vehicleDeletePromises = vehicleQuerySnapshot.docs
+        .filter(doc => doc.data().creator === email)
+        .map(doc => deleteDoc(doc.ref));
+      await Promise.all(vehicleDeletePromises);
 
-    //Eliminar todos los puntos de interés del usuario
-    const interestPointQuerySnapshot = await getDocs(
-      this.interestPointsCollection,
-    );
-    const interestPointDeletePromises = interestPointQuerySnapshot.docs
-      .filter(doc => doc.data().creator === email)
-      .map(doc => deleteDoc(doc.ref));
-    await Promise.all(interestPointDeletePromises);
+      //Eliminar todos los puntos de interés del usuario
+      const interestPointQuerySnapshot = await getDocs(
+        this.interestPointsCollection,
+      );
+      const interestPointDeletePromises = interestPointQuerySnapshot.docs
+        .filter(doc => doc.data().creator === email)
+        .map(doc => deleteDoc(doc.ref));
+      await Promise.all(interestPointDeletePromises);
 
-    //Eliminar el usuario
-    const userQuerySnapshot = await getDocs(this.usersCollection);
-    const userDoc = userQuerySnapshot.docs.find(
-      doc => doc.data().email === email,
-    );
-    if (userDoc) {
-      await deleteDoc(userDoc.ref);
+      //Eliminar el usuario
+      const userQuerySnapshot = await getDocs(this.usersCollection);
+      const userDoc = userQuerySnapshot.docs.find(
+        doc => doc.data().email === email,
+      );
+      if (userDoc) {
+        await deleteDoc(userDoc.ref);
+      }
+      //Eliminar almacenamiento local
+      await AsyncStorage.removeItem('user');
+      await AsyncStorage.removeItem('vehicles');
+      await AsyncStorage.removeItem('interestPoints');
+      return true;
+    } else {
+      const error = new Error('NoInetConection');
+      error.code = 'NoInetConection';
+      throw error;
     }
-    //Eliminar almacenamiento local
-    await AsyncStorage.removeItem('user')
-    await AsyncStorage.removeItem('vehicles')
-    await AsyncStorage.removeItem('interestPoints')
-    return true;
   }
 
   async addVehicle(vehicle) {
