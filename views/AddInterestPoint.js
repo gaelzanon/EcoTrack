@@ -14,6 +14,9 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {useAsyncStorage} from '../contexts/AsyncStorageContext';
 import {useInterestPointController} from '../contexts/InterestPointControllerContext';
 import InterestPoint from '../models/InterestPoint';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { FlatList } from 'react-native-gesture-handler';
+import Config from 'react-native-config';
 
 const AddInterestPoint = () => {
   const navigation = useNavigation();
@@ -116,7 +119,7 @@ const AddInterestPoint = () => {
   }
 
   return (
-    <ScrollView style={[globalStyles.primary, {flex: 1, padding: 20}]}>
+    <ScrollView style={[globalStyles.primary, {flex: 1, padding: 20}]} keyboardShouldPersistTaps='handled'>
       <View>
         <Text style={globalStyles.mainText}>New Interest Point</Text>
 
@@ -187,14 +190,38 @@ const AddInterestPoint = () => {
 
         { showToponymInput
           && <View>
-              <TextInput
-                cursorColor="black"
-                mode="flat"
-                label="Toponym"
-                style={styles.input}
-                value={toponym}
-                onChangeText={text => setToponym(text)}
-              />
+
+              <View>
+                <GooglePlacesAutocomplete
+                  placeholder='Name'
+                  fetchDetails={false}
+                  disableScroll={true}
+                  searchOptions={{ types: ["(cities)"] }}
+                  onPress={(details = null) => {
+                    // Formateamos los datos para enviar solamente el nombre de la ciudad (Sin el país)
+                    setToponym(details.structured_formatting.main_text)
+                  }}
+                  query={{
+                    key: Config.GOOGLE_MAPS_API_KEY,
+                    language: 'es',
+                  }}
+                  styles={{
+                    textInputContainer: {
+                      padding: 13,
+                      marginBottom: 10,
+                      ...globalStyles.white,
+                      borderWidth: 1,
+                      borderColor: 'black'
+                    },
+                    textInput: {
+                      marginTop: 2,
+                      marginLeft: 2,
+                      fontSize: 16,
+                      color: '#011a1b'
+                    }
+                  }}
+                />
+              </View>
 
               <Pressable
                 style={[
