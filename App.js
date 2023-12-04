@@ -1,11 +1,12 @@
 import 'react-native-gesture-handler';
 import React, {useRef, useEffect} from 'react';
 import {BackHandler} from 'react-native';
-import {createStackNavigator} from '@react-navigation/stack';
-import {PaperProvider, DefaultTheme} from 'react-native-paper';
+import {Header, createStackNavigator} from '@react-navigation/stack';
+import {PaperProvider, DefaultTheme, Title} from 'react-native-paper';
 import {NavigationContainer} from '@react-navigation/native';
 import globalStyles from './styles';
 import RNBootSplash from 'react-native-bootsplash';
+import HeaderDropdown from './components/HeaderDropdown';
 
 //Views
 import Login from './views/Login';
@@ -20,9 +21,11 @@ import {VehicleControllerProvider} from './contexts/VehicleControllerContext';
 import {InterestPointControllerProvider} from './contexts/InterestPointControllerContext';
 import {RouteControllerProvider} from './contexts/RouteControllerContext';
 import {useAsyncStorage} from './contexts/AsyncStorageContext';
+
 const App = () => {
   const Stack = createStackNavigator();
   const navigationRef = useRef(null);
+
   const {user, loaded} = useAsyncStorage();
 
   useEffect(() => {
@@ -77,6 +80,7 @@ const App = () => {
                     headerStyle: {...globalStyles.black},
                     headerTintColor: globalStyles.white.backgroundColor,
                     animationEnabled: false, // Deshabilita la animación de transición
+                    headerShown: true,
                   }}>
                   <Stack.Screen
                     name="Login"
@@ -91,22 +95,27 @@ const App = () => {
                   <Stack.Screen
                     name="Home"
                     component={Home}
-                    options={{headerShown: false}}
+                    options={{   
+                      headerBackVisible: false,   
+                      headerRight: () => (
+                        <HeaderDropdown></HeaderDropdown>
+                      ),
+                    }}
                   />
                   <Stack.Screen
                     name="AddVehicle"
                     component={AddVehicle}
-                    options={{headerShown: false}}
+                    options={{headerShown: true}}
                   />
                   <Stack.Screen
                     name="AddInterestPoint"
                     component={AddInterestPoint}
-                    options={{headerShown: false}}
-                  />
-                  <Stack.Screen
-                    name="RouteFinder"
-                    component={RouteFinder}
-                    options={{headerShown: false}}
+                    options={{headerShown: true}}
+                    />
+                    <Stack.Screen
+                      name="RouteFinder"
+                      component={RouteFinder}
+                      options={{headerShown: true}}
                   />
                 </Stack.Navigator>
               </NavigationContainer>
