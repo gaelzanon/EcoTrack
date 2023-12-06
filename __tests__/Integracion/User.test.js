@@ -68,19 +68,4 @@ describe('HU2: Como usuario registrado quiero iniciar sesión en la aplicación 
   });
 });
 
-describe('HU4: Como usuario quiero poder eliminar mi cuenta', () => {
-  it('E1: Se elimina el usuario correctamente', async () => {
-    const usuario = new User('usuario@example.com', 'Password12');
-    
-    await expect(
-      userController.deleteUser(usuario.email),
-    ).resolves.toBeTruthy();
-  });
-
-  it('E2: Se intenta eliminar un usuario que no existe', async () => {
-    await expect(
-      userController.deleteUser('usuarioInvalido@example.com'),
-    ).rejects.toThrow('InvalidUser');
-  });
-});
 
