@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, {useRef, useEffect} from 'react';
-import {BackHandler} from 'react-native';
+import { BackHandler } from 'react-native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {PaperProvider, DefaultTheme} from 'react-native-paper';
 import {NavigationContainer} from '@react-navigation/native';
@@ -13,8 +13,8 @@ import Login from './views/Login';
 import Register from './views/Register';
 import AddVehicle from './views/AddVehicle';
 import AddInterestPoint from './views/AddInterestPoint';
-import Home from './views/Home';
 import RouteFinder from './views/RouteFinder';
+import TabStack from './stacks/TabStack';
 //Contexts
 import {UserControllerProvider} from './contexts/UserControllerContext';
 import {VehicleControllerProvider} from './contexts/VehicleControllerContext';
@@ -25,15 +25,6 @@ import {useAsyncStorage} from './contexts/AsyncStorageContext';
 const App = () => {
   const Stack = createStackNavigator();
   const navigationRef = useRef(null);
-
-  const {user, loaded} = useAsyncStorage();
-
-  useEffect(() => {
-    if (loaded) {
-      RNBootSplash.hide({fade: true, duration: 500});
-    }
-  }, [loaded]);
-
   useEffect(() => {
     // Esto es para que no volvamos a login si pulsamos hacia atras en Home
     const backHandler = BackHandler.addEventListener(
@@ -50,6 +41,14 @@ const App = () => {
 
     return () => backHandler.remove();
   }, []);
+  const {user, loaded} = useAsyncStorage();
+
+  useEffect(() => {
+    if (loaded) {
+      RNBootSplash.hide({fade: true, duration: 500});
+    }
+  }, [loaded]);
+
   const theme = {
     ...DefaultTheme, // Usa el DefaultTheme como base
     colors: {
@@ -64,7 +63,8 @@ const App = () => {
   useEffect(() => {
     if (user) {
       // Si hay un usuario, redirige a Home
-      navigationRef.current?.navigate('Home');
+      navigationRef.current?.navigate('TabBar', { screen: 'Home' });
+
     }
   }, [user]);
 
@@ -93,27 +93,29 @@ const App = () => {
                     options={{headerShown: false}}
                   />
                   <Stack.Screen
-                    name="Home"
-                    component={Home}
+                    name="TabBar"
+                    component={TabStack}
                     options={{
+                      title: 'EcoTrack',
                       headerLeft: () => null,
                       headerRight: () => <HeaderDropdown />,
                     }}
                   />
+
                   <Stack.Screen
                     name="AddVehicle"
                     component={AddVehicle}
-                    options={{title:'Vehicle Creation',headerRight: () => <HeaderDropdown />}}
+                    options={{headerShown: false}}
                   />
                   <Stack.Screen
                     name="AddInterestPoint"
                     component={AddInterestPoint}
-                    options={{title:'Interest Point Creation',headerRight: () => <HeaderDropdown />}}
+                    options={{headerShown: false}}
                   />
                   <Stack.Screen
                     name="RouteFinder"
                     component={RouteFinder}
-                    options={{title:'Route Finder', headerRight: () => <HeaderDropdown />}}
+                    options={{headerShown: false}}
                   />
                 </Stack.Navigator>
               </NavigationContainer>
