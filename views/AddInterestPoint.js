@@ -15,7 +15,6 @@ import {useAsyncStorage} from '../contexts/AsyncStorageContext';
 import {useInterestPointController} from '../contexts/InterestPointControllerContext';
 import InterestPoint from '../models/InterestPoint';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import { FlatList } from 'react-native-gesture-handler';
 import Config from 'react-native-config';
 
 const AddInterestPoint = () => {
