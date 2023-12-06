@@ -142,7 +142,8 @@ const RouteFinder = () => {
           </View>
         </>
       ) : (
-        <>
+          <ScrollView style={[globalStyles.primary, { flex: 1, padding: 20 }]}
+          showsVerticalScrollIndicator={false} keyboardShouldPersistTaps='handled'>
           <Text style={styles.label}>Vehicle</Text>
           {vehicles && (
             <View style={styles.pickerContainer}>
@@ -290,7 +291,7 @@ const RouteFinder = () => {
             onPress={findRoute}>
             <Text style={styles.buttonText}>Find Route</Text>
           </Pressable>
-        </>
+        </ScrollView>
       )}
     </View>
   );

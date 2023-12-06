@@ -19,7 +19,8 @@ const Home = () => {
   };
 
   return (
-    <ScrollView style={[globalStyles.primary, {flex: 1, padding: 20}]}>
+    <ScrollView style={[globalStyles.primary, { flex: 1, padding: 20 }]}
+      showsVerticalScrollIndicator={false}>
       <View>
         <Text style={globalStyles.mainText}>Welcome to EcoTrack</Text>
 

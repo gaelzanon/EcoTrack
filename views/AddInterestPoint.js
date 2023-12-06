@@ -118,7 +118,8 @@ const AddInterestPoint = () => {
   }
 
   return (
-    <ScrollView style={[globalStyles.primary, {flex: 1, padding: 20}]} keyboardShouldPersistTaps='handled'>
+    <ScrollView style={[globalStyles.primary, { flex: 1, padding: 20 }]} keyboardShouldPersistTaps='handled'
+    showsVerticalScrollIndicator={false}>
       <View>
         <Text style={globalStyles.mainText}>New Interest Point</Text>
 

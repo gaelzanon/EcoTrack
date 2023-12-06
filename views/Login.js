@@ -77,7 +77,8 @@ const Login = () => {
   };
 
   return (
-    <ScrollView style={[globalStyles.primary, {flex: 1, padding: 20}]}>
+    <ScrollView style={[globalStyles.primary, { flex: 1, padding: 20 }]}
+    showsVerticalScrollIndicator={false} keyboardShouldPersistTaps='handled'>
       <View>
         <Text style={globalStyles.mainText}>Log In</Text>
         <TextInput
