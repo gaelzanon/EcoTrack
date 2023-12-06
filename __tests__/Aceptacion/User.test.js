@@ -4,9 +4,10 @@ import authService from '../../services/authService';
 import cloudService from '../../services/cloudService';
 import FormularioRegistroFactory from '../../patrones/FactoryMethod/FormularioRegistroFactory';
 import FormularioLoginFactory from '../../patrones/FactoryMethod/FormularioLoginFactory';
+import AsyncStorage from '@react-native-async-storage/async-storage/jest/async-storage-mock';
 const AuthService = new authService('test');
 const CloudService = new cloudService('test');
-const userController = new UserController(AuthService);
+const userController = new UserController(AuthService, CloudService);
 
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
@@ -15,6 +16,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 beforeEach(async () => {
   await CloudService.clearCollection('users');
   await jest.clearAllMocks();
+  await AsyncStorage.removeItem('user')
 });
 
 describe('HU1: Como usuario no registrado en la aplicación quiero poder registrarme en la misma para poder utilizar sus servicios', () => {
@@ -86,5 +88,37 @@ describe('HU2: Como usuario registrado quiero iniciar sesión en la aplicación 
     await expect(
       userController.login(formularioLogin.datosFormulario),
     ).rejects.toThrow('InvalidPassException');
+  });
+});
+
+describe('HU4: Como usuario quiero poder eliminar mi cuenta', () => {
+  it('E1: Se elimina el usuario correctamente', async () => {
+    //Para poder borrar el usuario del auth el usuario debe estar loggeado (temas de seguridad de firebase)
+    const usuario = new User('usuario@example.com', 'Password12');
+    const formularioRegistroFactory = new FormularioRegistroFactory();
+    const formularioRegistro = formularioRegistroFactory.crearFormulario();
+    formularioRegistro.rellenarDatos({
+      user: 'juan',
+      email: usuario.email,
+      password1: usuario.password,
+      password2: usuario.password,
+    });
+    await userController.register(formularioRegistro.datosFormulario);
+    const formularioLoginFactory = new FormularioLoginFactory();
+    const formularioLogin = formularioLoginFactory.crearFormulario();
+    formularioLogin.rellenarDatos({
+      email: usuario.email,
+      password: usuario.password,
+    });
+    await userController.login(formularioLogin.datosFormulario)
+    await expect(
+      userController.deleteUser(usuario.email),
+    ).resolves.toBeTruthy();
+  });
+
+  it('E2: Se intenta eliminar un usuario no registrado', async () => {
+    await expect(
+      userController.deleteUser('usuarioInvalido@example.com'),
+    ).rejects.toThrow('UserNotFoundException');
   });
 });

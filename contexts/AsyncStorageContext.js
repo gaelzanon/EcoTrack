@@ -97,12 +97,14 @@ export const AsyncStorageProvider = ({children}) => {
 
         if (!firebaseVehicle) {
           // Añadir a Firebase si no existe
-          addDoc(collection(db, 'production_vehicles'), localVehicle);
+          const vehicleData = {...localVehicle};
+          addDoc(collection(db, 'production_vehicles'), vehicleData);
         } else if (localVehicle.updatedAt > firebaseVehicle.updatedAt) {
           // Actualizar en Firebase si la versión local es más reciente
+          const vehicleData = {...localVehicle};
           updateDoc(
             doc(db, 'production_vehicles', firebaseVehicle.id),
-            localVehicle,
+            vehicleData,
           );
         }
       }
@@ -122,9 +124,10 @@ export const AsyncStorageProvider = ({children}) => {
             ip => ip.name === localInterestPoint.name,
           )
         ) {
+          const interestPointData = {...localInterestPoint};
           addDoc(
             collection(db, 'production_interestPoints'),
-            localInterestPoint,
+            interestPointData,
           );
         }
       }

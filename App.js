@@ -6,6 +6,7 @@ import {PaperProvider, DefaultTheme} from 'react-native-paper';
 import {NavigationContainer} from '@react-navigation/native';
 import globalStyles from './styles';
 import RNBootSplash from 'react-native-bootsplash';
+import HeaderDropdown from './components/HeaderDropdown';
 
 //Views
 import Login from './views/Login';
@@ -20,9 +21,11 @@ import {VehicleControllerProvider} from './contexts/VehicleControllerContext';
 import {InterestPointControllerProvider} from './contexts/InterestPointControllerContext';
 import {RouteControllerProvider} from './contexts/RouteControllerContext';
 import {useAsyncStorage} from './contexts/AsyncStorageContext';
+
 const App = () => {
   const Stack = createStackNavigator();
   const navigationRef = useRef(null);
+
   const {user, loaded} = useAsyncStorage();
 
   useEffect(() => {
@@ -77,6 +80,7 @@ const App = () => {
                     headerStyle: {...globalStyles.black},
                     headerTintColor: globalStyles.white.backgroundColor,
                     animationEnabled: false, // Deshabilita la animación de transición
+                    headerShown: true,
                   }}>
                   <Stack.Screen
                     name="Login"
@@ -91,22 +95,25 @@ const App = () => {
                   <Stack.Screen
                     name="Home"
                     component={Home}
-                    options={{headerShown: false}}
+                    options={{
+                      headerLeft: () => null,
+                      headerRight: () => <HeaderDropdown />,
+                    }}
                   />
                   <Stack.Screen
                     name="AddVehicle"
                     component={AddVehicle}
-                    options={{headerShown: false}}
+                    options={{title:'Vehicle Creation',headerRight: () => <HeaderDropdown />}}
                   />
                   <Stack.Screen
                     name="AddInterestPoint"
                     component={AddInterestPoint}
-                    options={{headerShown: false}}
+                    options={{title:'Interest Point Creation',headerRight: () => <HeaderDropdown />}}
                   />
                   <Stack.Screen
                     name="RouteFinder"
                     component={RouteFinder}
-                    options={{headerShown: false}}
+                    options={{title:'Route Finder', headerRight: () => <HeaderDropdown />}}
                   />
                 </Stack.Navigator>
               </NavigationContainer>

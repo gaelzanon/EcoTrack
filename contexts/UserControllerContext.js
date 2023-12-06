@@ -2,7 +2,7 @@
 import React, { createContext, useContext } from 'react';
 import UserController from '../controllers/UserController';
 import authService from '../services/authService';
-
+import cloudService from '../services/cloudService';
 // Crear el contexto
 const UserControllerContext = createContext(null);
 
@@ -10,7 +10,8 @@ const UserControllerContext = createContext(null);
 export const UserControllerProvider = ({ children }) => {
   // Crear una instancia de UserController
   const authProduction = new authService('production')
-  const userController = new UserController(authProduction);
+  const cloudProduction = new cloudService('production')
+  const userController = new UserController(authProduction, cloudProduction);
 
   return (
     <UserControllerContext.Provider value={userController}>
