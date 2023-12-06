@@ -25,7 +25,8 @@ const Login = () => {
   const formularioLogin = formularioLoginFactory.crearFormulario();
   useEffect(() => {
     if (user) {
-      navigation.navigate('Home');
+      navigation.navigate('TabBar', { screen: 'Home' });
+
     }
   }, [user]);
 
@@ -33,7 +34,8 @@ const Login = () => {
     try {
       formularioLogin.rellenarDatos({email, password});
       setUser(await userController.login(formularioLogin.datosFormulario));
-      navigation.navigate('Home');
+      navigation.navigate('TabBar', { screen: 'Home' });
+
     } catch (error) {
       let message = 'An error occurred. Please try again.';
       switch (error.code) {
