@@ -16,23 +16,75 @@ class CloudService {
     return collection(this.db, `${this.env}_interestPoints`);
   }
 
+  get usersCollection() {
+    return collection(this.db, `${this.env}_users`);
+  }
+
   async existsInFirebase(collection, queryFn) {
     const querySnapshot = await getDocs(collection);
     return querySnapshot.docs.some(queryFn);
   }
-  
+
+  async userExists(email) {
+    return this.existsInFirebase(
+      this.usersCollection,
+      doc => doc.data().email === email,
+    );
+  }
   async vehicleExists(creator, plate) {
-    return this.existsInFirebase(this.vehiclesCollection, doc =>
-      doc.data().creator === creator && doc.data().plate === plate,
+    return this.existsInFirebase(
+      this.vehiclesCollection,
+      doc => doc.data().creator === creator && doc.data().plate === plate,
     );
   }
-  
+
   async interestPointExists(creator, name) {
-    return this.existsInFirebase(this.interestPointsCollection, doc =>
-      doc.data().creator === creator && doc.data().name === name,
+    return this.existsInFirebase(
+      this.interestPointsCollection,
+      doc => doc.data().creator === creator && doc.data().name === name,
     );
   }
-  
+
+  async deleteUserInfo(email) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+    if (isConnected) {
+      //Eliminar todos los vehículos del usuario
+      const vehicleQuerySnapshot = await getDocs(this.vehiclesCollection);
+      const vehicleDeletePromises = vehicleQuerySnapshot.docs
+        .filter(doc => doc.data().creator === email)
+        .map(doc => deleteDoc(doc.ref));
+      await Promise.all(vehicleDeletePromises);
+
+      //Eliminar todos los puntos de interés del usuario
+      const interestPointQuerySnapshot = await getDocs(
+        this.interestPointsCollection,
+      );
+      const interestPointDeletePromises = interestPointQuerySnapshot.docs
+        .filter(doc => doc.data().creator === email)
+        .map(doc => deleteDoc(doc.ref));
+      await Promise.all(interestPointDeletePromises);
+
+      //Eliminar el usuario
+      const userQuerySnapshot = await getDocs(this.usersCollection);
+      const userDoc = userQuerySnapshot.docs.find(
+        doc => doc.data().email === email,
+      );
+      if (userDoc) {
+        await deleteDoc(userDoc.ref);
+      }
+      //Eliminar almacenamiento local
+      await AsyncStorage.removeItem('user');
+      await AsyncStorage.removeItem('vehicles');
+      await AsyncStorage.removeItem('interestPoints');
+      return true;
+    } else {
+      const error = new Error('NoInetConection');
+      error.code = 'NoInetConection';
+      throw error;
+    }
+  }
+
   async addVehicle(vehicle) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
@@ -40,14 +92,20 @@ class CloudService {
       try {
         let vehicles = await AsyncStorage.getItem('vehicles');
         vehicles = vehicles ? JSON.parse(vehicles) : [];
-        const existsInFirebase = await this.vehicleExists(vehicle.creator, vehicle.plate);
-        if (!vehicles.some(v => v.plate === vehicle.plate) && !existsInFirebase) {
+        const existsInFirebase = await this.vehicleExists(
+          vehicle.creator,
+          vehicle.plate,
+        );
+        if (
+          !vehicles.some(v => v.plate === vehicle.plate) &&
+          !existsInFirebase
+        ) {
           // Convierte el objeto a un formato que Firestore pueda entender
           const vehicleData = {...vehicle};
-          const docRef = await addDoc(this.vehiclesCollection, vehicleData);
+          await addDoc(this.vehiclesCollection, vehicleData);
           vehicles.push(vehicleData);
           await AsyncStorage.setItem('vehicles', JSON.stringify(vehicles));
-          return docRef
+          return vehicle;
         } else {
           const error = new Error('DuplicateVehicleException');
           error.code = 'DuplicateVehicleException';
@@ -65,6 +123,7 @@ class CloudService {
       if (!vehicles.some(v => v.plate === vehicle.plate)) {
         vehicles.push(vehicle);
         await AsyncStorage.setItem('vehicles', JSON.stringify(vehicles));
+        return vehicle;
       } else {
         const error = new Error('DuplicateVehicleException');
         error.code = 'DuplicateVehicleException';
@@ -72,26 +131,32 @@ class CloudService {
       }
     }
   }
-  
+
   async addInterestPoint(interestPoint) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
-    
+
     if (isConnected) {
       try {
         let interestPoints = await AsyncStorage.getItem('interestPoints');
         interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
-        const existsInFirebase = await this.interestPointExists(interestPoint.creator, interestPoint.name);
-        if (!interestPoints.some(ip => ip.name === interestPoint.name) && !existsInFirebase) {
+        const existsInFirebase = await this.interestPointExists(
+          interestPoint.creator,
+          interestPoint.name,
+        );
+        if (
+          !interestPoints.some(ip => ip.name === interestPoint.name) &&
+          !existsInFirebase
+        ) {
           // Convierte el objeto a un formato que Firestore pueda entender
           const interestPointData = {...interestPoint};
-          const docRef = await addDoc(this.interestPointsCollection, interestPointData);
+          await addDoc(this.interestPointsCollection, interestPointData);
           interestPoints.push(interestPointData);
           await AsyncStorage.setItem(
             'interestPoints',
             JSON.stringify(interestPoints),
           );
-          return docRef
+          return interestPoint;
         } else {
           const error = new Error('DuplicateInterestPointException');
           error.code = 'DuplicateInterestPointException';
@@ -112,7 +177,7 @@ class CloudService {
           'interestPoints',
           JSON.stringify(interestPoints),
         );
-        return 
+        return interestPoint;
       } else {
         const error = new Error('DuplicateInterestPointException');
         error.code = 'DuplicateInterestPointException';
@@ -123,7 +188,9 @@ class CloudService {
 
   async clearCollection(collectionName) {
     if (this.env === 'test') {
-      const querySnapshot = await getDocs(collection(this.db, `test_${collectionName}`));
+      const querySnapshot = await getDocs(
+        collection(this.db, `test_${collectionName}`),
+      );
       const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
       await Promise.all(deletePromises);
     }

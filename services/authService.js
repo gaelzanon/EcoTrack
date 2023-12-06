@@ -89,8 +89,21 @@ class AuthService {
   }
 
   async deleteUser() {
-    if (this.auth.currentUser) {
-      await deleteUser(this.auth.currentUser);
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+    if (isConnected) {
+      if (this.auth.currentUser) {
+        await deleteUser(this.auth.currentUser);
+        return true;
+      } else {
+        const error = new Error('UserNotLoggedException');
+        error.code = 'UserNotLoggedException';
+        throw error;
+      }
+    } else {
+      const error = new Error('NoInetConection');
+      error.code = 'NoInetConection';
+      throw error;
     }
   }
 }

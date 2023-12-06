@@ -67,3 +67,5 @@ describe('HU2: Como usuario registrado quiero iniciar sesión en la aplicación 
     ).rejects.toThrow('InvalidPassException');
   });
 });
+
+

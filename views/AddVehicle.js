@@ -25,7 +25,7 @@ const AddVehicle = () => {
   const [plate, setPlate] = useState('');
   const [type, setType] = useState('bike');
 
-  const {user} = useAsyncStorage(); // Obtener el usuario del contexto de AsyncStorage
+  const {user, setVehicles, vehicles} = useAsyncStorage(); // Obtener el usuario del contexto de AsyncStorage
 
   const handleAddVehicle = async () => {
     if (
@@ -54,7 +54,9 @@ const AddVehicle = () => {
           type,
         );
 
-        await vehicleController.registerVehicle(newVehicle);
+        const addedVehicle = await vehicleController.registerVehicle(newVehicle);
+        setVehicles(vehicles?[...vehicles, addedVehicle]:[addedVehicle])
+
         Alert.alert(
           'Vehicle Added',
           'Your vehicle has been successfully added.',
@@ -68,17 +70,19 @@ const AddVehicle = () => {
           error.message === 'YearNotValidException'
         ) {
           errorMessage = 'The year of the vehicle is not valid.';
-        } else if (error.code) {
-          // Aquí manejaremos errores específicos de Firebase si es necesario
-          errorMessage = `Firebase error: ${error.message}`;
+        } else if (error.code === 'DuplicateVehicleException') {
+          errorMessage = 'You already have a vehicle with that plate registered';
+
         }
         Alert.alert('Error', errorMessage);
+
       }
     }
   };
 
   return (
-    <ScrollView style={[globalStyles.primary, {flex: 1, padding: 20}]}>
+    <ScrollView style={[globalStyles.primary, { flex: 1, padding: 20 }]}
+    showsVerticalScrollIndicator={false} keyboardShouldPersistTaps='handled'>
       <View>
         <Text style={globalStyles.mainText}>New Vehicle</Text>
 

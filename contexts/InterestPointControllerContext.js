@@ -2,6 +2,7 @@
 import React, { createContext, useContext } from 'react';
 import InterestPointController from '../controllers/InterestPointController';
 import cloudService from '../services/cloudService';
+import GoogleGeocodingServiceAdapter from '../patrones/Adapter/GoogleGeocodingServiceAdapter';
 
 // Crear el contexto
 const InterestPointControllerContext = createContext(null);
@@ -10,7 +11,8 @@ const InterestPointControllerContext = createContext(null);
 export const InterestPointControllerProvider = ({ children }) => {
   // Crear una instancia de InterestPointController
   const cloudProduction = new cloudService('production')
-  const interestPointController = new InterestPointController(cloudProduction);
+  const geocodingService = new GoogleGeocodingServiceAdapter();
+  const interestPointController = new InterestPointController(cloudProduction, geocodingService);
 
   return (
     <InterestPointControllerContext.Provider value={interestPointController}>
