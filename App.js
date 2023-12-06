@@ -1,8 +1,8 @@
 import 'react-native-gesture-handler';
 import React, {useRef, useEffect} from 'react';
 import {BackHandler} from 'react-native';
-import {Header, createStackNavigator} from '@react-navigation/stack';
-import {PaperProvider, DefaultTheme, Title} from 'react-native-paper';
+import {createStackNavigator} from '@react-navigation/stack';
+import {PaperProvider, DefaultTheme} from 'react-native-paper';
 import {NavigationContainer} from '@react-navigation/native';
 import globalStyles from './styles';
 import RNBootSplash from 'react-native-bootsplash';
@@ -95,27 +95,25 @@ const App = () => {
                   <Stack.Screen
                     name="Home"
                     component={Home}
-                    options={{   
-                      headerBackVisible: false,   
-                      headerRight: () => (
-                        <HeaderDropdown></HeaderDropdown>
-                      ),
+                    options={{
+                      headerLeft: () => null,
+                      headerRight: () => <HeaderDropdown />,
                     }}
                   />
                   <Stack.Screen
                     name="AddVehicle"
                     component={AddVehicle}
-                    options={{headerShown: true}}
+                    options={{title:'Vehicle Creation',headerRight: () => <HeaderDropdown />}}
                   />
                   <Stack.Screen
                     name="AddInterestPoint"
                     component={AddInterestPoint}
-                    options={{headerShown: true}}
-                    />
-                    <Stack.Screen
-                      name="RouteFinder"
-                      component={RouteFinder}
-                      options={{headerShown: true}}
+                    options={{title:'Interest Point Creation',headerRight: () => <HeaderDropdown />}}
+                  />
+                  <Stack.Screen
+                    name="RouteFinder"
+                    component={RouteFinder}
+                    options={{title:'Route Finder', headerRight: () => <HeaderDropdown />}}
                   />
                 </Stack.Navigator>
               </NavigationContainer>

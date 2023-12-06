@@ -17,7 +17,7 @@ const HeaderDropdown = () => {
     const navigation = useNavigation();
     const userController = useUserController();
     const [value, setValue] = useState(null);
-    const {user} = useAsyncStorage();
+    const {user, setUser, setVehicles, setInterestPoints} = useAsyncStorage();
 
     const dropdownMenu = [
         {label: 'Delete User', value: 'delete'},
@@ -36,6 +36,9 @@ const HeaderDropdown = () => {
                 return;
                 }
                 userController.deleteUser(user.email);
+                setInterestPoints(null)
+                setUser(null)
+                setVehicles(null)
                 Alert.alert('Account succesfully deleted.');
                 navigation.navigate('Login');
             } catch (error) {
@@ -96,8 +99,6 @@ const HeaderDropdown = () => {
         />
         );
     }
-
-    const delay = ms => new Promise(res => setTimeout(res, ms));
 
     return(
         <Dropdown
