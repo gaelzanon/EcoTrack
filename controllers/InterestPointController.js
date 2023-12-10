@@ -47,6 +47,9 @@ class InterestPointController {
   }
 
   // Otros métodos del controlador como borrar, actualizar, obtener puntos, etc.
+  async removeInterestPoint(interestPoint) {
+    return 0
+  }
 }
 
 export default InterestPointController;
