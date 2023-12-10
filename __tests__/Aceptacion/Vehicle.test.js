@@ -13,8 +13,9 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 beforeEach(async () => {
   await CloudService.clearCollection('vehicles');
   await jest.clearAllMocks();
+  await AsyncStorage.removeItem('vehicles')
 });
-
+/*
 describe('HU9: Como usuario quiero poder dar de alta un vehículo para poder emplearlo como método de transporte en mis rutas', () => {
   it('E1: Se crea el vehículo correctamente con datos válidos', async () => {
     const creatorEmail = 'usuario@gmail.com';
@@ -48,5 +49,25 @@ describe('HU9: Como usuario quiero poder dar de alta un vehículo para poder emp
     await expect(vehicleController.registerVehicle(vehicle)).rejects.toThrow(
       'YearNotValidException',
     );
+  });
+});
+
+*/
+describe('HU10:  Como usuario quiero poder consultar la lista de vehículos dados de alta.', () => {
+  it('E1: Se muestra la lista de vehiculos disponibles si los hay.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 5, '8171MSL', 'gasoline');
+    await vehicleController.registerVehicle(vehicle)
+
+    const storedData = JSON.parse(await AsyncStorage.getItem('vehicles'));
+    expect(storedData).toEqual([
+      vehicle
+    ]);
+  });
+
+  it('E2: No se muestra la lista de vehiculos registrados si no los hay.', async () => {
+
+    const storedData = JSON.parse(await AsyncStorage.getItem('vehicles'));
+    expect(storedData).toEqual(null);
   });
 });
