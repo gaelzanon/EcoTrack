@@ -18,7 +18,7 @@ beforeEach(async () => {
   await jest.clearAllMocks();
   await AsyncStorage.removeItem('interestPoints');
 });
-/*
+
 describe('HU5: Como usuario quiero poder dar de alta un lugar de interés usando sus coordenadas', () => {
   it('E1: Se crea el lugar correctamente con coordenadas válidas', async () => {
     const creatorEmail = 'usuario@gmail.com';
@@ -98,7 +98,6 @@ describe('HU6: Como usuario quiero poder dar de alta un lugar de interés usando
     ).rejects.toThrow('InvalidToponymException');
   });
 });
-*/
 
 describe('HU7: Como usuario quiero poder consultar la lista de lugares de interés dados de alta.', () => {
   it('E1: Se muestra la lista de lugares de interes disponibles si los hay.', async () => {
