@@ -71,3 +71,26 @@ describe('HU10:  Como usuario quiero poder consultar la lista de vehículos dado
     expect(storedData).toEqual(null);
   });
 });
+
+
+describe('HU11: Como usuario quiero poder eliminar un vehículo cuando ya no vaya a utilizarlo más.', () => {
+  it('E1: Se elimina el vehiculo correctamente.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 5, '8171MSL', 'gasoline');
+    await vehicleController.registerVehicle(vehicle)
+
+    await expect(
+      vehicleController.removeVehicle(vehicle),
+    ).resolves.toBeTruthy();
+    
+  });
+
+  it('E2: Se intenta eliminar un vehiculo que no existe.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 5, '8171MSL', 'gasoline');
+
+    await expect(
+      vehicleController.removeVehicle(vehicle),
+    ).rejects.toThrow('VehicleNotFoundException');
+  });
+});

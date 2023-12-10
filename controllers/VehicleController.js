@@ -24,6 +24,9 @@ class VehicleController {
   }
 
   // Otros métodos del controlador como borrar, actualizar, obtener vehículos, etc.
+  async removeVehicle(vehicle) {
+    return 0
+  }
 }
 
 export default VehicleController;
