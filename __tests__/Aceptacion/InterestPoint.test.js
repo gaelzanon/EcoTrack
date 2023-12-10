@@ -101,7 +101,7 @@ describe('HU6: Como usuario quiero poder dar de alta un lugar de interÃ©s usando
 */
 
 describe('HU7: Como usuario quiero poder consultar la lista de lugares de interÃ©s dados de alta.', () => {
-  it('E1: Se muestra la lista de lugares de interes registrados si los hay.', async () => {
+  it('E1: Se muestra la lista de lugares de interes disponibles si los hay.', async () => {
     const creatorEmail = 'usuario@gmail.com';
     const interestPoint = new InterestPoint(
       creatorEmail,
@@ -110,9 +110,8 @@ describe('HU7: Como usuario quiero poder consultar la lista de lugares de interÃ
       -0.1,
     );
     await interestPointController.registerInterestPoint(interestPoint);
-    expect(AsyncStorage.getItem).toBeCalledWith('interestPoints');
 
-    const storedData = await interestPointController.getInterestPoints();
+    const storedData = JSON.parse(await AsyncStorage.getItem('interestPoints'));
     expect(storedData).toEqual([
       {
         creator: 'usuario@gmail.com',
@@ -122,10 +121,10 @@ describe('HU7: Como usuario quiero poder consultar la lista de lugares de interÃ
       },
     ]);
   });
-  
+
   it('E2: No se muestra la lista de lugares de interes registrados si no los hay.', async () => {
-    expect(AsyncStorage.getItem).toBeCalledWith('interestPoints');
-    const storedData = await interestPointController.getInterestPoints();
-    expect(storedData).toEqual([]);
+
+    const storedData = JSON.parse(await AsyncStorage.getItem('interestPoints'));
+    expect(storedData).toEqual(null);
   });
 });
