@@ -15,7 +15,7 @@ beforeEach(async () => {
   await jest.clearAllMocks();
   await AsyncStorage.removeItem('vehicles')
 });
-/*
+
 describe('HU9: Como usuario quiero poder dar de alta un vehículo para poder emplearlo como método de transporte en mis rutas', () => {
   it('E1: Se crea el vehículo correctamente con datos válidos', async () => {
     const creatorEmail = 'usuario@gmail.com';
@@ -52,7 +52,7 @@ describe('HU9: Como usuario quiero poder dar de alta un vehículo para poder emp
   });
 });
 
-*/
+
 describe('HU10:  Como usuario quiero poder consultar la lista de vehículos dados de alta.', () => {
   it('E1: Se muestra la lista de vehiculos disponibles si los hay.', async () => {
     const creatorEmail = 'usuario@gmail.com';
