@@ -46,6 +46,9 @@ class InterestPointController {
     }
   }
 
+  async getInterestPoints() {
+    return 0
+  }
   // Otros métodos del controlador como borrar, actualizar, obtener puntos, etc.
 }
 
