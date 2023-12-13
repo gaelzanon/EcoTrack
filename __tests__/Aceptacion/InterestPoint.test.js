@@ -110,7 +110,7 @@ describe('HU7: Como usuario quiero poder consultar la lista de lugares de interÃ
     );
     await interestPointController.registerInterestPoint(interestPoint);
 
-    const storedData = JSON.parse(await AsyncStorage.getItem('interestPoints'));
+    const storedData = await interestPointController.getInterestPoints();
     expect(storedData).toEqual([
       {
         creator: 'usuario@gmail.com',
@@ -123,7 +123,7 @@ describe('HU7: Como usuario quiero poder consultar la lista de lugares de interÃ
 
   it('E2: No se muestra la lista de lugares de interes registrados si no los hay.', async () => {
 
-    const storedData = JSON.parse(await AsyncStorage.getItem('interestPoints'));
-    expect(storedData).toEqual(null);
+    const storedData = await interestPointController.getInterestPoints();
+    expect(storedData).toEqual([]);
   });
 });
