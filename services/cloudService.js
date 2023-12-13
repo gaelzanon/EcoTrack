@@ -196,10 +196,17 @@ class CloudService {
     }
   }
 
+
   async getVehicles() {
     let vehicles = await AsyncStorage.getItem('vehicles');
     vehicles = vehicles ? JSON.parse(vehicles) : [];
     return vehicles
+  }
+
+  async getInterestPoints() {
+    let interestPoints = await AsyncStorage.getItem('interestPoints');
+    interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
+    return interestPoints
   }
 
 }
