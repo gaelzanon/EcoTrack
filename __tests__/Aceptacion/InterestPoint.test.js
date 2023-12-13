@@ -110,7 +110,7 @@ describe('HU7: Como usuario quiero poder consultar la lista de lugares de interÃ
     );
     await interestPointController.registerInterestPoint(interestPoint);
 
-    const storedData = JSON.parse(await AsyncStorage.getItem('interestPoints'));
+    const storedData = await interestPointController.getInterestPoints();
     expect(storedData).toEqual([
       {
         creator: 'usuario@gmail.com',
@@ -123,7 +123,38 @@ describe('HU7: Como usuario quiero poder consultar la lista de lugares de interÃ
 
   it('E2: No se muestra la lista de lugares de interes registrados si no los hay.', async () => {
 
-    const storedData = JSON.parse(await AsyncStorage.getItem('interestPoints'));
-    expect(storedData).toEqual(null);
+    const storedData = await interestPointController.getInterestPoints();
+    expect(storedData).toEqual([]);
+  });
+});
+
+describe('HU8: Como usuario quiero poder eliminar un lugar de interÃ©s cuando no ya no voy a utilizarlo mÃ¡s.', () => {
+  it('E1: Se elimina el lugar correctamente.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint = new InterestPoint(
+      creatorEmail,
+      'Villarreal',
+      39.93333,
+      -0.1,
+    );
+    await interestPointController.registerInterestPoint(interestPoint);
+    await expect(
+      interestPointController.removeInterestPoint(interestPoint),
+    ).resolves.toBeTruthy();
+    
+  });
+
+  it('E2: Se intenta eliminar un lugar que no existe.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint = new InterestPoint(
+      creatorEmail,
+      'Villarreal',
+      39.93333,
+      -0.1,
+    );
+
+    await expect(
+      interestPointController.removeInterestPoint(interestPoint),
+    ).rejects.toThrow('InterestPointNotFoundException');
   });
 });
