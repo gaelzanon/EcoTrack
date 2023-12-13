@@ -127,3 +127,34 @@ describe('HU7: Como usuario quiero poder consultar la lista de lugares de inter�
     expect(storedData).toEqual([]);
   });
 });
+
+describe('HU8: Como usuario quiero poder eliminar un lugar de interés cuando no ya no voy a utilizarlo más.', () => {
+  it('E1: Se elimina el lugar correctamente.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint = new InterestPoint(
+      creatorEmail,
+      'Villarreal',
+      39.93333,
+      -0.1,
+    );
+    await interestPointController.registerInterestPoint(interestPoint);
+    await expect(
+      interestPointController.removeInterestPoint(interestPoint),
+    ).resolves.toBeTruthy();
+    
+  });
+
+  it('E2: Se intenta eliminar un lugar que no existe.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint = new InterestPoint(
+      creatorEmail,
+      'Villarreal',
+      39.93333,
+      -0.1,
+    );
+
+    await expect(
+      interestPointController.removeInterestPoint(interestPoint),
+    ).rejects.toThrow('InterestPointNotFoundException');
+  });
+});
