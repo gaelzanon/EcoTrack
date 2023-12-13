@@ -1,68 +1,77 @@
 import React, {useEffect, useState} from 'react';
 import {View, Text, Pressable, StyleSheet, FlatList, Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import { useAsyncStorage } from '../contexts/AsyncStorageContext';
+import {useAsyncStorage} from '../contexts/AsyncStorageContext';
 import {useInterestPointController} from '../contexts/InterestPointControllerContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import globalStyles from '../styles';
-
 const InterestPointsScreen = () => {
   const navigation = useNavigation();
-  const { interestPoints } = useAsyncStorage();
-  const [localInterestPoints, setLocalInterestPoints] = useState(interestPoints?interestPoints:[])
+  const {interestPoints, setInterestPoints} = useAsyncStorage();
+  const [localInterestPoints, setLocalInterestPoints] = useState(
+    interestPoints ? interestPoints : [],
+  );
   const interestPointController = useInterestPointController();
   const handleNavigateToAddInterestPoint = () => {
     navigation.navigate('AddInterestPoint');
   };
 
-  const handleDeleteInterestPoint = async (interestPoint) => {
-    Alert.alert('DELETE INTEREST POINT','Do you want to delete this interest point?', [
-      {
-          text: 'OK', 
-          onPress: () => {  
+  const handleDeleteInterestPoint = async interestPoint => {
+    Alert.alert(
+      'DELETE INTEREST POINT',
+      'Do you want to delete this interest point?',
+      [
+        {
+          text: 'OK',
+          onPress: async ()  => {
             try {
-                interestPointController.removeInterestPoint(interestPoint);
-                fetchInterestPoints();
-                Alert.alert('Interest point succesfully deleted.');
+              await interestPointController.removeInterestPoint(interestPoint);
+              // Filtrar la lista para eliminar el punto de interés
+              const updatedInterestPoints = interestPoints.filter(
+                ip => ip.name !== interestPoint.name,
+              );
+              // Guardar la lista actualizada
+              setInterestPoints(updatedInterestPoints); 
+              Alert.alert('Interest point succesfully deleted.');
             } catch (error) {
-                let message = 'An error occurred. Please try again.';
-                switch (error.code) {
+              let message = 'An error occurred. Please try again.';
+              switch (error.code) {
                 case 'InterestPointNotFoundException':
-                    message = "Interest Point doesn't exist.";
-                    break;
+                  message = "Interest Point doesn't exist.";
+                  break;
                 default:
-                    console.log(error);
-                    break;
-                }
-                Alert.alert('Deletion Error', message);
+                  console.log(error);
+                  break;
+              }
+              Alert.alert('Deletion Error', message);
             }
           },
-      },
-      {
+        },
+        {
           text: 'Cancel',
           style: 'cancel',
-      },
-      ]);
-  }
-
-  async function fetchInterestPoints() {
-    const points = await interestPointController.getInterestPoints();
-    setLocalInterestPoints(points);
-    
-  }
+        },
+      ],
+    );
+  };
 
   useEffect(() => {
+    async function fetchInterestPoints() {
+      const points = await interestPointController.getInterestPoints();
+      setLocalInterestPoints(points);
+    }
     fetchInterestPoints();
   }, [interestPoints]);
-  
 
   const renderInterestPoints = ({item}) => <InterestPointCard ip={item} />;
 
   const InterestPointCard = ({ip}) => (
-    <View style={[styles.card, 
-      { 
-        flexDirection: 'row',
-      }
+    <View
+      style={[
+        styles.card,
+        {
+          flexDirection: 'row',
+        },
       ]}>
       <View style={{flex: 1}}>
         <Text style={styles.name}>{ip.name}</Text>
@@ -70,12 +79,11 @@ const InterestPointsScreen = () => {
         <Text style={styles.details}>Latitude: {ip.latitude}</Text>
       </View>
       <View style={{flex: 2, position: 'absolute', right: 13, top: 13}}>
-        <Pressable
-          onPress={() => handleDeleteInterestPoint(ip)}>
+        <Pressable onPress={() => handleDeleteInterestPoint(ip)}>
           <MaterialCommunityIcons
             name={'trash-can'}
             size={30}
-            color='#8f0916'
+            color="#8f0916"
           />
         </Pressable>
       </View>

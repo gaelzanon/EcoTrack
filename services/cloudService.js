@@ -203,15 +203,13 @@ class CloudService {
         // Eliminar objeto de listado en almacenamiento local
         let interestPoints = await AsyncStorage.getItem('interestPoints');
         interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
-
-        var pos = interestPoints.findIndex(item => item.name === interestPoint.name);
-        interestPoints.splice(pos, 1);
-        console.log(interestPoints)
-
-        // await addDoc(this.interestPointsCollection, interestPoints);
+        const updatedInterestPoints = interestPoints.filter(
+          ip => ip.name !== interestPoint.name,
+        );
+        
         await AsyncStorage.setItem(
           'interestPoints',
-          JSON.stringify(interestPoints),
+          JSON.stringify(updatedInterestPoints),
         );
         return true;
       } catch (error) {
