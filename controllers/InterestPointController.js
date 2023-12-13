@@ -52,7 +52,7 @@ class InterestPointController {
     const list = await this.cloudService.getInterestPoints();
     return list;
   }
-    
+
   async removeInterestPoint(interestPoint) {
     //Consultar base de datos según punto de interés enviado
     const existe = await this.cloudService.interestPointExists(interestPoint.creator, interestPoint.name);
