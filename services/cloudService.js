@@ -197,7 +197,9 @@ class CloudService {
   }
 
   async getInterestPoints() {
-    return 'TODO'
+    let interestPoints = await AsyncStorage.getItem('interestPoints');
+    interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
+    return interestPoints
   }
 }
 
