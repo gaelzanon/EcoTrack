@@ -51,7 +51,7 @@ class InterestPointController {
   async getInterestPoints() {
     const list = await this.cloudService.getInterestPoints();
     return list;
-    
+  }
   async removeInterestPoint(interestPoint) {
     return 0
   }
