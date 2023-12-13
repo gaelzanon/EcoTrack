@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, Pressable, StyleSheet, FlatList} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {useAsyncStorage} from '../contexts/AsyncStorageContext';
+import {useVehicleController} from '../contexts/VehicleControllerContext';
 import globalStyles from '../styles';
 
 const VehiclesScreen = () => {
@@ -10,6 +11,16 @@ const VehiclesScreen = () => {
   const handleNavigateToAddVehicle = () => {
     navigation.navigate('AddVehicle');
   };
+  const [localVehicles, setlLocalVehicles] = useState(vehicles ? vehicles : []);
+  const vehiclesController = useVehicleController();
+  useEffect(() => {
+    async function fetchVehicles() {
+      const vehicles = await vehiclesController.getVehicles();
+      setlLocalVehicles(vehicles);
+    }
+
+    fetchVehicles();
+  }, [vehicles]);
 
   const renderVehicles = ({item}) => <VehicleCard vehicle={item} />;
 
@@ -28,7 +39,7 @@ const VehiclesScreen = () => {
   return (
     <View style={[globalStyles.primary, {flex: 1, padding: 20}]}>
       <FlatList
-        data={vehicles}
+        data={localVehicles}
         keyExtractor={item => item.plate}
         renderItem={renderVehicles}
         ListFooterComponent={

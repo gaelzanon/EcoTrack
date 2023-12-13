@@ -13,7 +13,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 beforeEach(async () => {
   await CloudService.clearCollection('vehicles');
   await jest.clearAllMocks();
-  await AsyncStorage.removeItem('vehicles')
+  await AsyncStorage.removeItem('vehicles');
 });
 
 describe('HU9: Como usuario quiero poder dar de alta un vehículo para poder emplearlo como método de transporte en mis rutas', () => {
@@ -31,15 +31,10 @@ describe('HU9: Como usuario quiero poder dar de alta un vehículo para poder emp
     const creatorEmail = 'usuario@gmail.com';
     const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 5, '8171MSL', 'gasoline');
 
-    // Configura el mock de AsyncStorage para simular que ya existe el punto de interés
-    AsyncStorage.getItem.mockResolvedValue(JSON.stringify([vehicle]));
-
-    // Intenta agregar el mismo punto de interés
+    //Agregamos el vehiculo
+    await vehicleController.registerVehicle(vehicle)
+    // Intenta agregar el mismo vehiculo
     await expect(vehicleController.registerVehicle(vehicle)).rejects.toThrow('DuplicateVehicleException');
-
-    // Verifica que se haya llamado a getItem y setItem correctamente
-    await expect(AsyncStorage.getItem).toBeCalledWith('vehicles');
-    await expect(AsyncStorage.setItem).not.toBeCalled();
   });
 
   it('E4: No se crea el vehículo si el año no es válido', async () => {
@@ -59,7 +54,8 @@ describe('HU10:  Como usuario quiero poder consultar la lista de vehículos dado
     const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 5, '8171MSL', 'gasoline');
     await vehicleController.registerVehicle(vehicle)
 
-    const storedData = JSON.parse(await AsyncStorage.getItem('vehicles'));
+    
+    const storedData = await vehicleController.getVehicles();
     expect(storedData).toEqual([
       vehicle
     ]);
@@ -67,7 +63,7 @@ describe('HU10:  Como usuario quiero poder consultar la lista de vehículos dado
 
   it('E2: No se muestra la lista de vehiculos registrados si no los hay.', async () => {
 
-    const storedData = JSON.parse(await AsyncStorage.getItem('vehicles'));
-    expect(storedData).toEqual(null);
+    const storedData = await vehicleController.getVehicles();
+    expect(storedData).toEqual([]);
   });
 });
