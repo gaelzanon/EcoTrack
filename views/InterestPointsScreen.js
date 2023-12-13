@@ -1,15 +1,30 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, Pressable, StyleSheet, FlatList} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {useAsyncStorage} from '../contexts/AsyncStorageContext';
+import { useAsyncStorage } from '../contexts/AsyncStorageContext';
+import {useInterestPointController} from '../contexts/InterestPointControllerContext';
 import globalStyles from '../styles';
 
 const InterestPointsScreen = () => {
   const navigation = useNavigation();
-  const {interestPoints} = useAsyncStorage();
+  const { interestPoints } = useAsyncStorage();
+  const [localInterestPoints, setLocalInterestPoints] = useState(interestPoints?interestPoints:[])
+  const interestPointController = useInterestPointController();
   const handleNavigateToAddInterestPoint = () => {
     navigation.navigate('AddInterestPoint');
   };
+
+  useEffect(() => {
+    async function fetchInterestPoints() {
+      const points = await interestPointController.getInterestPoints();
+      setLocalInterestPoints(points);
+      
+    }
+  
+    fetchInterestPoints();
+  }, [interestPoints]);
+  
+
   const renderInterestPoints = ({item}) => <InterestPointCard ip={item} />;
 
   const InterestPointCard = ({ip}) => (
@@ -23,7 +38,7 @@ const InterestPointsScreen = () => {
   return (
     <View style={[globalStyles.primary, {flex: 1, padding: 20}]}>
       <FlatList
-        data={interestPoints}
+        data={localInterestPoints}
         keyExtractor={item => item.name}
         renderItem={renderInterestPoints}
         ListFooterComponent={
