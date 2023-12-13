@@ -186,6 +186,18 @@ class CloudService {
     }
   }
 
+  async deleteInterestPoint(interestPoint) {
+    const interestPointQuerySnapshot = await getDocs(this.interestPointsCollection);
+    const interestPointDoc = interestPointQuerySnapshot.docs.find(
+      doc => doc.data().creator === interestPoint.creator && doc.data().name === interestPoint.name,
+    );
+    if (interestPointDoc) {
+      await deleteDoc(interestPointDoc.ref);
+      return true;
+    }
+    return false;
+  }
+
   async clearCollection(collectionName) {
     if (this.env === 'test') {
       const querySnapshot = await getDocs(
