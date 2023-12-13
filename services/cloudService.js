@@ -195,6 +195,13 @@ class CloudService {
       await Promise.all(deletePromises);
     }
   }
+
+  async getVehicles() {
+    let vehicles = await AsyncStorage.getItem('vehicles');
+    vehicles = vehicles ? JSON.parse(vehicles) : [];
+    return vehicles
+  }
+
 }
 
 export default CloudService;
