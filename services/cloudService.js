@@ -195,6 +195,10 @@ class CloudService {
       await Promise.all(deletePromises);
     }
   }
+
+  async getInterestPoints() {
+    return 'TODO'
+  }
 }
 
 export default CloudService;
