@@ -54,7 +54,22 @@ class InterestPointController {
   }
     
   async removeInterestPoint(interestPoint) {
-    return 0
+    //Consultar base de datos según punto de interés enviado
+    const existe = await this.cloudService.interestPointExists(interestPoint.creator, interestPoint.name);
+    if (!existe) {
+      const error = new Error('InterestPointNotFoundException');
+      error.code = 'InterestPointNotFoundException';
+      throw error;
+    }
+
+    try {
+      const resultDatabase = await this.cloudService.deleteInterestPoint(interestPoint);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar excepción recibida
+
+      throw error;
+    }
   }
 }
 
