@@ -231,6 +231,42 @@ class CloudService {
     }
   }
 
+  async deleteInterestPoint(interestPoint) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+
+    if (isConnected) {
+      try {
+        const interestPointQuerySnapshot = await getDocs(this.interestPointsCollection);
+        const interestPointDoc = interestPointQuerySnapshot.docs.find(
+          doc => doc.data().creator === interestPoint.creator && doc.data().name === interestPoint.name,
+        );
+        if (interestPointDoc) {
+          // Eliminar de BBDD
+          await deleteDoc(interestPointDoc.ref);
+        }
+        // Eliminar objeto de listado en almacenamiento local
+        let interestPoints = await AsyncStorage.getItem('interestPoints');
+        interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
+        const updatedInterestPoints = interestPoints.filter(
+          ip => ip.name !== interestPoint.name,
+        );
+        
+        await AsyncStorage.setItem(
+          'interestPoints',
+          JSON.stringify(updatedInterestPoints),
+        );
+        return true;
+      } catch (error) {
+        throw error;
+      }
+    } else {
+      const error = new Error('NoInetConection');
+      error.code = 'NoInetConection';
+      throw error;
+    }
+  }
+
   async clearCollection(collectionName) {
     if (this.env === 'test') {
       const querySnapshot = await getDocs(
