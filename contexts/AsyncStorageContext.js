@@ -159,10 +159,10 @@ export const AsyncStorageProvider = ({children}) => {
       }
     }
 
-    if (user) {
+    if (user && vehicles && interestPoints) {
       fetchData();
     }
-  }, [user]);
+  }, [user, vehicles, interestPoints]);
 
   const value = {
     user,
