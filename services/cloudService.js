@@ -132,6 +132,51 @@ class CloudService {
     }
   }
 
+  async deleteVehicle(vehicle) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+
+    if (isConnected) {
+      try {
+        const vehicleQuerySnapshot = await getDocs(this.vehiclesCollection);
+        const vehicleDoc = vehicleQuerySnapshot.docs.find(
+          doc => doc.data().creator === vehicle.creator && doc.data().plate === vehicle.plate,
+        );
+        if (vehicleDoc) {
+          // Eliminar de BBDD
+          await deleteDoc(vehicleDoc.ref);
+        }
+        // Eliminar objeto de listado en almacenamiento local
+        let vehicles = await AsyncStorage.getItem('vehicles');
+        vehicles = vehicles ? JSON.parse(vehicles) : [];
+        const updatedVehicles = vehicles.filter(
+          item => item.plate !== vehicle.plate,
+        );
+        await AsyncStorage.setItem(
+          'interestPoints',
+          JSON.stringify(updatedVehicles),
+        );
+        return true;
+      } catch (error) {
+        throw error;
+      }
+    } else {
+      const error = new Error('NoInetConection');
+      error.code = 'NoInetConection';
+      throw error;
+    }
+  }
+
+  async clearCollection(collectionName) {
+    if (this.env === 'test') {
+      const querySnapshot = await getDocs(
+        collection(this.db, `test_${collectionName}`),
+      );
+      const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+    }
+  }
+
   async addInterestPoint(interestPoint) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;

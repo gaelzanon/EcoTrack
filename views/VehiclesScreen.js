@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, Pressable, StyleSheet, FlatList} from 'react-native';
+import {View, Text, Pressable, StyleSheet, FlatList, Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useAsyncStorage} from '../contexts/AsyncStorageContext';
 import {useVehicleController} from '../contexts/VehicleControllerContext';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import globalStyles from '../styles';
 
 const VehiclesScreen = () => {
@@ -13,6 +14,46 @@ const VehiclesScreen = () => {
   };
   const [localVehicles, setlLocalVehicles] = useState(vehicles ? vehicles : []);
   const vehiclesController = useVehicleController();
+
+  const handleDeleteVehicle = async vehicle => {
+    Alert.alert(
+      'DELETE Vehicle',
+      'Do you want to delete this vehicle?',
+      [
+        {
+          text: 'OK',
+          onPress: async ()  => {
+            try {
+              await vehiclesController.removeVehicle(vehicle);
+              // Filtrar la lista para eliminar el punto de interés
+              const updatedVehicles = vehicles.filter(
+                item => item.plate !== vehicle.plate,
+              );
+              // Guardar la lista actualizada
+              setlLocalVehicles(updatedVehicles); 
+              Alert.alert('Vehicle succesfully deleted.');
+            } catch (error) {
+              let message = 'An error occurred. Please try again.';
+              switch (error.code) {
+                case 'VehicleNotFoundException':
+                  message = "Vehicle doesn't exist.";
+                  break;
+                default:
+                  console.log(error);
+                  break;
+              }
+              Alert.alert('Deletion Error', message);
+            }
+          },
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ],
+    );
+  };
+
   useEffect(() => {
     async function fetchVehicles() {
       const vehicles = await vehiclesController.getVehicles();
@@ -25,15 +66,32 @@ const VehiclesScreen = () => {
   const renderVehicles = ({item}) => <VehicleCard vehicle={item} />;
 
   const VehicleCard = ({vehicle}) => (
-    <View style={styles.card}>
-      <Text style={styles.plate}>{vehicle.plate}</Text>
-      <Text style={styles.details}>Brand: {vehicle.brand}</Text>
-      <Text style={styles.details}>Model: {vehicle.model}</Text>
-      <Text style={styles.details}>Year: {vehicle.year}</Text>
-      <Text style={styles.details}>
-        Avg. Consumption: {vehicle.averageConsumption}
-      </Text>
-      <Text style={styles.details}>Type: {vehicle.type}</Text>
+    <View
+      style={[
+        styles.card,
+        {
+          flexDirection: 'row',
+        },
+      ]}>
+      <View style={{flex: 1}}>
+        <Text style={styles.plate}>{vehicle.plate}</Text>
+        <Text style={styles.details}>Brand: {vehicle.brand}</Text>
+        <Text style={styles.details}>Model: {vehicle.model}</Text>
+        <Text style={styles.details}>Year: {vehicle.year}</Text>
+        <Text style={styles.details}>
+          Avg. Consumption: {vehicle.averageConsumption}
+        </Text>
+        <Text style={styles.details}>Type: {vehicle.type}</Text>
+      </View>
+      <View style={{flex: 2, position: 'absolute', right: 13, top: 13}}>
+        <Pressable onPress={() => handleDeleteVehicle(vehicle)}>
+          <MaterialCommunityIcons
+            name={'trash-can'}
+            size={30}
+            color="#8f0916"
+          />
+        </Pressable>
+      </View>
     </View>
   );
   return (
