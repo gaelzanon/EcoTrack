@@ -132,6 +132,67 @@ class CloudService {
     }
   }
 
+  async deleteVehicle(vehicle) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+
+    if (isConnected) {
+      try {
+        const existe = await this.vehicleExists(vehicle.creator, vehicle.plate);
+        if (!existe) {
+          const error = new Error('VehicleNotFoundException');
+          error.code = 'VehicleNotFoundException';
+          throw error;
+        }
+        const vehicleQuerySnapshot = await getDocs(this.vehiclesCollection);
+        const vehicleDoc = vehicleQuerySnapshot.docs.find(
+          doc =>
+            doc.data().creator === vehicle.creator &&
+            doc.data().plate === vehicle.plate,
+        );
+        if (vehicleDoc) {
+          // Eliminar de BBDD
+          await deleteDoc(vehicleDoc.ref);
+        }
+        // Eliminar objeto de listado en almacenamiento local
+        let vehicles = await AsyncStorage.getItem('vehicles');
+        vehicles = vehicles ? JSON.parse(vehicles) : [];
+        const updatedVehicles = vehicles.filter(
+          item => item.plate !== vehicle.plate,
+        );
+        await AsyncStorage.setItem('vehicles', JSON.stringify(updatedVehicles));
+        return true;
+      } catch (error) {
+        throw error;
+      }
+    } else {
+      //No hay internet
+      // Eliminar objeto de listado en almacenamiento local
+      let vehicles = await AsyncStorage.getItem('vehicles');
+      vehicles = vehicles ? JSON.parse(vehicles) : [];
+      const updatedVehicles = vehicles.filter(
+        item => item.plate !== vehicle.plate,
+      );
+      if (vehicles.length === updatedVehicles.length) {
+        const error = new Error('VehicleNotFoundException');
+        error.code = 'VehicleNotFoundException';
+        throw error;
+      }
+      await AsyncStorage.setItem('vehicles', JSON.stringify(updatedVehicles));
+      return true;
+    }
+  }
+
+  async clearCollection(collectionName) {
+    if (this.env === 'test') {
+      const querySnapshot = await getDocs(
+        collection(this.db, `test_${collectionName}`),
+      );
+      const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+    }
+  }
+
   async addInterestPoint(interestPoint) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
@@ -186,6 +247,69 @@ class CloudService {
     }
   }
 
+  async deleteInterestPoint(interestPoint) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+
+    if (isConnected) {
+      try {
+        const existe = await this.interestPointExists(
+          interestPoint.creator,
+          interestPoint.name,
+        );
+        if (!existe) {
+          const error = new Error('InterestPointNotFoundException');
+          error.code = 'InterestPointNotFoundException';
+          throw error;
+        }
+        const interestPointQuerySnapshot = await getDocs(
+          this.interestPointsCollection,
+        );
+        const interestPointDoc = interestPointQuerySnapshot.docs.find(
+          doc =>
+            doc.data().creator === interestPoint.creator &&
+            doc.data().name === interestPoint.name,
+        );
+        if (interestPointDoc) {
+          // Eliminar de BBDD
+          await deleteDoc(interestPointDoc.ref);
+        }
+        // Eliminar objeto de listado en almacenamiento local
+        let interestPoints = await AsyncStorage.getItem('interestPoints');
+        interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
+        const updatedInterestPoints = interestPoints.filter(
+          ip => ip.name !== interestPoint.name,
+        );
+
+        await AsyncStorage.setItem(
+          'interestPoints',
+          JSON.stringify(updatedInterestPoints),
+        );
+        return true;
+      } catch (error) {
+        throw error;
+      }
+    } else {
+      //No hay internet
+      // Eliminar objeto de listado en almacenamiento local
+      let interestPoints = await AsyncStorage.getItem('interestPoints');
+      interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
+      const updatedInterestPoints = interestPoints.filter(
+        ip => ip.name !== interestPoint.name,
+      );
+      if (interestPoints.length === updatedInterestPoints.length) {
+        const error = new Error('InterestPointNotFoundException');
+        error.code = 'InterestPointNotFoundException';
+        throw error;
+      }
+      await AsyncStorage.setItem(
+        'interestPoints',
+        JSON.stringify(updatedInterestPoints),
+      );
+      return true;
+    }
+  }
+
   async clearCollection(collectionName) {
     if (this.env === 'test') {
       const querySnapshot = await getDocs(
@@ -194,6 +318,18 @@ class CloudService {
       const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
       await Promise.all(deletePromises);
     }
+  }
+
+  async getVehicles() {
+    let vehicles = await AsyncStorage.getItem('vehicles');
+    vehicles = vehicles ? JSON.parse(vehicles) : [];
+    return vehicles;
+  }
+
+  async getInterestPoints() {
+    let interestPoints = await AsyncStorage.getItem('interestPoints');
+    interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
+    return interestPoints;
   }
 }
 

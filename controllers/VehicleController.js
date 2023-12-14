@@ -24,6 +24,23 @@ class VehicleController {
   }
 
   // Otros métodos del controlador como borrar, actualizar, obtener vehículos, etc.
+
+  async getVehicles() {
+    const list = await this.cloudService.getVehicles();
+    return list;
+  }
+
+  async removeVehicle(vehicle) {
+
+    try {
+      const resultDatabase = await this.cloudService.deleteVehicle(vehicle);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar excepción recibida
+      throw error;
+    }
+  }
+  
 }
 
 export default VehicleController;

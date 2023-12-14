@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -14,9 +14,9 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {useAsyncStorage} from '../contexts/AsyncStorageContext';
 import {useInterestPointController} from '../contexts/InterestPointControllerContext';
 import InterestPoint from '../models/InterestPoint';
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 import Config from 'react-native-config';
-
+import NetInfo from '@react-native-community/netinfo';
 const AddInterestPoint = () => {
   const navigation = useNavigation();
   const [showCoordinateInput, setCoordinateInput] = useState(true);
@@ -28,7 +28,17 @@ const AddInterestPoint = () => {
   const [toponym, setToponym] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const [connected, setConnected] = useState(false);
 
+  useEffect(() => {
+    const checkConnectivity = async () => {
+      const netInfo = await NetInfo.fetch();
+      setConnected(netInfo.isConnected);
+    };
+
+    checkConnectivity();
+  }, []);
+  
   const handleAddInterestPointByCoordinates = async () => {
     if (name === '' || latitude === '' || longitude === '') {
       Alert.alert('Please fill in all the parameters');
@@ -47,8 +57,12 @@ const AddInterestPoint = () => {
           parseFloat(longitude),
         );
 
-        const point = await interestPointController.registerInterestPoint(newInterestPoint);
-        setInterestPoints(interestPoints? [...interestPoints, point]:[point] )
+        const point = await interestPointController.registerInterestPoint(
+          newInterestPoint,
+        );
+        setInterestPoints(
+          interestPoints ? [...interestPoints, point] : [point],
+        );
         Alert.alert(
           'Interest Point Added',
           'Your interest point has been successfully added.',
@@ -63,11 +77,11 @@ const AddInterestPoint = () => {
         ) {
           errorMessage = 'The coordinates of the interest point are not valid.';
         } else if (error.code === 'DuplicateInterestPointException') {
-          errorMessage = 'You already have an interest point with that name registered';
-
+          errorMessage =
+            'You already have an interest point with that name registered';
         }
         Alert.alert('Error', errorMessage);
-        console.log(error)
+        console.log(error);
       }
     }
   };
@@ -83,13 +97,15 @@ const AddInterestPoint = () => {
           return;
         }
 
-        const newInterestPoint = new InterestPoint(
-          userEmail, 
-          toponym
-        );
+        const newInterestPoint = new InterestPoint(userEmail, toponym);
 
-        const point = await interestPointController.registerInterestPointToponym(newInterestPoint);
-        setInterestPoints(interestPoints? [...interestPoints, point]:[point] )
+        const point =
+          await interestPointController.registerInterestPointToponym(
+            newInterestPoint,
+          );
+        setInterestPoints(
+          interestPoints ? [...interestPoints, point] : [point],
+        );
         Alert.alert(
           'Interest Point Added',
           'Your interest point has been successfully added.',
@@ -99,10 +115,11 @@ const AddInterestPoint = () => {
       } catch (error) {
         let errorMessage = 'Failed to add interest point.';
         if (error.code === 'DuplicateInterestPointException') {
-          errorMessage = 'You already have an interest point with that name registered';
+          errorMessage =
+            'You already have an interest point with that name registered';
         }
         Alert.alert('Error', errorMessage);
-        console.log(error)
+        console.log(error);
       }
     }
   };
@@ -110,131 +127,135 @@ const AddInterestPoint = () => {
   const swapCoordinateView = async () => {
     setCoordinateInput(true);
     setToponymInput(false);
-  }
+  };
 
   const swapToponymView = async () => {
     setCoordinateInput(false);
     setToponymInput(true);
-  }
+  };
 
   return (
-    <ScrollView style={[globalStyles.primary, { flex: 1, padding: 20 }]} keyboardShouldPersistTaps='handled'
-    showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={[globalStyles.primary, {flex: 1, padding: 20}]}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}>
       <View>
         <Text style={globalStyles.mainText}>New Interest Point</Text>
-
-        <View style={styles.container}>
-          <View style={styles.buttonContainer}>
-            <Pressable
-              style={[
-                showCoordinateInput ? styles.selectedButton : styles.buttonTab,
-                {marginTop: 0, marginBottom: 30},
-              ]}
-              onPress={swapCoordinateView}>
-              <Text style={styles.buttonText}>COORDINATES</Text>
-            </Pressable>
-          </View>
-          <View style={styles.buttonContainer}>
-            <Pressable
-              style={[
-                showToponymInput ? styles.selectedButton : styles.buttonTab,
-                {marginTop: 0, marginBottom: 30},
-              ]}
-              onPress={swapToponymView}>
-              <Text style={styles.buttonText}>TOPONYM</Text>
-            </Pressable>
-          </View>
-        </View>
-        { showCoordinateInput
-          && <View>
-              <TextInput
-                cursorColor="black"
-                mode="flat"
-                label="Name"
-                style={styles.input}
-                value={name}
-                onChangeText={text => setName(text)}
-              />
-
-              <TextInput
-                cursorColor="black"
-                mode="flat"
-                label="Latitude"
-                style={styles.input}
-                value={latitude}
-                onChangeText={text => setLatitude(text)}
-                keyboardType='numeric'
-              />
-
-              <TextInput
-                cursorColor="black"
-                mode="flat"
-                label="Longitude"
-                style={styles.input}
-                value={longitude}
-                onChangeText={text => setLongitude(text)}
-                keyboardType='numeric'
-              />
-
+        {connected && (
+          <View style={styles.container}>
+            <View style={styles.buttonContainer}>
               <Pressable
                 style={[
-                  styles.button,
-                  globalStyles.secondary,
+                  showCoordinateInput
+                    ? styles.selectedButton
+                    : styles.buttonTab,
                   {marginTop: 0, marginBottom: 30},
                 ]}
-                onPress={handleAddInterestPointByCoordinates}>
-                <Text style={styles.buttonText}>CREATE INTEREST POINT</Text>
+                onPress={swapCoordinateView}>
+                <Text style={styles.buttonText}>COORDINATES</Text>
               </Pressable>
             </View>
-        }
-
-        { showToponymInput
-          && <View>
-
-              <View>
-                <GooglePlacesAutocomplete
-                  placeholder='Name'
-                  fetchDetails={false}
-                  disableScroll={true}
-                  searchOptions={{ types: ["(cities)"] }}
-                  onPress={(details = null) => {
-                    // Formateamos los datos para enviar solamente el nombre de la ciudad (Sin el país)
-                    setToponym(details.structured_formatting.main_text)
-                  }}
-                  query={{
-                    key: Config.GOOGLE_MAPS_API_KEY,
-                    language: 'es',
-                  }}
-                  styles={{
-                    textInputContainer: {
-                      padding: 13,
-                      marginBottom: 10,
-                      ...globalStyles.white,
-                      borderWidth: 1,
-                      borderColor: 'black'
-                    },
-                    textInput: {
-                      marginTop: 2,
-                      marginLeft: 2,
-                      fontSize: 16,
-                      color: '#011a1b'
-                    }
-                  }}
-                />
-              </View>
-
+            <View style={styles.buttonContainer}>
               <Pressable
                 style={[
-                  styles.button,
-                  globalStyles.secondary,
+                  showToponymInput ? styles.selectedButton : styles.buttonTab,
                   {marginTop: 0, marginBottom: 30},
                 ]}
-                onPress={handleAddInterestPointByToponym}>
-                <Text style={styles.buttonText}>CREATE INTEREST POINT</Text>
+                onPress={swapToponymView}>
+                <Text style={styles.buttonText}>TOPONYM</Text>
               </Pressable>
             </View>
-        }
-        
+          </View>
+        )}
+
+        {showCoordinateInput && (
+          <View>
+            <TextInput
+              cursorColor="black"
+              mode="flat"
+              label="Name"
+              style={styles.input}
+              value={name}
+              onChangeText={text => setName(text)}
+            />
+
+            <TextInput
+              cursorColor="black"
+              mode="flat"
+              label="Latitude"
+              style={styles.input}
+              value={latitude}
+              onChangeText={text => setLatitude(text)}
+              keyboardType="numeric"
+            />
+
+            <TextInput
+              cursorColor="black"
+              mode="flat"
+              label="Longitude"
+              style={styles.input}
+              value={longitude}
+              onChangeText={text => setLongitude(text)}
+              keyboardType="numeric"
+            />
+
+            <Pressable
+              style={[
+                styles.button,
+                globalStyles.secondary,
+                {marginTop: 0, marginBottom: 30},
+              ]}
+              onPress={handleAddInterestPointByCoordinates}>
+              <Text style={styles.buttonText}>CREATE INTEREST POINT</Text>
+            </Pressable>
+          </View>
+        )}
+
+        {showToponymInput && (
+          <View>
+            <View>
+              <GooglePlacesAutocomplete
+                placeholder="Name"
+                fetchDetails={false}
+                disableScroll={true}
+                searchOptions={{types: ['(cities)']}}
+                onPress={(details = null) => {
+                  // Formateamos los datos para enviar solamente el nombre de la ciudad (Sin el país)
+                  setToponym(details.structured_formatting.main_text);
+                }}
+                query={{
+                  key: Config.GOOGLE_MAPS_API_KEY,
+                  language: 'es',
+                }}
+                styles={{
+                  textInputContainer: {
+                    padding: 13,
+                    marginBottom: 10,
+                    ...globalStyles.white,
+                    borderWidth: 1,
+                    borderColor: 'black',
+                  },
+                  textInput: {
+                    marginTop: 2,
+                    marginLeft: 2,
+                    fontSize: 16,
+                    color: '#011a1b',
+                  },
+                }}
+              />
+            </View>
+
+            <Pressable
+              style={[
+                styles.button,
+                globalStyles.secondary,
+                {marginTop: 0, marginBottom: 30},
+              ]}
+              onPress={handleAddInterestPointByToponym}>
+              <Text style={styles.buttonText}>CREATE INTEREST POINT</Text>
+            </Pressable>
+          </View>
+        )}
       </View>
     </ScrollView>
   );
@@ -295,7 +316,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flex: 1,
-  }
+  },
 });
 
 export default AddInterestPoint;

@@ -47,6 +47,22 @@ class InterestPointController {
   }
 
   // Otros métodos del controlador como borrar, actualizar, obtener puntos, etc.
+
+  async getInterestPoints() {
+    const list = await this.cloudService.getInterestPoints();
+    return list;
+  }
+
+  async removeInterestPoint(interestPoint) {
+    try {
+      const resultDatabase = await this.cloudService.deleteInterestPoint(interestPoint);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar excepción recibida
+
+      throw error;
+    }
+  }
 }
 
 export default InterestPointController;

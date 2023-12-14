@@ -13,6 +13,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 beforeEach(async () => {
   await CloudService.clearCollection('vehicles');
   await jest.clearAllMocks();
+  await AsyncStorage.removeItem('vehicles');
 });
 
 describe('HU9: Como usuario quiero poder dar de alta un vehículo para poder emplearlo como método de transporte en mis rutas', () => {
@@ -30,15 +31,10 @@ describe('HU9: Como usuario quiero poder dar de alta un vehículo para poder emp
     const creatorEmail = 'usuario@gmail.com';
     const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 5, '8171MSL', 'gasoline');
 
-    // Configura el mock de AsyncStorage para simular que ya existe el punto de interés
-    AsyncStorage.getItem.mockResolvedValue(JSON.stringify([vehicle]));
-
-    // Intenta agregar el mismo punto de interés
+    //Agregamos el vehiculo
+    await vehicleController.registerVehicle(vehicle)
+    // Intenta agregar el mismo vehiculo
     await expect(vehicleController.registerVehicle(vehicle)).rejects.toThrow('DuplicateVehicleException');
-
-    // Verifica que se haya llamado a getItem y setItem correctamente
-    await expect(AsyncStorage.getItem).toBeCalledWith('vehicles');
-    await expect(AsyncStorage.setItem).not.toBeCalled();
   });
 
   it('E4: No se crea el vehículo si el año no es válido', async () => {
@@ -48,5 +44,49 @@ describe('HU9: Como usuario quiero poder dar de alta un vehículo para poder emp
     await expect(vehicleController.registerVehicle(vehicle)).rejects.toThrow(
       'YearNotValidException',
     );
+  });
+});
+
+
+describe('HU10:  Como usuario quiero poder consultar la lista de vehículos dados de alta.', () => {
+  it('E1: Se muestra la lista de vehiculos disponibles si los hay.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 5, '8171MSL', 'gasoline');
+    await vehicleController.registerVehicle(vehicle)
+
+    
+    const storedData = await vehicleController.getVehicles();
+    expect(storedData).toEqual([
+      vehicle
+    ]);
+  });
+
+  it('E2: No se muestra la lista de vehiculos registrados si no los hay.', async () => {
+
+    const storedData = await vehicleController.getVehicles();
+    expect(storedData).toEqual([]);
+  });
+});
+
+
+describe('HU11: Como usuario quiero poder eliminar un vehículo cuando ya no vaya a utilizarlo más.', () => {
+  it('E1: Se elimina el vehiculo correctamente.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 5, '8171MSL', 'gasoline');
+    await vehicleController.registerVehicle(vehicle)
+
+    await expect(
+      vehicleController.removeVehicle(vehicle),
+    ).resolves.toBeTruthy();
+    
+  });
+
+  it('E2: Se intenta eliminar un vehiculo que no existe.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 5, '8171MSL', 'gasoline');
+
+    await expect(
+      vehicleController.removeVehicle(vehicle),
+    ).rejects.toThrow('VehicleNotFoundException');
   });
 });
