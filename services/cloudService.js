@@ -153,7 +153,7 @@ class CloudService {
           item => item.plate !== vehicle.plate,
         );
         await AsyncStorage.setItem(
-          'interestPoints',
+          'vehicles',
           JSON.stringify(updatedVehicles),
         );
         return true;
