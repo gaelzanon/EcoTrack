@@ -31,13 +31,6 @@ class VehicleController {
   }
 
   async removeVehicle(vehicle) {
-    //Consultar base de datos según punto de interés enviado
-    const existe = await this.cloudService.vehicleExists(vehicle.creator, vehicle.plate);
-    if (!existe) {
-      const error = new Error('VehicleNotFoundException');
-      error.code = 'VehicleNotFoundException';
-      throw error;
-    }
 
     try {
       const resultDatabase = await this.cloudService.deleteVehicle(vehicle);
