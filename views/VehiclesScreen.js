@@ -8,56 +8,52 @@ import globalStyles from '../styles';
 
 const VehiclesScreen = () => {
   const navigation = useNavigation();
-  const {vehicles} = useAsyncStorage();
+  const {vehicles, setVehicles} = useAsyncStorage();
   const handleNavigateToAddVehicle = () => {
     navigation.navigate('AddVehicle');
   };
-  const [localVehicles, setlLocalVehicles] = useState(vehicles ? vehicles : []);
+  const [localVehicles, setLocalVehicles] = useState(vehicles ? vehicles : []);
   const vehiclesController = useVehicleController();
 
   const handleDeleteVehicle = async vehicle => {
-    Alert.alert(
-      'DELETE Vehicle',
-      'Do you want to delete this vehicle?',
-      [
-        {
-          text: 'OK',
-          onPress: async ()  => {
-            try {
-              await vehiclesController.removeVehicle(vehicle);
-              // Filtrar la lista para eliminar el punto de interés
-              const updatedVehicles = vehicles.filter(
-                item => item.plate !== vehicle.plate,
-              );
-              // Guardar la lista actualizada
-              setlLocalVehicles(updatedVehicles); 
-              Alert.alert('Vehicle succesfully deleted.');
-            } catch (error) {
-              let message = 'An error occurred. Please try again.';
-              switch (error.code) {
-                case 'VehicleNotFoundException':
-                  message = "Vehicle doesn't exist.";
-                  break;
-                default:
-                  console.log(error);
-                  break;
-              }
-              Alert.alert('Deletion Error', message);
+    Alert.alert('DELETE Vehicle', 'Do you want to delete this vehicle?', [
+      {
+        text: 'OK',
+        onPress: async () => {
+          try {
+            await vehiclesController.removeVehicle(vehicle);
+            // Filtrar la lista para eliminar el punto de interés
+            const updatedVehicles = vehicles.filter(
+              item => item.plate !== vehicle.plate,
+            );
+            // Guardar la lista actualizada
+            setVehicles(updatedVehicles);
+            Alert.alert('Vehicle succesfully deleted.');
+          } catch (error) {
+            let message = 'An error occurred. Please try again.';
+            switch (error.code) {
+              case 'VehicleNotFoundException':
+                message = "Vehicle doesn't exist.";
+                break;
+              default:
+                console.log(error);
+                break;
             }
-          },
+            Alert.alert('Deletion Error', message);
+          }
         },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ],
-    );
+      },
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+    ]);
   };
 
   useEffect(() => {
     async function fetchVehicles() {
       const vehicles = await vehiclesController.getVehicles();
-      setlLocalVehicles(vehicles);
+      setLocalVehicles(vehicles);
     }
 
     fetchVehicles();
