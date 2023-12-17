@@ -41,7 +41,14 @@ class VehicleController {
   }
 
   async favoriteVehicle(vehicle) {
-    return 0;
+    try {
+      const resultDatabase = await this.cloudService.favoriteVehicle(vehicle);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar excepción recibida
+
+      throw error;
+    }
   }
 }
 

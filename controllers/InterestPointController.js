@@ -63,9 +63,16 @@ class InterestPointController {
       throw error;
     }
   }
-  
+
   async favoriteInterestPoint(interestPoint) {
-    return 0
+    try {
+      const resultDatabase = await this.cloudService.favoriteInterestPoint(interestPoint);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar excepción recibida
+
+      throw error;
+    }
   }
 }
 

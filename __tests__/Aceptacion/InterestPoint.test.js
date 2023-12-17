@@ -178,7 +178,7 @@ describe('HU20: Como usuario quiero poder marcar como favorito  lugares de inter
     expect(storedData[0]).toEqual(
       {
         ...interestPoint2,
-        favorite: true,
+        isFavorite: true,
       },
     );
   });

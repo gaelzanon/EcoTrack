@@ -103,7 +103,7 @@ describe('HU20: Como usuario quiero poder marcar como favorito vehiculos para qu
     expect(storedData[0]).toEqual(
       {
         ...vehicle2,
-        favorite: true,
+        isFavorite: true,
       }
     );
   });
