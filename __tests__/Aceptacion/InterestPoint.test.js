@@ -184,6 +184,7 @@ describe('HU20: Como usuario quiero poder marcar como favorito  lugares de inter
   });
 
   it('E2: Se intenta marcar como favorito punto de interés que no existe.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
     const interestPoint2 = new InterestPoint(
       creatorEmail,
       'Castellón',
