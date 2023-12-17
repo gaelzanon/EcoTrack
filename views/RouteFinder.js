@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Pressable,
@@ -10,6 +10,8 @@ import {
 import {TextInput} from 'react-native-paper';
 import MapView, {Marker, Polyline} from 'react-native-maps';
 import {useRouteController} from '../contexts/RouteControllerContext';
+import {useVehicleController} from '../contexts/VehicleControllerContext';
+import {useInterestPointController} from '../contexts/InterestPointControllerContext';
 import {useAsyncStorage} from '../contexts/AsyncStorageContext';
 import {Picker} from '@react-native-picker/picker';
 import InterestPoint from '../models/InterestPoint';
@@ -17,11 +19,17 @@ import Vehicle from '../models/Vehicle';
 import Route from '../models/Route';
 import globalStyles from '../styles';
 const RouteFinder = () => {
+  const vehiclesController = useVehicleController();
   const routeController = useRouteController();
+  const interestPointController = useInterestPointController();
   const {vehicles, interestPoints, user} = useAsyncStorage();
-
+  const [localInterestPoints, setLocalInterestPoints] =
+    useState(interestPoints);
+  const [localVehicles, setLocalVehicles] = useState(vehicles);
   const [showMap, setShowMap] = useState(false);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
+  const [duration, setDuration] = useState('')
+  const [distance, setDistance] = useState('')
 
   const [originName, setOriginName] = useState('');
   const [destinationName, setDestinationName] = useState('');
@@ -34,19 +42,33 @@ const RouteFinder = () => {
   const [selectedGenericVehicleType, setSelectedGenericVehicleType] =
     useState('walking');
 
-  const [selectedVehicle, setSelectedVehicle] = useState(
-    vehicles && vehicles.length > 0 ? vehicles[0].plate : null,
-  );
-  const [selectedOrigin, setSelectedOrigin] = useState(
-    interestPoints && interestPoints.length > 0 ? interestPoints[0].name : null,
-  );
-  const [selectedDestination, setSelectedDestination] = useState(
-    interestPoints && interestPoints.length > 0 ? interestPoints[0].name : null,
-  );
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [selectedOrigin, setSelectedOrigin] = useState(null);
+  const [selectedDestination, setSelectedDestination] = useState(null);
 
   const [useCustomVehicle, setUseCustomVehicle] = useState(false);
   const [useCustomOrigin, setuseCustomOrigin] = useState(false);
   const [useCustomDestiny, setuseCustomDestiny] = useState(false);
+
+  useEffect(() => {
+    async function fetchInterestPoints() {
+      const points = await interestPointController.getInterestPoints();
+      setLocalInterestPoints(points);
+      setSelectedOrigin(points[0].name);
+      setSelectedDestination(points[0].name);
+    }
+    fetchInterestPoints();
+  }, [interestPoints]);
+
+  useEffect(() => {
+    async function fetchVehicles() {
+      const vehicles = await vehiclesController.getVehicles();
+      setLocalVehicles(vehicles);
+      setSelectedVehicle(vehicles[0].plate);
+    }
+
+    fetchVehicles();
+  }, [vehicles]);
 
   const findRoute = async () => {
     try {
@@ -84,6 +106,8 @@ const RouteFinder = () => {
 
       // Actualiza el estado para mostrar la ruta en el mapa
       setRouteCoordinates(journey.coordinates);
+      setDuration(journey.duration);
+      setDistance(journey.distance);
       setShowMap(true);
     } catch (error) {
       let message = 'An error occurred. Please try again.';
@@ -137,13 +161,15 @@ const RouteFinder = () => {
                 styles.label,
                 {color: globalStyles.white.backgroundColor},
               ]}>
-              Test
+              {duration} {distance}m
             </Text>
           </View>
         </>
       ) : (
-          <ScrollView style={[globalStyles.primary, { flex: 1, padding: 20 }]}
-          showsVerticalScrollIndicator={false} keyboardShouldPersistTaps='handled'>
+        <ScrollView
+          style={[globalStyles.primary, {flex: 1, padding: 20}]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled">
           <Text style={styles.label}>Vehicle</Text>
           {vehicles && (
             <View style={styles.pickerContainer}>
@@ -161,16 +187,16 @@ const RouteFinder = () => {
 
           {selectedVehicleOption === 'custom' ? (
             <>
-              {vehicles && vehicles.length > 0 ? (
+              {localVehicles && localVehicles.length > 0 ? (
                 <Picker
                   selectedValue={selectedVehicle}
                   onValueChange={(itemValue, itemIndex) => {
                     setSelectedVehicle(itemValue);
                   }}>
-                  {vehicles.map(v => (
+                  {localVehicles.map(v => (
                     <Picker.Item
                       key={v.plate}
-                      label={v.model}
+                      label={v.plate}
                       value={v.plate}
                     />
                   ))}
@@ -193,7 +219,7 @@ const RouteFinder = () => {
             </Picker>
           )}
           <Text style={styles.label}>Origin</Text>
-          {interestPoints && (
+          {localInterestPoints && (
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={selectedOriginOption}
@@ -218,13 +244,13 @@ const RouteFinder = () => {
             />
           ) : (
             <>
-              {interestPoints && interestPoints.length > 0 ? (
+              {localInterestPoints && localInterestPoints.length > 0 ? (
                 <Picker
                   selectedValue={selectedOrigin}
                   onValueChange={(itemValue, itemIndex) => {
                     setSelectedOrigin(itemValue);
                   }}>
-                  {interestPoints.map(ip => (
+                  {localInterestPoints.map(ip => (
                     <Picker.Item
                       key={ip.name}
                       label={ip.name}
@@ -238,7 +264,7 @@ const RouteFinder = () => {
             </>
           )}
           <Text style={styles.label}>Destination</Text>
-          {interestPoints && (
+          {localInterestPoints && (
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={selectedDestinationOption}
@@ -263,13 +289,13 @@ const RouteFinder = () => {
             />
           ) : (
             <>
-              {interestPoints && interestPoints.length > 0 ? (
+              {localInterestPoints && localInterestPoints.length > 0 ? (
                 <Picker
                   selectedValue={selectedDestination}
                   onValueChange={(itemValue, itemIndex) => {
                     setSelectedDestination(itemValue);
                   }}>
-                  {interestPoints.map(ip => (
+                  {localInterestPoints.map(ip => (
                     <Picker.Item
                       key={ip.name}
                       label={ip.name}
