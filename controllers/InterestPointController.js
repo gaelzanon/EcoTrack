@@ -63,6 +63,10 @@ class InterestPointController {
       throw error;
     }
   }
+  
+  async favoriteInterestPoint(interestPoint) {
+    return 0
+  }
 }
 
 export default InterestPointController;
