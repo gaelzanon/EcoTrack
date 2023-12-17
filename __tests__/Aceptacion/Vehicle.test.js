@@ -101,7 +101,10 @@ describe('HU20: Como usuario quiero poder marcar como favorito vehiculos para qu
     await vehicleController.favoriteVehicle(vehicle2)
     const storedData = await vehicleController.getVehicles();
     expect(storedData[0]).toEqual(
-      vehicle
+      {
+        ...vehicle2,
+        favorite: true,
+      }
     );
   });
 

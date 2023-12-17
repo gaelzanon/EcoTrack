@@ -177,10 +177,7 @@ describe('HU20: Como usuario quiero poder marcar como favorito  lugares de inter
     const storedData = await interestPointController.getInterestPoints();
     expect(storedData[0]).toEqual(
       {
-        creator: 'usuario@gmail.com',
-        name: 'Castellón',
-        latitude: 39,
-        longitude: 0,
+        ...interestPoint2,
         favorite: true,
       },
     );
