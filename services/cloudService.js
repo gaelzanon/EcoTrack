@@ -44,7 +44,12 @@ class CloudService {
       doc => doc.data().creator === creator && doc.data().name === name,
     );
   }
-
+  async deleteLocalInfo() {
+    await AsyncStorage.removeItem('user');
+    await AsyncStorage.removeItem('vehicles');
+    await AsyncStorage.removeItem('interestPoints');
+    return true
+  }
   async deleteUserInfo(email) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;

@@ -69,10 +69,11 @@ class UserController {
       error.code = 'UserNotFoundException';
       throw error;
     }
-    
+
     try {
-      const result = await this.authService.logout();
-      return result;
+      const resultAuth = await this.authService.logout();
+      const resultDatabase = await this.cloudService.deleteLocalInfo();
+      return resultAuth && resultDatabase;
     } catch (error) {
       // Reenviar la excepción tal como se recibe
       throw error;
