@@ -53,7 +53,6 @@ describe('HU5: Como usuario quiero poder dar de alta un lugar de interés usando
 
     // Verifica que se haya llamado a getItem
     expect(AsyncStorage.getItem).toBeCalledWith('interestPoints');
-    
   });
 
   it('E3: No se crea el lugar si las coordinadas no son válidas', async () => {
@@ -122,7 +121,6 @@ describe('HU7: Como usuario quiero poder consultar la lista de lugares de inter�
   });
 
   it('E2: No se muestra la lista de lugares de interes registrados si no los hay.', async () => {
-
     const storedData = await interestPointController.getInterestPoints();
     expect(storedData).toEqual([]);
   });
@@ -141,7 +139,6 @@ describe('HU8: Como usuario quiero poder eliminar un lugar de interés cuando no
     await expect(
       interestPointController.removeInterestPoint(interestPoint),
     ).resolves.toBeTruthy();
-    
   });
 
   it('E2: Se intenta eliminar un lugar que no existe.', async () => {
@@ -155,6 +152,48 @@ describe('HU8: Como usuario quiero poder eliminar un lugar de interés cuando no
 
     await expect(
       interestPointController.removeInterestPoint(interestPoint),
+    ).rejects.toThrow('InterestPointNotFoundException');
+  });
+});
+
+describe('HU20: Como usuario quiero poder marcar como favorito  lugares de interés para que aparezcan los primeros cuando los listo.', () => {
+  it('E1: Se marca como favorito un punto de interés existente.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint1 = new InterestPoint(
+      creatorEmail,
+      'Villarreal',
+      39.93333,
+      -0.1,
+    );
+    const interestPoint2 = new InterestPoint(
+      creatorEmail,
+      'Castellón',
+      39,
+      0,
+    );
+    await interestPointController.registerInterestPoint(interestPoint1);
+    await interestPointController.registerInterestPoint(interestPoint2);
+    await interestPointController.favoriteInterestPoint(interestPoint2)
+    const storedData = await interestPointController.getInterestPoints();
+    expect(storedData[0]).toEqual(
+      {
+        ...interestPoint2,
+        isFavorite: true,
+      },
+    );
+  });
+
+  it('E2: Se intenta marcar como favorito punto de interés que no existe.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint2 = new InterestPoint(
+      creatorEmail,
+      'Castellón',
+      39,
+      0,
+    );
+    
+    await expect(
+      interestPointController.favoriteInterestPoint(interestPoint2),
     ).rejects.toThrow('InterestPointNotFoundException');
   });
 });

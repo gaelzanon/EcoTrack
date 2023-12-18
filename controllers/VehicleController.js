@@ -11,7 +11,7 @@ class VehicleController {
   async registerVehicle(vehicle) {
     // Validación del vehículo antes de intentar registrar
     if (!this.validarAnoVehiculo(vehicle.year)) {
-      throw new Error("YearNotValidException");
+      throw new Error('YearNotValidException');
     }
 
     try {
@@ -31,7 +31,6 @@ class VehicleController {
   }
 
   async removeVehicle(vehicle) {
-
     try {
       const resultDatabase = await this.cloudService.deleteVehicle(vehicle);
       return resultDatabase;
@@ -40,7 +39,17 @@ class VehicleController {
       throw error;
     }
   }
-  
+
+  async favoriteVehicle(vehicle) {
+    try {
+      const resultDatabase = await this.cloudService.favoriteVehicle(vehicle);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar excepción recibida
+
+      throw error;
+    }
+  }
 }
 
 export default VehicleController;
