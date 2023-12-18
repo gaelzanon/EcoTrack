@@ -39,8 +39,9 @@ class AuthService {
         });
         /*
         await sendEmailVerification(user);
-        await signOut(this.auth);
         */
+        await signOut(this.auth);
+        
         return user;
       } catch (error) {
         // Manejo de errores específicos de Firebase
@@ -94,6 +95,26 @@ class AuthService {
     if (isConnected) {
       if (this.auth.currentUser) {
         await deleteUser(this.auth.currentUser);
+        return true;
+      } else {
+        const error = new Error('UserNotLoggedException');
+        error.code = 'UserNotLoggedException';
+        throw error;
+      }
+    } else {
+      const error = new Error('NoInetConection');
+      error.code = 'NoInetConection';
+      throw error;
+    }
+  }
+
+  async logout() {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+    
+    if (isConnected) {
+      if (this.auth.currentUser) {
+        await signOut(this.auth);
         return true;
       } else {
         const error = new Error('UserNotLoggedException');
