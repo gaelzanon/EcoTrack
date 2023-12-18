@@ -10,7 +10,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
-beforeEach(async () => {
+afterEach(async () => {
   await CloudService.clearCollection('vehicles');
   await jest.clearAllMocks();
   await AsyncStorage.removeItem('vehicles');

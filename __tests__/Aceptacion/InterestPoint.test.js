@@ -12,7 +12,8 @@ const interestPointController = new InterestPointController(
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
-beforeEach(async () => {
+
+afterEach(async () => {
   // Vaciar la base de datos antes de cada prueba
   await CloudService.clearCollection('interestPoints');
   await jest.clearAllMocks();
