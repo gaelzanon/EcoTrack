@@ -122,3 +122,35 @@ describe('HU4: Como usuario quiero poder eliminar mi cuenta', () => {
     ).rejects.toThrow('UserNotFoundException');
   });
 });
+
+describe('HU3: Como usuario quiero poder cerrar la sesión de mi cuenta para salir del sistema.', () => {
+  it('E1: Se cierra sesión correctamente aal usuario logueado', async () => {
+    //Para poder borrar el usuario del auth el usuario debe estar loggeado (temas de seguridad de firebase)
+    const usuario = new User('usuario@example.com', 'Password12');
+    const formularioRegistroFactory = new FormularioRegistroFactory();
+    const formularioRegistro = formularioRegistroFactory.crearFormulario();
+    formularioRegistro.rellenarDatos({
+      user: 'juan',
+      email: usuario.email,
+      password1: usuario.password,
+      password2: usuario.password,
+    });
+    await userController.register(formularioRegistro.datosFormulario);
+    const formularioLoginFactory = new FormularioLoginFactory();
+    const formularioLogin = formularioLoginFactory.crearFormulario();
+    formularioLogin.rellenarDatos({
+      email: usuario.email,
+      password: usuario.password,
+    });
+    await userController.login(formularioLogin.datosFormulario)
+    await expect(
+      userController.logout(),
+    ).resolves.toBeTruthy();
+  });
+
+  it('E2: Se intenta desloguear un usuario no logueado', async () => {
+    await expect(
+      userController.logout(),
+    ).rejects.toThrow('UserNotLoggedException');
+  });
+});

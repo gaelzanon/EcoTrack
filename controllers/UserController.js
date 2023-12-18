@@ -60,6 +60,10 @@ class UserController {
       throw error;
     }
   }
+
+  async logout() {
+    return 0
+  }
 }
 
 export default UserController;
