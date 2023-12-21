@@ -42,8 +42,13 @@ class VehicleController {
   }
 
   async updateVehicle(vehicle) {
-    // Actualizar vehiculo
-    return 0;
+    try {
+      const resultDatabase = await this.cloudService.updateVehicle(vehicle);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar excepción recibida
+      throw error;
+    }
   }
   
 }
