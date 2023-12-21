@@ -60,6 +60,25 @@ class UserController {
       throw error;
     }
   }
+
+  async logout(email) {
+    //Consultar base de datos según email  enviado
+    const existe = await this.cloudService.userExists(email);
+    if (!existe) {
+      const error = new Error('UserNotFoundException');
+      error.code = 'UserNotFoundException';
+      throw error;
+    }
+
+    try {
+      const resultAuth = await this.authService.logout();
+      const resultDatabase = await this.cloudService.deleteLocalInfo();
+      return resultAuth && resultDatabase;
+    } catch (error) {
+      // Reenviar la excepción tal como se recibe
+      throw error;
+    }
+  }
 }
 
 export default UserController;

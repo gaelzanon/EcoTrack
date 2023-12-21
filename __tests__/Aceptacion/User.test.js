@@ -13,10 +13,10 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
-beforeEach(async () => {
+afterEach(async () => {
   await CloudService.clearCollection('users');
   await jest.clearAllMocks();
-  await AsyncStorage.removeItem('user')
+  await AsyncStorage.removeItem('user');
 });
 
 describe('HU1: Como usuario no registrado en la aplicación quiero poder registrarme en la misma para poder utilizar sus servicios', () => {
@@ -34,6 +34,15 @@ describe('HU1: Como usuario no registrado en la aplicación quiero poder registr
     await expect(
       userController.register(formularioRegistro.datosFormulario),
     ).resolves.toBeTruthy();
+    
+    //Ahora lo logueamos para borrarlo del auth
+    const formularioLoginFactory = new FormularioLoginFactory();
+    const formularioLogin = formularioLoginFactory.crearFormulario();
+    formularioLogin.rellenarDatos({
+      email: usuario.email,
+      password: usuario.password,
+    });
+    await userController.login(formularioLogin.datosFormulario);
     await AuthService.deleteUser();
   });
 
@@ -121,4 +130,57 @@ describe('HU4: Como usuario quiero poder eliminar mi cuenta', () => {
       userController.deleteUser('usuarioInvalido@example.com'),
     ).rejects.toThrow('UserNotFoundException');
   });
+});
+
+describe('HU3: Como usuario quiero poder cerrar la sesión de mi cuenta para salir del sistema.', () => {
+  it('E1: Se cierra sesión correctamente al usuario logueado', async () => {
+    const usuario = new User('usuario@example.com', 'Password12');
+    const formularioRegistroFactory = new FormularioRegistroFactory();
+    const formularioRegistro = formularioRegistroFactory.crearFormulario();
+    formularioRegistro.rellenarDatos({
+      user: 'juan',
+      email: usuario.email,
+      password1: usuario.password,
+      password2: usuario.password,
+    });
+    await userController.register(formularioRegistro.datosFormulario);
+    const formularioLoginFactory = new FormularioLoginFactory();
+    const formularioLogin = formularioLoginFactory.crearFormulario();
+    formularioLogin.rellenarDatos({
+      email: usuario.email,
+      password: usuario.password,
+    });
+    await userController.login(formularioLogin.datosFormulario);
+    await expect(userController.logout(usuario.email)).resolves.toBeTruthy();
+    //Ahora lo logueamos para borrarlo del auth
+    await userController.login(formularioLogin.datosFormulario);
+    await AuthService.deleteUser();
+  });
+
+  it('E2: Se intenta desloguear un usuario no logueado', async () => {
+    const usuario = new User('usuario2@example.com', 'Password12');
+    const formularioRegistroFactory = new FormularioRegistroFactory();
+    const formularioRegistro = formularioRegistroFactory.crearFormulario();
+    formularioRegistro.rellenarDatos({
+      user: 'juan',
+      email: usuario.email,
+      password1: usuario.password,
+      password2: usuario.password,
+    });
+    await userController.register(formularioRegistro.datosFormulario);
+    await expect(userController.logout(usuario.email)).rejects.toThrow(
+      'UserNotLoggedException',
+    );
+    
+    //Ahora lo logueamos para borrarlo del auth
+    const formularioLoginFactory = new FormularioLoginFactory();
+    const formularioLogin = formularioLoginFactory.crearFormulario();
+    formularioLogin.rellenarDatos({
+      email: usuario.email,
+      password: usuario.password,
+    });
+    await userController.login(formularioLogin.datosFormulario);
+    await AuthService.deleteUser();
+  });
+  
 });

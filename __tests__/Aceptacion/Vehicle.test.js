@@ -10,7 +10,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
-beforeEach(async () => {
+afterEach(async () => {
   await CloudService.clearCollection('vehicles');
   await jest.clearAllMocks();
   await AsyncStorage.removeItem('vehicles');
@@ -101,7 +101,6 @@ describe('HU12: Como usuario quiero poder cambiar los datos de un vehículo para
     await expect(
       vehicleController.updateVehicle(updatedVehicle),
     ).resolves.toBeTruthy();
-    
   });
 
   it('E2: Intenta actualizar un vehículo que no existe.', async () => {
@@ -111,5 +110,34 @@ describe('HU12: Como usuario quiero poder cambiar los datos de un vehículo para
     await expect(
       vehicleController.updateVehicle(vehicle),
     ).rejects.toThrow('VehicleNotFoundException');
+  });
+});
+
+describe('HU20: Como usuario quiero poder marcar como favorito vehiculos para que aparezcan los primeros cuando los listo.', () => {
+  it('E1: Se marca como favorito un vehiculo existente.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const vehicle1 = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 5, '8171MSL', 'gasoline');
+    const vehicle2 = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 1999, 5, '3774MSL', 'diesel');
+    await vehicleController.registerVehicle(vehicle1);
+    await vehicleController.registerVehicle(vehicle2);
+    await vehicleController.favoriteVehicle(vehicle2)
+    const storedData = await vehicleController.getVehicles();
+    expect(storedData[0]).toEqual(
+      {
+        ...vehicle2,
+        isFavorite: true,
+      }
+    );
+  });
+
+  it('E2: Se intenta marcar como favorito vehiculos que no existe.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 5, '8171MSL', 'gasoline');
+
+
+    await expect(
+      vehicleController.favoriteVehicle(vehicle),
+    ).rejects.toThrow('VehicleNotFoundException');
+  
   });
 });

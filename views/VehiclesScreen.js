@@ -50,6 +50,25 @@ const VehiclesScreen = () => {
     ]);
   };
 
+  const handleFavoriteVehicle = async vehicle => {
+    try {
+      await vehiclesController.favoriteVehicle(vehicle);
+      // Actualizar el estado local para reflejar el cambio
+      const updatedVehicles = localVehicles.map(v =>
+        v.plate === vehicle.plate && v.creator === vehicle.creator
+          ? {...v, isFavorite: !v.isFavorite}
+          : v,
+      );
+      setLocalVehicles(updatedVehicles);
+      setVehicles(updatedVehicles);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        'An error occurred while updating the favorite status.',
+      );
+    }
+  };
+
   useEffect(() => {
     async function fetchVehicles() {
       const vehicles = await vehiclesController.getVehicles();
@@ -79,8 +98,23 @@ const VehiclesScreen = () => {
         </Text>
         <Text style={styles.details}>Type: {vehicle.type}</Text>
       </View>
-      <View style={{flex: 2, position: 'absolute', right: 13, top: 13}}>
-        <Pressable onPress={() => handleDeleteVehicle(vehicle)}>
+      <View
+        style={{
+          flexDirection: 'row',
+          position: 'absolute',
+          right: 13,
+          top: 13,
+        }}>
+        <Pressable onPress={() => handleFavoriteVehicle(vehicle)}>
+          <MaterialCommunityIcons
+            name={vehicle.isFavorite ? 'star' : 'star-outline'}
+            size={30}
+            color={vehicle.isFavorite ? 'gold' : 'grey'}
+          />
+        </Pressable>
+        <Pressable
+          onPress={() => handleDeleteVehicle(vehicle)}
+          style={{marginLeft: 10}}>
           <MaterialCommunityIcons
             name={'trash-can'}
             size={30}
