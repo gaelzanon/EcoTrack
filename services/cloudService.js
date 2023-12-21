@@ -188,6 +188,51 @@ class CloudService {
     }
   }
 
+  async updateVehicle(vehicle) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+
+    if (isConnected) {
+      try {
+        const existe = await this.vehicleExists(vehicle.creator, vehicle.plate);
+        if (!existe) {
+          const error = new Error('VehicleNotFoundException');
+          error.code = 'VehicleNotFoundException';
+          throw error;
+        }
+        const vehicleQuerySnapshot = await getDocs(this.vehiclesCollection);
+        const vehicleDoc = vehicleQuerySnapshot.docs.find(
+          doc =>
+            doc.data().creator === vehicle.creator &&
+            doc.data().plate === vehicle.plate,
+        );
+        if (vehicleDoc) {
+          // Actualizar en BBDD
+          const vehicleData = {...vehicle};
+          await updateDoc(vehicleDoc.ref, vehicleData);
+        }
+      } catch (error) {
+        throw error;
+      }
+    } else {
+      //No hay internet
+      if (vehicles.length === updatedVehicles.length) {
+        const error = new Error('VehicleNotFoundException');
+        error.code = 'VehicleNotFoundException';
+        throw error;
+      }
+    }
+    // Eliminar vehiculo de listado en almacenamiento local y se añade de nuevo con los cambios
+    let vehicles = await AsyncStorage.getItem('vehicles');
+    vehicles = vehicles ? JSON.parse(vehicles) : [];
+    const updatedVehicles = vehicles.filter(
+      item => item.plate !== vehicle.plate,
+    );
+    vehicles.push(vehicle);
+    await AsyncStorage.setItem('vehicles', JSON.stringify(updatedVehicles));
+    return true;
+  }
+
   async clearCollection(collectionName) {
     if (this.env === 'test') {
       const querySnapshot = await getDocs(

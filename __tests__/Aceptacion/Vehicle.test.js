@@ -91,6 +91,28 @@ describe('HU11: Como usuario quiero poder eliminar un vehículo cuando ya no vay
   });
 });
 
+describe('HU12: Como usuario quiero poder cambiar los datos de un vehículo para poder actualizar su información.', () => {
+  it('E1: Los datos del vehículo se actualizan correctamente.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 5, '8171MSL', 'gasoline');
+    await vehicleController.registerVehicle(vehicle);
+
+    const updatedVehicle = new Vehicle(creatorEmail, 'Ford', 'Fiesta', 2018, 2, '8171MSL', 'gasoline');
+    await expect(
+      vehicleController.updateVehicle(updatedVehicle),
+    ).resolves.toBeTruthy();
+  });
+
+  it('E2: Intenta actualizar un vehículo que no existe.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 5, '8171MSL', 'gasoline');
+
+    await expect(
+      vehicleController.updateVehicle(vehicle),
+    ).rejects.toThrow('VehicleNotFoundException');
+  });
+});
+
 describe('HU20: Como usuario quiero poder marcar como favorito vehiculos para que aparezcan los primeros cuando los listo.', () => {
   it('E1: Se marca como favorito un vehiculo existente.', async () => {
     const creatorEmail = 'usuario@gmail.com';

@@ -40,6 +40,16 @@ class VehicleController {
     }
   }
 
+  async updateVehicle(vehicle) {
+    try {
+      const resultDatabase = await this.cloudService.updateVehicle(vehicle);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar excepción recibida
+      throw error;
+    }
+  }
+  
   async favoriteVehicle(vehicle) {
     try {
       const resultDatabase = await this.cloudService.favoriteVehicle(vehicle);
