@@ -1,7 +1,7 @@
 import firebaseInstance from '../firebase';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {addDoc, collection, getDocs, deleteDoc} from 'firebase/firestore';
+import {addDoc, collection, getDocs, deleteDoc, updateDoc} from 'firebase/firestore';
 
 class CloudService {
   constructor(env) {

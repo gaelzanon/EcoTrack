@@ -40,6 +40,11 @@ class VehicleController {
       throw error;
     }
   }
+
+  async updateVehicle(vehicle) {
+    // Actualizar vehiculo
+    return 0;
+  }
   
 }
 
