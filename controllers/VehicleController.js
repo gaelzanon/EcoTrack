@@ -41,6 +41,11 @@ class VehicleController {
   }
 
   async updateVehicle(vehicle) {
+    // Validación del vehículo antes de intentar registrar
+    if (!this.validarAnoVehiculo(vehicle.year)) {
+      
+      throw new Error('YearNotValidException');
+    }
     try {
       const resultDatabase = await this.cloudService.updateVehicle(vehicle);
       return resultDatabase;
