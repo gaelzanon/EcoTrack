@@ -1,7 +1,13 @@
 import firebaseInstance from '../firebase';
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {addDoc, collection, getDocs, deleteDoc, updateDoc} from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  getDocs,
+  deleteDoc,
+  updateDoc,
+} from 'firebase/firestore';
 
 class CloudService {
   constructor(env) {
@@ -48,7 +54,7 @@ class CloudService {
     await AsyncStorage.removeItem('user');
     await AsyncStorage.removeItem('vehicles');
     await AsyncStorage.removeItem('interestPoints');
-    return true
+    return true;
   }
   async deleteUserInfo(email) {
     const netInfo = await NetInfo.fetch();
@@ -191,46 +197,53 @@ class CloudService {
   async updateVehicle(vehicle) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
+    let vehicles = await AsyncStorage.getItem('vehicles');
+    vehicles = vehicles ? JSON.parse(vehicles) : [];
+    const existeLocal = vehicles.findIndex(
+      item => item.plate === vehicle.plate,
+    );
+    if (existeLocal === -1) {
+      const error = new Error('VehicleNotFoundException');
+      error.code = 'VehicleNotFoundException';
+      throw error;
+    }
 
     if (isConnected) {
       try {
         const existe = await this.vehicleExists(vehicle.creator, vehicle.plate);
+
         if (!existe) {
-          const error = new Error('VehicleNotFoundException');
-          error.code = 'VehicleNotFoundException';
-          throw error;
-        }
-        const vehicleQuerySnapshot = await getDocs(this.vehiclesCollection);
-        const vehicleDoc = vehicleQuerySnapshot.docs.find(
-          doc =>
-            doc.data().creator === vehicle.creator &&
-            doc.data().plate === vehicle.plate,
-        );
-        if (vehicleDoc) {
-          // Actualizar en BBDD
+          // Añadirlo a firebase (esto ocurrira cuando se ha añadido estando sin conexion y se modifica con conexion)
+          // Convierte el objeto a un formato que Firestore pueda entender
+          const vehicleData = {...vehicle};
+          await addDoc(this.vehiclesCollection, vehicleData);
+        } else {
+          // Modificarlo en firebase
+          const vehicleQuerySnapshot = await getDocs(this.vehiclesCollection);
+          const vehicleDoc = vehicleQuerySnapshot.docs.find(
+            doc =>
+              doc.data().creator === vehicle.creator &&
+              doc.data().plate === vehicle.plate,
+          );
+
           const vehicleData = {...vehicle};
           await updateDoc(vehicleDoc.ref, vehicleData);
         }
+
+        // Cambiar el local con el actualizado
+        vehicles[existeLocal] = vehicle;
+        await AsyncStorage.setItem('vehicles', JSON.stringify(vehicles));
+        return true;
       } catch (error) {
         throw error;
       }
     } else {
-      //No hay internet
-      if (vehicles.length === updatedVehicles.length) {
-        const error = new Error('VehicleNotFoundException');
-        error.code = 'VehicleNotFoundException';
-        throw error;
-      }
+      // No hay internet
+      // Cambiar el local con el actualizado
+      vehicles[existeLocal] = vehicle;
+      await AsyncStorage.setItem('vehicles', JSON.stringify(updatedVehicles));
+      return true;
     }
-    // Eliminar vehiculo de listado en almacenamiento local y se añade de nuevo con los cambios
-    let vehicles = await AsyncStorage.getItem('vehicles');
-    vehicles = vehicles ? JSON.parse(vehicles) : [];
-    const updatedVehicles = vehicles.filter(
-      item => item.plate !== vehicle.plate,
-    );
-    vehicles.push(vehicle);
-    await AsyncStorage.setItem('vehicles', JSON.stringify(updatedVehicles));
-    return true;
   }
 
   async clearCollection(collectionName) {
@@ -378,13 +391,13 @@ class CloudService {
       // Considera los puntos de vehiculos sin el parámetro 'isFavorite' como no favoritos
       const isFavoriteA = a.isFavorite === true;
       const isFavoriteB = b.isFavorite === true;
-  
+
       if (isFavoriteA && !isFavoriteB) {
         return -1; // 'a' es favorito y 'b' no, 'a' va primero
       } else if (!isFavoriteA && isFavoriteB) {
-        return 1;  // 'b' es favorito y 'a' no, 'b' va primero
+        return 1; // 'b' es favorito y 'a' no, 'b' va primero
       } else {
-        return 0;  // Si ambos son favoritos o no favoritos, se mantienen en el mismo orden
+        return 0; // Si ambos son favoritos o no favoritos, se mantienen en el mismo orden
       }
     });
     return vehicles;
@@ -393,25 +406,24 @@ class CloudService {
   async getInterestPoints() {
     let interestPoints = await AsyncStorage.getItem('interestPoints');
     interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
-  
+
     // Ordenar los puntos de interés para que los favoritos aparezcan primero
     interestPoints.sort((a, b) => {
       // Considera los puntos de interés sin el parámetro 'isFavorite' como no favoritos
       const isFavoriteA = a.isFavorite === true;
       const isFavoriteB = b.isFavorite === true;
-  
+
       if (isFavoriteA && !isFavoriteB) {
         return -1; // 'a' es favorito y 'b' no, 'a' va primero
       } else if (!isFavoriteA && isFavoriteB) {
-        return 1;  // 'b' es favorito y 'a' no, 'b' va primero
+        return 1; // 'b' es favorito y 'a' no, 'b' va primero
       } else {
-        return 0;  // Si ambos son favoritos o no favoritos, se mantienen en el mismo orden
+        return 0; // Si ambos son favoritos o no favoritos, se mantienen en el mismo orden
       }
     });
-  
+
     return interestPoints;
   }
-  
 
   async favoriteInterestPoint(interestPoint) {
     const netInfo = await NetInfo.fetch();
@@ -474,16 +486,16 @@ class CloudService {
   async favoriteVehicle(vehicle) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
-  
+
     try {
       let vehicles = await AsyncStorage.getItem('vehicles');
       vehicles = vehicles ? JSON.parse(vehicles) : [];
-  
+
       // Buscar el vehículo en el almacenamiento local usando 'creator' y 'plate' como clave
       const index = vehicles.findIndex(
-        v => v.creator === vehicle.creator && v.plate === vehicle.plate
+        v => v.creator === vehicle.creator && v.plate === vehicle.plate,
       );
-  
+
       if (index !== -1) {
         // Invertir el estado de favorito, o establecerlo si no existe
         vehicles[index].isFavorite = !vehicles[index].isFavorite;
@@ -491,32 +503,35 @@ class CloudService {
         // Si no existe en local, no se puede marcar como favorito
         throw new Error('VehicleNotFoundException');
       }
-  
+
       // Actualizar el almacenamiento local
       await AsyncStorage.setItem('vehicles', JSON.stringify(vehicles));
-  
+
       if (isConnected) {
         // Actualizar el estado de favorito en la base de datos remota
         const vehicleQuerySnapshot = await getDocs(this.vehiclesCollection);
         const vehicleDoc = vehicleQuerySnapshot.docs.find(
-          doc => doc.data().creator === vehicle.creator && doc.data().plate === vehicle.plate
+          doc =>
+            doc.data().creator === vehicle.creator &&
+            doc.data().plate === vehicle.plate,
         );
-  
+
         if (vehicleDoc) {
           // Actualizar el documento en la base de datos
-          await updateDoc(vehicleDoc.ref, { isFavorite: vehicles[index].isFavorite });
+          await updateDoc(vehicleDoc.ref, {
+            isFavorite: vehicles[index].isFavorite,
+          });
         } else {
           // Si el documento no existe en la base de datos, crea uno nuevo
           await addDoc(this.vehiclesCollection, vehicle);
         }
       }
-  
+
       return true;
     } catch (error) {
       throw error;
     }
-  };
-  
+  }
 }
 
 export default CloudService;

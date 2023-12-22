@@ -49,7 +49,9 @@ const VehiclesScreen = () => {
       },
     ]);
   };
-
+  const handleNavigateToEditVehicle = vehicle => {
+    navigation.navigate('UpdateVehicle', {vehicleToEdit: vehicle});
+  };
   const handleFavoriteVehicle = async vehicle => {
     try {
       await vehiclesController.favoriteVehicle(vehicle);
@@ -111,6 +113,11 @@ const VehiclesScreen = () => {
             size={30}
             color={vehicle.isFavorite ? 'gold' : 'grey'}
           />
+        </Pressable>
+        <Pressable
+          onPress={() => handleNavigateToEditVehicle(vehicle)}
+          style={{marginLeft: 10}}>
+          <MaterialCommunityIcons name="pencil" size={30} color="#0077b6" />
         </Pressable>
         <Pressable
           onPress={() => handleDeleteVehicle(vehicle)}

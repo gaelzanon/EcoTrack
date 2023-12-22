@@ -12,6 +12,7 @@ import HeaderDropdown from './components/HeaderDropdown';
 import Login from './views/Login';
 import Register from './views/Register';
 import AddVehicle from './views/AddVehicle';
+import UpdateVehicle from './views/UpdateVehicle';
 import AddInterestPoint from './views/AddInterestPoint';
 import RouteFinder from './views/RouteFinder';
 import TabStack from './stacks/TabStack';
@@ -105,6 +106,11 @@ const App = () => {
                   <Stack.Screen
                     name="AddVehicle"
                     component={AddVehicle}
+                    options={{headerShown: false}}
+                  />
+                  <Stack.Screen
+                    name="UpdateVehicle"
+                    component={UpdateVehicle}
                     options={{headerShown: false}}
                   />
                   <Stack.Screen
