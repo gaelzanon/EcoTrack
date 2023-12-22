@@ -1,11 +1,11 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View, Text, Pressable, StyleSheet, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import globalStyles from '../styles';
-
+import {useAsyncStorage} from '../contexts/AsyncStorageContext';
 const Home = () => {
   const navigation = useNavigation();
-
+  const {syncData, vehicles, interestPoints} = useAsyncStorage();
   const handleNavigateToAddVehicle = () => {
     navigation.navigate('AddVehicle');
   };
@@ -17,6 +17,10 @@ const Home = () => {
   const handleNavigateToRouteFinder = () => {
     navigation.navigate('RouteFinder');
   };
+
+  useEffect(() => {
+    syncData(vehicles, interestPoints)
+  }, [])
 
   return (
     <ScrollView style={[globalStyles.primary, { flex: 1, padding: 20 }]}

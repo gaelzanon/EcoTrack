@@ -23,7 +23,7 @@ const InterestPointsScreen = () => {
       [
         {
           text: 'OK',
-          onPress: async ()  => {
+          onPress: async () => {
             try {
               await interestPointController.removeInterestPoint(interestPoint);
               // Filtrar la lista para eliminar el punto de interés
@@ -31,7 +31,7 @@ const InterestPointsScreen = () => {
                 ip => ip.name !== interestPoint.name,
               );
               // Guardar la lista actualizada
-              setInterestPoints(updatedInterestPoints); 
+              setInterestPoints(updatedInterestPoints);
               Alert.alert('Interest point succesfully deleted.');
             } catch (error) {
               let message = 'An error occurred. Please try again.';
@@ -53,6 +53,25 @@ const InterestPointsScreen = () => {
         },
       ],
     );
+  };
+
+  const handleFavoriteInterestPoint = async interestPoint => {
+    try {
+      await interestPointController.favoriteInterestPoint(interestPoint);
+      // Actualizar el estado local para reflejar el cambio
+      const updatedInterestPoints = localInterestPoints.map(ip =>
+        ip.name === interestPoint.name && ip.creator === interestPoint.creator
+          ? {...ip, isFavorite: !ip.isFavorite}
+          : ip,
+      );
+      setLocalInterestPoints(updatedInterestPoints);
+      setInterestPoints(updatedInterestPoints);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        'An error occurred while updating the favorite status.',
+      );
+    }
   };
 
   useEffect(() => {
@@ -78,18 +97,31 @@ const InterestPointsScreen = () => {
         <Text style={styles.details}>Longitude: {ip.longitude}</Text>
         <Text style={styles.details}>Latitude: {ip.latitude}</Text>
       </View>
-      <View style={{flex: 2, position: 'absolute', right: 13, top: 13}}>
+      <View
+        style={{
+          flexDirection: 'row',
+          position: 'absolute',
+          right: 13,
+          top: 13,
+        }}>
+        <Pressable onPress={() => handleFavoriteInterestPoint(ip)}>
+          <MaterialCommunityIcons
+            name={ip.isFavorite ? 'star' : 'star-outline'}
+            size={30}
+            color={ip.isFavorite ? 'gold' : 'grey'}
+          />
+        </Pressable>
         <Pressable onPress={() => handleDeleteInterestPoint(ip)}>
           <MaterialCommunityIcons
             name={'trash-can'}
             size={30}
             color="#8f0916"
+            style={{marginLeft: 10}}
           />
         </Pressable>
       </View>
     </View>
   );
-
   return (
     <View style={[globalStyles.primary, {flex: 1, padding: 20}]}>
       <FlatList

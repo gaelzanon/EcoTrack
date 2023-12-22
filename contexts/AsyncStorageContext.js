@@ -65,6 +65,11 @@ export const AsyncStorageProvider = ({children}) => {
   };
 
   const syncData = async (localVehicles, localInterestPoints) => {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+    if (!isConnected) {
+      return;
+    }
     const {firebaseVehicles, firebaseInterestPoints} = await getFirebaseData();
     const db = firebaseInstance.db;
     //Si no existe coleccion local pero si online es que el usuario ha borrado aplicacion y ha vuelto a instalar
@@ -150,19 +155,6 @@ export const AsyncStorageProvider = ({children}) => {
     loadInitialData();
   }, []);
 
-  useEffect(() => {
-    async function fetchData() {
-      const netInfo = await NetInfo.fetch();
-      const isConnected = netInfo.isConnected;
-      if (isConnected) {
-        await syncData(vehicles, interestPoints);
-      }
-    }
-
-    if (user && vehicles && interestPoints) {
-      fetchData();
-    }
-  }, [user, vehicles, interestPoints]);
 
   const value = {
     user,
@@ -178,6 +170,7 @@ export const AsyncStorageProvider = ({children}) => {
       setInterestPoints(interestPointData);
     },
     loaded,
+    syncData,
   };
 
   return (
