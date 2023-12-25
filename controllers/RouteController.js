@@ -1,7 +1,8 @@
 export default class RouteController {
-  constructor(cloudService, routeService) {
+  constructor(cloudService, routeService, carburanteService) {
     this.cloudService = cloudService;
     this.rutaService = routeService;
+    this.carburanteService = carburanteService;
   }
 
   async getRoute(route) {
@@ -20,7 +21,8 @@ export default class RouteController {
         route.mode,
         route.vehicle,
       );
-      return journey;
+      const price = await this.carburanteService.obtenerPrecioCarburante(journey)
+      return {...journey, price};
     } catch (error) {
       throw error;
     }

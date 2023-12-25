@@ -1,5 +1,5 @@
 export default class PrecioCarburanteService {
-    obtenerPrecioCarburante(tipoCarburante) {
+    obtenerPrecioCarburante(journey) {
         throw new Error('Método obtenerPrecioCarburante() debe ser implementado');
     }
 }
