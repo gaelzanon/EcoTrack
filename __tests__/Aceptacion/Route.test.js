@@ -5,10 +5,12 @@ import InterestPoint from '../../models/InterestPoint';
 import cloudService from '../../services/cloudService';
 import GoogleDirectionsServiceAdapter from '../../patrones/Adapter/GoogleDirectionsServiceAdapter';
 import DatosGobServiceAdapter from '../../patrones/Adapter/DatosGobServiceAdapter';
+import PrecioDeLaLuzServiceAdapter from '../../patrones/Adapter/PrecioDeLaLuzServiceAdapter';
 const CloudService = new cloudService('test');
 const routeService = new GoogleDirectionsServiceAdapter();
 const carburanteService = new DatosGobServiceAdapter();
-const routeController = new RouteController(CloudService, routeService, carburanteService);
+const precioLuzService = new PrecioDeLaLuzServiceAdapter();
+const routeController = new RouteController(CloudService, routeService, carburanteService, precioLuzService);
 /*
 //Estos tests seguramente fallen en github ya que no comiteamos nuestra apiKey al repositorio, es lo que se espera
 describe('HU13: Como usuario, dados dos lugares de interés y un método de movilidad, quiero obtener una ruta entre ambos lugares', () => {
