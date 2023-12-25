@@ -28,8 +28,9 @@ const RouteFinder = () => {
   const [localVehicles, setLocalVehicles] = useState(vehicles);
   const [showMap, setShowMap] = useState(false);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
-  const [duration, setDuration] = useState('')
-  const [distance, setDistance] = useState('')
+  const [duration, setDuration] = useState('');
+  const [distance, setDistance] = useState('');
+  const [price, setPrice] = useState('');
 
   const [originName, setOriginName] = useState('');
   const [destinationName, setDestinationName] = useState('');
@@ -70,6 +71,21 @@ const RouteFinder = () => {
     fetchVehicles();
   }, [vehicles]);
 
+  const formatDuration = durationStr => {
+    const seconds = parseInt(durationStr.replace('s', ''), 10);
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    return `${hours.toString()}h ${minutes.toString()}min ${secs.toString()}s`;
+  };
+
+  const formatDistance = meters => {
+    const kilometers = meters / 1000;
+
+    return `${kilometers.toFixed(2)} km`;
+  };
+
   const findRoute = async () => {
     try {
       // Decide si usar puntos de interés personalizados o toponímicos
@@ -106,8 +122,9 @@ const RouteFinder = () => {
 
       // Actualiza el estado para mostrar la ruta en el mapa
       setRouteCoordinates(journey.coordinates);
-      setDuration(journey.duration);
-      setDistance(journey.distance);
+      setDuration(formatDuration(journey.duration));
+      setDistance(formatDistance(journey.distance));
+      setPrice(journey.price);
       setShowMap(true);
     } catch (error) {
       let message = 'An error occurred. Please try again.';
@@ -154,14 +171,29 @@ const RouteFinder = () => {
           <View
             style={[
               globalStyles.black,
-              {position: 'absolute', bottom: 0, width: '100%'},
+              { position: 'absolute', bottom: 0, width: '100%' ,alignItems:'center'},
+              
             ]}>
             <Text
               style={[
                 styles.label,
                 {color: globalStyles.white.backgroundColor},
               ]}>
-              {duration} {distance}m
+              Duration: {duration}
+            </Text>
+            <Text
+              style={[
+                styles.label,
+                {color: globalStyles.white.backgroundColor},
+              ]}>
+              Distance: {distance}
+            </Text>
+            <Text
+              style={[
+                styles.label,
+                {color: globalStyles.white.backgroundColor},
+              ]}>
+              Estimated Price: {price}€
             </Text>
           </View>
         </>
@@ -362,6 +394,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'black',
     marginBottom: 5,
+    fontWeight:'bold'
   },
 });
 
