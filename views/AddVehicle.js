@@ -120,7 +120,11 @@ const AddVehicle = () => {
           label="Avg. Consumption"
           style={styles.input}
           value={averageConsumption}
-          onChangeText={text => setAverageConsumption(text)}
+          onChangeText={text => {
+            // Replace commas with points in the input
+            const formattedText = text.replace(',', '.');
+            setAverageConsumption(formattedText);
+          }}
           keyboardType="numeric"
         />
 
