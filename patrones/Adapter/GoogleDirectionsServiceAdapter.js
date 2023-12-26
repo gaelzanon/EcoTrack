@@ -42,7 +42,7 @@ export default class GoogleDirectionsServiceAdapter extends RutaService {
           },
         );
 
-        return this.formatRouteResponse(response.data);
+        return this.selectAppropriateRoute(response.data, mode);
       } catch (error) {
         throw error;
       }
@@ -51,6 +51,37 @@ export default class GoogleDirectionsServiceAdapter extends RutaService {
       error.code = 'NoInetConection';
       throw error;
     }
+  }
+
+  // Método para seleccionar la ruta adecuada
+  selectAppropriateRoute(data, mode) {
+    if (!data.routes || data.routes.length === 0) {
+      const error = new Error('RouteNotAvailableException');
+      error.code = 'RouteNotAvailableException';
+      throw error;
+    }
+
+    let selectedRoute;
+    if (mode === 'economic') {
+      // Busca una ruta etiquetada como FUEL_EFFICIENT
+      selectedRoute = data.routes.find(
+        route => route.routeLabel === 'FUEL_EFFICIENT',
+      );
+
+      // Si no se encuentra una ruta FUEL_EFFICIENT, selecciona la de menor distancia
+      if (!selectedRoute) {
+        selectedRoute = data.routes.reduce((shortest, current) => {
+          return !shortest || current.distanceMeters < shortest.distanceMeters
+            ? current
+            : shortest;
+        }, null);
+      }
+    }
+
+    // Si el modo no es económico, selecciona la primera ruta
+    selectedRoute = selectedRoute || data.routes[0];
+
+    return this.formatRouteResponse(selectedRoute);
   }
 
   // Método para construir un objeto Waypoint
@@ -85,26 +116,14 @@ export default class GoogleDirectionsServiceAdapter extends RutaService {
     }
   }
 
-  formatRouteResponse(data) {
-    // Verifica si la respuesta es válida
-    if (!data.routes || data.routes.length === 0) {
-      const error = new Error('RouteNotAvailableException');
-      error.code = 'RouteNotAvailableException';
-      throw error;
-    }
-
-    // Toma la primera ruta (la más recomendada)
-    const firstRoute = data.routes[0];
-
+  formatRouteResponse(route) {
     // Decodifica la polyline.
-    const decodedPolyline = this.decodePolyline(
-      firstRoute.polyline.encodedPolyline,
-    );
+    const decodedPolyline = this.decodePolyline(route.polyline.encodedPolyline);
 
     // Construye el objeto de respuesta
     const response = {
-      distance: firstRoute.distanceMeters, // Distancia en metros
-      duration: firstRoute.duration, // Duración en segundos
+      distance: route.distanceMeters, // Distancia en metros
+      duration:  parseInt(route.duration.replace('s', ''), 10), // Duración en segundos
       coordinates: decodedPolyline, // Coordenadas de la ruta
     };
 

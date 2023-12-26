@@ -8,6 +8,7 @@ class Vehicle {
     this.plate = plate;
     this.type = type;
     this.updatedAt = new Date().getTime();
+    this.isFavorite = false;
   }
 
 }

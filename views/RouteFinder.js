@@ -35,6 +35,7 @@ const RouteFinder = () => {
   const [originName, setOriginName] = useState('');
   const [destinationName, setDestinationName] = useState('');
 
+  const [selectedRouteOption, setSelectedRouteOption] = useState('fast');
   const [selectedVehicleOption, setSelectedVehicleOption] = useState('generic');
   const [selectedOriginOption, setSelectedOriginOption] = useState('custom');
   const [selectedDestinationOption, setSelectedDestinationOption] =
@@ -71,8 +72,8 @@ const RouteFinder = () => {
     fetchVehicles();
   }, [vehicles]);
 
-  const formatDuration = durationStr => {
-    const seconds = parseInt(durationStr.replace('s', ''), 10);
+  const formatDuration = seconds => {
+    
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
@@ -114,7 +115,7 @@ const RouteFinder = () => {
         origin,
         destination,
         vehicle,
-        'fastest',
+        selectedRouteOption,
       );
 
       // Obtiene la ruta del RouteController
@@ -209,6 +210,18 @@ const RouteFinder = () => {
           style={[globalStyles.primary, {flex: 1, padding: 20}]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled">
+          <Text style={styles.label}>Route Type</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={selectedRouteOption}
+              onValueChange={itemValue => {
+                setSelectedRouteOption(itemValue);
+              }}>
+              <Picker.Item label="Fast" value="fast" />
+              <Picker.Item label="Economic" value="economic" />
+            </Picker>
+          </View>
+
           <Text style={styles.label}>Vehicle</Text>
           {vehicles && (
             <View style={styles.pickerContainer}>
@@ -235,7 +248,7 @@ const RouteFinder = () => {
                   {localVehicles.map(v => (
                     <Picker.Item
                       key={v.plate}
-                      label={v.plate}
+                      label={`${v.plate} | ${v.brand} | ${v.model}`}
                       value={v.plate}
                     />
                   ))}
