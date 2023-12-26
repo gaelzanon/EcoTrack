@@ -124,8 +124,9 @@ const RouteFinder = () => {
       setRouteCoordinates(journey.coordinates);
       setDuration(formatDuration(journey.duration));
       setDistance(formatDistance(journey.distance));
-      setPrice(journey.price);
       setShowMap(true);
+      const price = await routeController.getPrice(journey, route);
+      setPrice(price);
     } catch (error) {
       let message = 'An error occurred. Please try again.';
       switch (error.code) {
@@ -171,8 +172,12 @@ const RouteFinder = () => {
           <View
             style={[
               globalStyles.black,
-              { position: 'absolute', bottom: 0, width: '100%' ,alignItems:'center'},
-              
+              {
+                position: 'absolute',
+                bottom: 0,
+                width: '100%',
+                alignItems: 'center',
+              },
             ]}>
             <Text
               style={[
@@ -188,13 +193,15 @@ const RouteFinder = () => {
               ]}>
               Distance: {distance}
             </Text>
-            <Text
-              style={[
-                styles.label,
-                {color: globalStyles.white.backgroundColor},
-              ]}>
-              Estimated Price: {price}€
-            </Text>
+            {price !== '' && (
+              <Text
+                style={[
+                  styles.label,
+                  {color: globalStyles.white.backgroundColor},
+                ]}>
+                Estimated Price: {price}€
+              </Text>
+            )}
           </View>
         </>
       ) : (
@@ -394,7 +401,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'black',
     marginBottom: 5,
-    fontWeight:'bold'
+    fontWeight: 'bold',
   },
 });
 
