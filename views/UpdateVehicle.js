@@ -50,12 +50,12 @@ const UpdateVehicle = () => {
           vehicleToEdit.plate,
           type,
         );
-        
+
         const vehicleToUpdate = {
           ...newVehicle,
           isFavorite: vehicleToEdit.isFavorite,
         };
-        
+
         await vehicleController.updateVehicle(vehicleToUpdate);
 
         // Actualizar el arreglo de vehículos reemplazando el vehículo editado
@@ -126,7 +126,11 @@ const UpdateVehicle = () => {
           label="Avg. Consumption"
           style={styles.input}
           value={averageConsumption}
-          onChangeText={text => setAverageConsumption(text)}
+          onChangeText={text => {
+            // Replace commas with points in the input
+            const formattedText = text.replace(',', '.');
+            setAverageConsumption(formattedText);
+          }}
           keyboardType="numeric"
         />
 
