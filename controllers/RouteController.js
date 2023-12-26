@@ -16,14 +16,6 @@ export default class RouteController {
       const error = new Error('InvalidInterestPointException');
       error.code = 'InvalidInterestPointException';
       throw error;
-    } else if (
-      !['electric', 'gasoline', 'diesel', 'bike', 'walking'].includes(
-        route.vehicle.type,
-      )
-    ) {
-      const error = new Error('InvalidVehicleException');
-      error.code = 'InvalidVehicleException';
-      throw error;
     }
 
     try {
@@ -34,62 +26,68 @@ export default class RouteController {
         route.vehicle,
       );
 
-      let price = 0;
-      switch (route.vehicle.type) {
-        case 'electric':
-          price =
-            await this.precioElectricidadService.obtenerPrecioElectricidad();
-          price = (
-            (journey.distance / 1000 / 100) *
-            (route.vehicle.averageConsumption > 0
-              ? route.vehicle.averageConsumption
-              : 16) *
-            (price / 1000)
-          ).toFixed(2);
-          price = parseFloat(price); 
-          return {...journey, price};
-
-        case 'gasoline':
-          price = await this.carburanteService.obtenerPrecioCarburante(
-            'gasoline',
-            journey.coordinates[0],
-          );
-          price = (
-            (journey.distance / 1000 / 100) *
-            (route.vehicle.averageConsumption > 0
-              ? route.vehicle.averageConsumption
-              : 6) *
-            price
-          ).toFixed(2);
-          price = parseFloat(price); 
-          return {...journey, price};
-
-        case 'diesel':
-          price = await this.carburanteService.obtenerPrecioCarburante(
-            'diesel',
-            journey.coordinates[0],
-          );
-          price = (
-            (journey.distance / 1000 / 100) *
-            (route.vehicle.averageConsumption > 0
-              ? route.vehicle.averageConsumption
-              : 6) *
-            price
-          ).toFixed(2);
-          price = parseFloat(price); 
-          return {...journey, price};
-
-        case 'bike':
-        case 'walking':
-          // Aquí podrías definir un precio o cálculo calórico para 'bike' y 'walking'
-          return {...journey, price: 0}; // Ejemplo con precio = 0
-
-        default:
-          // Manejar cualquier otro tipo de vehículo no especificado
-          return {...journey, price};
-      }
+      return journey;
     } catch (error) {
       throw error;
+    }
+  }
+
+  async getPrice(journey, route) {
+    let price = 0;
+    switch (route.vehicle.type) {
+      case 'electric':
+        price =
+          await this.precioElectricidadService.obtenerPrecioElectricidad();
+        price = (
+          (journey.distance / 1000 / 100) *
+          (route.vehicle.averageConsumption > 0
+            ? route.vehicle.averageConsumption
+            : 16) *
+          (price / 1000)
+        ).toFixed(2);
+        price = parseFloat(price);
+        return price;
+
+      case 'gasoline':
+        price = await this.carburanteService.obtenerPrecioCarburante(
+          'gasoline',
+          journey.coordinates[0],
+        );
+        price = (
+          (journey.distance / 1000 / 100) *
+          (route.vehicle.averageConsumption > 0
+            ? route.vehicle.averageConsumption
+            : 6) *
+          price
+        ).toFixed(2);
+        price = parseFloat(price);
+        return price;
+
+      case 'diesel':
+        price = await this.carburanteService.obtenerPrecioCarburante(
+          'diesel',
+          journey.coordinates[0],
+        );
+        price = (
+          (journey.distance / 1000 / 100) *
+          (route.vehicle.averageConsumption > 0
+            ? route.vehicle.averageConsumption
+            : 6) *
+          price
+        ).toFixed(2);
+        price = parseFloat(price);
+        return price;
+
+      case 'bike':
+      case 'walking':
+        // Aquí podrías definir un precio o cálculo calórico para 'bike' y 'walking'
+        return 0; // Ejemplo con precio = 0
+
+      default:
+        // Manejar cualquier otro tipo de vehículo no especificado
+        const error = new Error('InvalidVehicleException');
+        error.code = 'InvalidVehicleException';
+        throw error;
     }
   }
 }
