@@ -90,4 +90,8 @@ export default class RouteController {
         throw error;
     }
   }
+
+  async getCalories(journey, route) {
+    return '';
+  }
 }

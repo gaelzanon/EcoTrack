@@ -68,8 +68,33 @@ describe('HU14: Como usuario quiero conocer el coste asociado a la realización 
       'InvalidVehicleException',
     );
   });
+});
 
+describe('HU15: Como usuario quiero conocer el coste asociado a la realización de una ruta a pie o en bicicleta (calorías).', () => {
+  it('E1: Se calcula el coste correctamente', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint1 = new InterestPoint(creatorEmail, 'Villarreal', 39.9333300, -0.1000000);
+    const interestPoint2 = new InterestPoint(creatorEmail, 'Castellón de la Plana', 39.98567, -0.04935);
+    const route = new Route(creatorEmail, interestPoint1, interestPoint2, 'walking', 'fastest');
 
+    const journey = await routeController.getRoute(route);
+    const calories = await routeController.getCalories(journey, route);
+    
+    // Verifica que se devuelva un valor válido de calorías
+    expect(calories).not.toBeNull();
+    expect(typeof calories).toEqual('number');
+  });
+  it('E2: Ruta no disponible', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint1 = new InterestPoint(creatorEmail, 'Villarreal', 39.9333300, -0.1000000);
+    const interestPoint2 = new InterestPoint(creatorEmail, '', undefined, undefined)
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'gasoline');
+    const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'shortest');
+
+    await expect(routeController.getRoute(route)).rejects.toThrow(
+      'InvalidInterestPointException',
+    );
+  });
 });
 
 describe('HU16: Como usuario quiero conocer la ruta más recomendada/rápida/corta/económica entre dos puntos.', () => {
