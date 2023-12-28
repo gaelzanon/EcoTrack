@@ -260,18 +260,8 @@ describe('HU21: Como usuario quiero establecer un vehículo/modo de transporte p
     });
     await userController.register(formularioRegistro.datosFormulario);
 
-    const vehicle = new Vehicle(
-      creatorEmail,
-      'Toyota',
-      'Corolla',
-      2020,
-      10,
-      '1171MSL',
-      'electric',
-    );
-
     await expect(
-      userController.setDefaultVehicle(vehicle),
+      userController.setDefaultVehicle(usuario.email, '1171MSL'),
     ).resolves.toBeTruthy();
   });
 
@@ -288,7 +278,7 @@ describe('HU21: Como usuario quiero establecer un vehículo/modo de transporte p
 
     const vehicle = null;
 
-    await expect(userController.setDefaultVehicle(vehicle)).rejects.toThrow(
+    await expect(userController.setDefaultVehicle(usuario.email, vehicle)).rejects.toThrow(
       'InvalidVehicleException',
     );
   });

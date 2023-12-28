@@ -22,7 +22,7 @@ const RouteFinder = () => {
   const vehiclesController = useVehicleController();
   const routeController = useRouteController();
   const interestPointController = useInterestPointController();
-  const {vehicles, interestPoints, user} = useAsyncStorage();
+  const {vehicles, interestPoints, user, userInfo} = useAsyncStorage();
   const [localInterestPoints, setLocalInterestPoints] =
     useState(interestPoints);
   const [localVehicles, setLocalVehicles] = useState(vehicles);
@@ -66,11 +66,25 @@ const RouteFinder = () => {
     async function fetchVehicles() {
       const vehicles = await vehiclesController.getVehicles();
       setLocalVehicles(vehicles);
-      setSelectedVehicle(vehicles[0].plate);
+      if (!userInfo) {
+        setSelectedVehicle(vehicles[0].plate);
+      } else {
+        setSelectedRouteOption(userInfo.defaultRouteType)
+        if (
+          ['walking', 'bike', 'diesel', 'electric', 'gasoline'].includes(
+            userInfo.defaultVehicle,
+          )
+        ) {
+          setSelectedGenericVehicleType(userInfo.defaultVehicle);
+        } else {
+          setSelectedVehicleOption('custom');
+          setSelectedVehicle(userInfo.defaultVehicle);
+        }
+      }
     }
 
     fetchVehicles();
-  }, [vehicles]);
+  }, [vehicles, userInfo]);
 
   const formatDuration = seconds => {
     

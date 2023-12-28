@@ -534,7 +534,7 @@ class CloudService {
   }
 
 
-  async setDefaultRouteType(user, type) {
+  async setDefaultRouteType(email, type) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
 
@@ -546,9 +546,9 @@ class CloudService {
     try {
       if (isConnected) {
         const userQuerySnapshot = await getDocs(this.usersCollection);
-        const userDoc = userQuerySnapshot.docs.find(doc => doc.data().email === user.email);
+        const userDoc = userQuerySnapshot.docs.find(doc => doc.data().email === email);
 
-        await updateDoc(userDoc.ref, {defaultRouteType: {...type}});
+        await updateDoc(userDoc.ref, {defaultRouteType: type});
 
       }
       return true;
@@ -557,12 +557,12 @@ class CloudService {
     }
   }
 
-  async setDefaultVehicle(vehicle) {
+  async setDefaultVehicle(email, vehicle) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
     let userInfo = await AsyncStorage.getItem('userInfo');
     userInfo = userInfo ? JSON.parse(userInfo) : {};
-
+    
     userInfo = {...userInfo, defaultVehicle: vehicle};
     await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
     try {
@@ -570,11 +570,12 @@ class CloudService {
         // Actualizar el estado de vehiculo default en la base de datos remota
         const userQuerySnapshot = await getDocs(this.usersCollection);
         const userDoc = userQuerySnapshot.docs.find(
-          doc => doc.data().email === vehicle.creator,
+          doc => doc.data().email === email,
         );
+
         // Actualizar el documento en la base de datos
         await updateDoc(userDoc.ref, {
-          defaultVehicle: {...vehicle},
+          defaultVehicle: vehicle,
         });
 
       }
