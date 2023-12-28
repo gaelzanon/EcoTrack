@@ -194,13 +194,22 @@ const RouteFinder = () => {
               ]}>
               Distance: {distance}
             </Text>
-            {price !== '' && (
+            {price !== '' && selectedGenericVehicleType !== 'walking' && selectedGenericVehicleType !== 'bike' && (
               <Text
                 style={[
                   styles.label,
                   {color: globalStyles.white.backgroundColor},
                 ]}>
-                Estimated Price: {price}€
+                Estimated fuel price: {price}€
+              </Text>
+            )}
+            {(price !== '' && (selectedGenericVehicleType == 'walking' || selectedGenericVehicleType == 'bike')) && (
+              <Text
+                style={[
+                  styles.label,
+                  {color: globalStyles.white.backgroundColor},
+                ]}>
+                Estimated calories burnt: {price}
               </Text>
             )}
           </View>
