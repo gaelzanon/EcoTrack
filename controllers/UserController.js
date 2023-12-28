@@ -79,6 +79,10 @@ class UserController {
       throw error;
     }
   }
+
+  async setDefaultRouteType(email, type) {
+    return 0;
+  }
 }
 
 export default UserController;

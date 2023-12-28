@@ -182,5 +182,59 @@ describe('HU3: Como usuario quiero poder cerrar la sesión de mi cuenta para sal
     await userController.login(formularioLogin.datosFormulario);
     await AuthService.deleteUser();
   });
-  
+
+});
+
+describe('HU22: Como usuario quiero establecer un tipo de ruta por defecto a emplear en las nuevas rutas.', () => {
+  it('E1: Establecer un tipo de ruta por defecto correctamente', async () => {
+    const usuario = new User('usuario3@example.com', 'Password12');
+    const formularioRegistroFactory = new FormularioRegistroFactory();
+    const formularioRegistro = formularioRegistroFactory.crearFormulario();
+    formularioRegistro.rellenarDatos({
+      user: 'juan',
+      email: usuario.email,
+      password1: usuario.password,
+      password2: usuario.password,
+    });
+    await userController.register(formularioRegistro.datosFormulario);
+
+    await expect(userController.setDefaultRouteType(usuario.email, 'bike')).resolves.toBeTruthy();
+    
+    // Borramos usuario
+    const formularioLoginFactory = new FormularioLoginFactory();
+    const formularioLogin = formularioLoginFactory.crearFormulario();
+    console.log('aqui')
+    formularioLogin.rellenarDatos({
+      email: usuario.email,
+      password: usuario.password,
+    });
+    await userController.login(formularioLogin.datosFormulario);
+    await AuthService.deleteUser();
+  });
+  it('E2: Intenta establecer un tipo de ruta inexistente por defecto', async () => {
+    const usuario = new User('usuario4@example.com', 'Password12');
+    const formularioRegistroFactory = new FormularioRegistroFactory();
+    const formularioRegistro = formularioRegistroFactory.crearFormulario();
+    formularioRegistro.rellenarDatos({
+      user: 'juan',
+      email: usuario.email,
+      password1: usuario.password,
+      password2: usuario.password,
+    });
+    await userController.register(formularioRegistro.datosFormulario);
+    
+    await expect(userController.setDefaultRouteType(usuario.email, 'notFound')).rejects.toThrow(
+      'InvalidTypeException',
+    );
+
+    // Borramos usuario
+    const formularioLoginFactory = new FormularioLoginFactory();
+    const formularioLogin = formularioLoginFactory.crearFormulario();
+    formularioLogin.rellenarDatos({
+      email: usuario.email,
+      password: usuario.password,
+    });
+    await userController.login(formularioLogin.datosFormulario);
+    await AuthService.deleteUser();
+  });
 });
