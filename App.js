@@ -22,6 +22,7 @@ import {VehicleControllerProvider} from './contexts/VehicleControllerContext';
 import {InterestPointControllerProvider} from './contexts/InterestPointControllerContext';
 import {RouteControllerProvider} from './contexts/RouteControllerContext';
 import {useAsyncStorage} from './contexts/AsyncStorageContext';
+import Preferences from './views/Preferences';
 
 const App = () => {
   const Stack = createStackNavigator();
@@ -116,6 +117,11 @@ const App = () => {
                   <Stack.Screen
                     name="AddInterestPoint"
                     component={AddInterestPoint}
+                    options={{headerShown: false}}
+                  />
+                  <Stack.Screen
+                    name="Preferences"
+                    component={Preferences}
                     options={{headerShown: false}}
                   />
                   <Stack.Screen
