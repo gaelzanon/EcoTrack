@@ -12,6 +12,10 @@ const RoutesScreen = () => {
     navigation.navigate('RouteFinder');
   };
 
+  const handleNavigateToPreferences = () => {
+    navigation.navigate('Preferences');
+  };
+
   return (
     <ScrollView style={[globalStyles.primary, { flex: 1, padding: 20 }]}
       showsVerticalScrollIndicator={false}>
@@ -22,6 +26,11 @@ const RoutesScreen = () => {
           onPress={handleNavigateToRouteFinder}>
           <Text style={styles.buttonText}>Find a Route</Text>
         </Pressable>
+        <Pressable
+            style={[styles.button, globalStyles.secondary]}
+            onPress={handleNavigateToPreferences}>
+            <Text style={styles.buttonText}>Route Preferences</Text>
+          </Pressable>
       </View>
     </ScrollView>
   );

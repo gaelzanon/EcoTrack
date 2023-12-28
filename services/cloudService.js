@@ -146,7 +146,14 @@ class CloudService {
   async deleteVehicle(vehicle) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
-
+    let userInfo = await AsyncStorage.getItem('userInfo');
+    userInfo = userInfo ? JSON.parse(userInfo) : {};
+    
+    if (userInfo && vehicle.plate === userInfo.defaultVehicle) {
+      const error = new Error('VehicleIsDefaultException');
+      error.code = 'VehicleIsDefaultException';
+      throw error;
+    }
     if (isConnected) {
       try {
         const existe = await this.vehicleExists(vehicle.creator, vehicle.plate);
@@ -534,20 +541,22 @@ class CloudService {
   }
 
 
-  async setDefaultRouteType(user, type) {
+  async setDefaultRouteType(email, type) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
 
-    try {
-      let userInfo = await AsyncStorage.getItem('userInfo');
-      userInfo = userInfo ? JSON.parse(userInfo) : {};
-      userInfo = {...userInfo, defaultRouteType: type};
+    let userInfo = await AsyncStorage.getItem('userInfo');
+    userInfo = userInfo ? JSON.parse(userInfo) : {};
+    userInfo = {...userInfo, defaultRouteType: type};
+    await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
 
+    try {
       if (isConnected) {
         const userQuerySnapshot = await getDocs(this.usersCollection);
-        const userDoc = userQuerySnapshot.docs.find(doc => doc.data().email === user.email);
+        const userDoc = userQuerySnapshot.docs.find(doc => doc.data().email === email);
 
-        await updateDoc(userDoc.ref, {defaultRouteType: {...type}});
+        await updateDoc(userDoc.ref, {defaultRouteType: type});
+
       }
       return true;
     } catch (error) {
@@ -555,12 +564,12 @@ class CloudService {
     }
   }
 
-  async setDefaultVehicle(vehicle) {
+  async setDefaultVehicle(email, vehicle) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
     let userInfo = await AsyncStorage.getItem('userInfo');
     userInfo = userInfo ? JSON.parse(userInfo) : {};
-
+    
     userInfo = {...userInfo, defaultVehicle: vehicle};
     await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
     try {
@@ -568,13 +577,14 @@ class CloudService {
         // Actualizar el estado de vehiculo default en la base de datos remota
         const userQuerySnapshot = await getDocs(this.usersCollection);
         const userDoc = userQuerySnapshot.docs.find(
-          doc => doc.data().email === vehicle.creator,
+          doc => doc.data().email === email,
         );
 
         // Actualizar el documento en la base de datos
         await updateDoc(userDoc.ref, {
-          defaultVehicle: {...vehicle},
+          defaultVehicle: vehicle,
         });
+
       }
       return true;
     } catch (error) {
