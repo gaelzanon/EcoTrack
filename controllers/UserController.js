@@ -82,7 +82,7 @@ class UserController {
 
 
   async setDefaultRouteType(email, type) {
-    if (type != 'fast' || type != 'economic') {
+    if (type !== 'fast' && type !== 'economic') {
       const error = new Error('InvalidTypeException');
       error.code = 'InvalidTypeException';
       throw error;

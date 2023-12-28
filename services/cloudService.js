@@ -538,16 +538,18 @@ class CloudService {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
 
-    try {
-      let userInfo = await AsyncStorage.getItem('userInfo');
-      userInfo = userInfo ? JSON.parse(userInfo) : {};
-      userInfo = {...userInfo, defaultRouteType: type};
+    let userInfo = await AsyncStorage.getItem('userInfo');
+    userInfo = userInfo ? JSON.parse(userInfo) : {};
+    userInfo = {...userInfo, defaultRouteType: type};
+    await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
 
+    try {
       if (isConnected) {
         const userQuerySnapshot = await getDocs(this.usersCollection);
         const userDoc = userQuerySnapshot.docs.find(doc => doc.data().email === user.email);
 
         await updateDoc(userDoc.ref, {defaultRouteType: {...type}});
+
       }
       return true;
     } catch (error) {
@@ -570,11 +572,11 @@ class CloudService {
         const userDoc = userQuerySnapshot.docs.find(
           doc => doc.data().email === vehicle.creator,
         );
-
         // Actualizar el documento en la base de datos
         await updateDoc(userDoc.ref, {
           defaultVehicle: {...vehicle},
         });
+
       }
       return true;
     } catch (error) {
