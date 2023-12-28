@@ -22,18 +22,20 @@ const RouteFinder = () => {
   const vehiclesController = useVehicleController();
   const routeController = useRouteController();
   const interestPointController = useInterestPointController();
-  const {vehicles, interestPoints, user} = useAsyncStorage();
+  const {vehicles, interestPoints, user, userInfo} = useAsyncStorage();
   const [localInterestPoints, setLocalInterestPoints] =
     useState(interestPoints);
   const [localVehicles, setLocalVehicles] = useState(vehicles);
   const [showMap, setShowMap] = useState(false);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
-  const [duration, setDuration] = useState('')
-  const [distance, setDistance] = useState('')
+  const [duration, setDuration] = useState('');
+  const [distance, setDistance] = useState('');
+  const [price, setPrice] = useState('');
 
   const [originName, setOriginName] = useState('');
   const [destinationName, setDestinationName] = useState('');
 
+  const [selectedRouteOption, setSelectedRouteOption] = useState('fast');
   const [selectedVehicleOption, setSelectedVehicleOption] = useState('generic');
   const [selectedOriginOption, setSelectedOriginOption] = useState('custom');
   const [selectedDestinationOption, setSelectedDestinationOption] =
@@ -64,11 +66,40 @@ const RouteFinder = () => {
     async function fetchVehicles() {
       const vehicles = await vehiclesController.getVehicles();
       setLocalVehicles(vehicles);
-      setSelectedVehicle(vehicles[0].plate);
+      if (!userInfo) {
+        setSelectedVehicle(vehicles[0].plate);
+      } else {
+        setSelectedRouteOption(userInfo.defaultRouteType)
+        if (
+          ['walking', 'bike', 'diesel', 'electric', 'gasoline'].includes(
+            userInfo.defaultVehicle,
+          )
+        ) {
+          setSelectedGenericVehicleType(userInfo.defaultVehicle);
+        } else {
+          setSelectedVehicleOption('custom');
+          setSelectedVehicle(userInfo.defaultVehicle);
+        }
+      }
     }
 
     fetchVehicles();
-  }, [vehicles]);
+  }, [vehicles, userInfo]);
+
+  const formatDuration = seconds => {
+    
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    return `${hours.toString()}h ${minutes.toString()}min ${secs.toString()}s`;
+  };
+
+  const formatDistance = meters => {
+    const kilometers = meters / 1000;
+
+    return `${kilometers.toFixed(2)} km`;
+  };
 
   const findRoute = async () => {
     try {
@@ -98,7 +129,7 @@ const RouteFinder = () => {
         origin,
         destination,
         vehicle,
-        'fastest',
+        selectedRouteOption,
       );
 
       // Obtiene la ruta del RouteController
@@ -106,9 +137,11 @@ const RouteFinder = () => {
 
       // Actualiza el estado para mostrar la ruta en el mapa
       setRouteCoordinates(journey.coordinates);
-      setDuration(journey.duration);
-      setDistance(journey.distance);
+      setDuration(formatDuration(journey.duration));
+      setDistance(formatDistance(journey.distance));
       setShowMap(true);
+      const price = await routeController.getPrice(journey, route);
+      setPrice(price);
     } catch (error) {
       let message = 'An error occurred. Please try again.';
       switch (error.code) {
@@ -154,15 +187,45 @@ const RouteFinder = () => {
           <View
             style={[
               globalStyles.black,
-              {position: 'absolute', bottom: 0, width: '100%'},
+              {
+                position: 'absolute',
+                bottom: 0,
+                width: '100%',
+                alignItems: 'center',
+              },
             ]}>
             <Text
               style={[
                 styles.label,
                 {color: globalStyles.white.backgroundColor},
               ]}>
-              {duration} {distance}m
+              Duration: {duration}
             </Text>
+            <Text
+              style={[
+                styles.label,
+                {color: globalStyles.white.backgroundColor},
+              ]}>
+              Distance: {distance}
+            </Text>
+            {price !== '' && selectedGenericVehicleType !== 'walking' && selectedGenericVehicleType !== 'bike' && (
+              <Text
+                style={[
+                  styles.label,
+                  {color: globalStyles.white.backgroundColor},
+                ]}>
+                Estimated fuel price: {price}€
+              </Text>
+            )}
+            {(price !== '' && (selectedGenericVehicleType == 'walking' || selectedGenericVehicleType == 'bike')) && (
+              <Text
+                style={[
+                  styles.label,
+                  {color: globalStyles.white.backgroundColor},
+                ]}>
+                Estimated calories burnt: {price}
+              </Text>
+            )}
           </View>
         </>
       ) : (
@@ -170,6 +233,18 @@ const RouteFinder = () => {
           style={[globalStyles.primary, {flex: 1, padding: 20}]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled">
+          <Text style={styles.label}>Route Type</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={selectedRouteOption}
+              onValueChange={itemValue => {
+                setSelectedRouteOption(itemValue);
+              }}>
+              <Picker.Item label="Fast" value="fast" />
+              <Picker.Item label="Economic" value="economic" />
+            </Picker>
+          </View>
+
           <Text style={styles.label}>Vehicle</Text>
           {vehicles && (
             <View style={styles.pickerContainer}>
@@ -196,7 +271,7 @@ const RouteFinder = () => {
                   {localVehicles.map(v => (
                     <Picker.Item
                       key={v.plate}
-                      label={v.plate}
+                      label={`${v.plate} | ${v.brand} | ${v.model}`}
                       value={v.plate}
                     />
                   ))}
@@ -362,6 +437,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'black',
     marginBottom: 5,
+    fontWeight: 'bold',
   },
 });
 

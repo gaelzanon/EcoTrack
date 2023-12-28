@@ -38,7 +38,7 @@ const AddInterestPoint = () => {
 
     checkConnectivity();
   }, []);
-  
+
   const handleAddInterestPointByCoordinates = async () => {
     if (name === '' || latitude === '' || longitude === '') {
       Alert.alert('Please fill in all the parameters');
@@ -185,7 +185,11 @@ const AddInterestPoint = () => {
               label="Latitude"
               style={styles.input}
               value={latitude}
-              onChangeText={text => setLatitude(text)}
+              onChangeText={text => {
+                // Replace commas with points in the input
+                const formattedText = text.replace(',', '.');
+                setLatitude(formattedText);
+              }}
               keyboardType="numeric"
             />
 
@@ -195,7 +199,11 @@ const AddInterestPoint = () => {
               label="Longitude"
               style={styles.input}
               value={longitude}
-              onChangeText={text => setLongitude(text)}
+              onChangeText={text => {
+                // Replace commas with points in the input
+                const formattedText = text.replace(',', '.');
+                setLongitude(formattedText);
+              }}
               keyboardType="numeric"
             />
 

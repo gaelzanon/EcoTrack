@@ -29,19 +29,28 @@ class AuthService {
           email,
           password,
         );
-
         const user = res.user;
 
-        await addDoc(this.usersCollection, {
+        // Añadir el documento y capturar el resultado
+        const docRef = await addDoc(this.usersCollection, {
           uid: user.uid,
           username,
           email,
         });
-        /*
-        await sendEmailVerification(user);
-        */
+
+        // Definir el objeto userInfo para almacenamiento local, incluyendo el id del documento
+        const userInfo = {
+          id: docRef.id, // Incluir el id del documento
+          uid: user.uid,
+          username,
+          email,
+        };
+
+        // Guardar userInfo en el almacenamiento local
+        await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+
         await signOut(this.auth);
-        
+
         return user;
       } catch (error) {
         // Manejo de errores específicos de Firebase
@@ -66,14 +75,7 @@ class AuthService {
         );
 
         const userLocal = userCredential.user;
-        /*
-        if (!userLocal.emailVerified) {
-          await signOut(this.auth);
-          const error = new Error('NoVerificatedUser');
-          error.code = 'NoVerificatedUser';
-          throw error;
-        }
-        */
+
         // Otras operaciones necesarias después del inicio de sesión
         //Logeamos y guardamos el perfil en la base de datos local
         await AsyncStorage.setItem('user', JSON.stringify(userLocal));
@@ -111,7 +113,7 @@ class AuthService {
   async logout() {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
-    
+
     if (isConnected) {
       if (this.auth.currentUser) {
         await signOut(this.auth);
