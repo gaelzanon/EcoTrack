@@ -81,7 +81,19 @@ class UserController {
   }
 
   async setDefaultVehicle(vehicle) {
-    return null;
+    if (!vehicle) {
+      const error = new Error('InvalidVehicleException');
+      error.code = 'InvalidVehicleException';
+      throw error;
+    }
+      
+    try {
+      const resultDatabase = await this.cloudService.setDefaultVehicle(vehicle);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar la excepción tal como se recibe
+      throw error;
+    }
   }
 }
 

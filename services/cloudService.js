@@ -532,6 +532,33 @@ class CloudService {
       throw error;
     }
   }
+
+  async setDefaultVehicle(vehicle) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+    let userInfo = await AsyncStorage.getItem('userInfo');
+    userInfo = userInfo ? JSON.parse(userInfo) : {};
+
+    userInfo = {...userInfo, defaultVehicle: vehicle};
+    await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+    try {
+      if (isConnected) {
+        // Actualizar el estado de vehiculo default en la base de datos remota
+        const userQuerySnapshot = await getDocs(this.usersCollection);
+        const userDoc = userQuerySnapshot.docs.find(
+          doc => doc.data().email === vehicle.creator,
+        );
+
+        // Actualizar el documento en la base de datos
+        await updateDoc(userDoc.ref, {
+          defaultVehicle: {...vehicle},
+        });
+      }
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default CloudService;
