@@ -17,15 +17,20 @@ export const AsyncStorageProvider = ({children}) => {
   const [user, setUser] = useState(null);
   const [vehicles, setVehicles] = useState(null);
   const [interestPoints, setInterestPoints] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
   const [loaded, setLoaded] = useState(null);
   const loadInitialData = async () => {
     try {
       const storedUser = await AsyncStorage.getItem('user');
       const storedVehicles = await AsyncStorage.getItem('vehicles');
       const storedInterestPoints = await AsyncStorage.getItem('interestPoints');
+      const storedUserInfo = await AsyncStorage.getItem('userInfo');
 
       if (storedUser) {
         setUser(JSON.parse(storedUser));
+      }
+      if (storedUserInfo) {
+        setUserInfo(JSON.parse(storedUserInfo));
       }
       if (storedVehicles) {
         setVehicles(JSON.parse(storedVehicles));
@@ -44,6 +49,10 @@ export const AsyncStorageProvider = ({children}) => {
     const db = firebaseInstance.db;
     const userEmail = user.email;
 
+    const userInfoQuery = query(
+      collection(db, 'production_users'),
+      where('email', '==', userEmail),
+    );
     const vehicleQuery = query(
       collection(db, 'production_vehicles'),
       where('creator', '==', userEmail),
@@ -60,18 +69,38 @@ export const AsyncStorageProvider = ({children}) => {
       querySnapshot =>
         querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})),
     );
+    const firebaseUserInfoDocs = await getDocs(userInfoQuery);
+    const firebaseUserInfo = firebaseUserInfoDocs.docs[0]
+      ? {
+          id: firebaseUserInfoDocs.docs[0].id,
+          ...firebaseUserInfoDocs.docs[0].data(),
+        }
+      : null;
 
-    return {firebaseVehicles, firebaseInterestPoints};
+    return {firebaseVehicles, firebaseInterestPoints, firebaseUserInfo};
   };
 
-  const syncData = async (localVehicles, localInterestPoints) => {
+  const syncData = async (
+    localVehicles,
+    localInterestPoints,
+    localUserInfo,
+  ) => {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
     if (!isConnected) {
       return;
     }
-    const {firebaseVehicles, firebaseInterestPoints} = await getFirebaseData();
+    const {firebaseVehicles, firebaseInterestPoints, firebaseUserInfo} =
+      await getFirebaseData();
     const db = firebaseInstance.db;
+    //Si no existe coleccion local pero si online es que el usuario ha borrado aplicacion y ha vuelto a instalar
+    if (!localUserInfo && firebaseUserInfo) {
+      //Hacer una copia de firebaseVehicles pero sin incluir el id en cada vehicle
+      const userInfoWithoutId = firebaseUserInfo.map(({id, ...rest}) => rest);
+      //guardarlo en asyncstorage y en el state
+      await AsyncStorage.setItem('userInfo', JSON.stringify(userInfoWithoutId));
+      setUserInfo(userInfoWithoutId);
+    }
     //Si no existe coleccion local pero si online es que el usuario ha borrado aplicacion y ha vuelto a instalar
     if (!localVehicles && firebaseVehicles.length > 0) {
       //Hacer una copia de firebaseVehicles pero sin incluir el id en cada vehicle
@@ -93,6 +122,32 @@ export const AsyncStorageProvider = ({children}) => {
       );
       setInterestPoints(interestPointsWithoutId);
     }
+
+    if (localUserInfo) {
+      // Sincronizar Informacion de usuario
+      if (
+        localUserInfo.defaultRouteType !== firebaseUserInfo.defaultRouteType ||
+        localUserInfo.defaultVehicle.plate !==
+          firebaseUserInfo.defaultVehicle.plate
+      ) {
+        // Update Firebase con la información local
+        const userDocRef = doc(db, 'production_users', firebaseUserInfo.id);
+        const updatedUserInfo = {
+          ...firebaseUserInfo,
+          defaultRouteType: localUserInfo.defaultRouteType,
+          defaultVehicle: localUserInfo.defaultVehicle,
+        };
+
+        updateDoc(userDocRef, updatedUserInfo)
+          .then(() => {
+            console.log('User info updated in Firebase successfully');
+          })
+          .catch(error => {
+            console.error('Error updating user info in Firebase:', error);
+          });
+      }
+    }
+
     if (localVehicles) {
       // Sincronizar Vehículos
       for (const localVehicle of localVehicles) {
@@ -155,7 +210,6 @@ export const AsyncStorageProvider = ({children}) => {
     loadInitialData();
   }, []);
 
-
   const value = {
     user,
     setUser: userData => {
@@ -168,6 +222,10 @@ export const AsyncStorageProvider = ({children}) => {
     interestPoints,
     setInterestPoints: interestPointData => {
       setInterestPoints(interestPointData);
+    },
+    userInfo,
+    setUserInfo: userInfo => {
+      setUserInfo(userInfo);
     },
     loaded,
     syncData,
