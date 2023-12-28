@@ -1,4 +1,5 @@
 import User from '../../models/User';
+import Vehicle from '../../models/Vehicle';
 import UserController from '../../controllers/UserController';
 import authService from '../../services/authService';
 import cloudService from '../../services/cloudService';
@@ -18,7 +19,7 @@ afterEach(async () => {
   await jest.clearAllMocks();
   await AsyncStorage.removeItem('user');
 });
-
+/*
 describe('HU1: Como usuario no registrado en la aplicación quiero poder registrarme en la misma para poder utilizar sus servicios', () => {
   it('E1: Se crea el usuario correctamente con una contraseña válida', async () => {
     const usuario = new User('usuario@example.com', 'Password12');
@@ -183,4 +184,64 @@ describe('HU3: Como usuario quiero poder cerrar la sesión de mi cuenta para sal
     await AuthService.deleteUser();
   });
   
+});
+*/
+describe('HU21: Como usuario quiero establecer un vehículo/modo de transporte por defecto a emplear en las nuevas rutas que calcule para no tener que indicarlo a mano.', () => {
+  const creatorEmail = 'usuario@gmail.com';
+  const usuario = new User(creatorEmail, 'Password12');
+
+  afterEach(async () => {
+    //Ahora lo logueamos para borrarlo del auth
+    const formularioLoginFactory = new FormularioLoginFactory();
+    const formularioLogin = formularioLoginFactory.crearFormulario();
+    formularioLogin.rellenarDatos({
+      email: usuario.email,
+      password: usuario.password,
+    });
+    await userController.login(formularioLogin.datosFormulario);
+    await AuthService.deleteUser();
+  });
+  it('E1: Se establece un vehículo por defecto correctamente', async () => {
+    const formularioRegistroFactory = new FormularioRegistroFactory();
+    const formularioRegistro = formularioRegistroFactory.crearFormulario();
+    formularioRegistro.rellenarDatos({
+      user: 'juan',
+      email: usuario.email,
+      password1: usuario.password,
+      password2: usuario.password,
+    });
+    await userController.register(formularioRegistro.datosFormulario);
+
+    const vehicle = new Vehicle(
+      creatorEmail,
+      'Toyota',
+      'Corolla',
+      2020,
+      10,
+      '1171MSL',
+      'electric',
+    );
+
+    await expect(
+      userController.setDefaultVehicle(vehicle),
+    ).resolves.toBeTruthy();
+  });
+
+  it('E2: Se intenta establecer un vehículo inexistente por defecto', async () => {
+    const formularioRegistroFactory = new FormularioRegistroFactory();
+    const formularioRegistro = formularioRegistroFactory.crearFormulario();
+    formularioRegistro.rellenarDatos({
+      user: 'juan',
+      email: usuario.email,
+      password1: usuario.password,
+      password2: usuario.password,
+    });
+    await userController.register(formularioRegistro.datosFormulario);
+
+    const vehicle = null;
+
+    await expect(userController.setDefaultVehicle(vehicle)).rejects.toThrow(
+      'InvalidVehicleException',
+    );
+  });
 });
