@@ -79,6 +79,10 @@ class UserController {
       throw error;
     }
   }
+
+  async setDefaultVehicle(vehicle) {
+    return null;
+  }
 }
 
 export default UserController;
