@@ -35,6 +35,10 @@ const VehiclesScreen = () => {
               case 'VehicleNotFoundException':
                 message = "Vehicle doesn't exist.";
                 break;
+              case 'VehicleIsDefaultException':
+                message = 'The vehicle is set as default, it cant be deleted.';
+                break;
+
               default:
                 console.log(error);
                 break;

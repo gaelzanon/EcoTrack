@@ -97,7 +97,7 @@ class UserController {
   }
 
   async setDefaultVehicle(email, vehicle) {
-    console.log(vehicle)
+    
     if (!vehicle) {
       const error = new Error('InvalidVehicleException');
       error.code = 'InvalidVehicleException';

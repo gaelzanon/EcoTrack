@@ -146,7 +146,14 @@ class CloudService {
   async deleteVehicle(vehicle) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
-
+    let userInfo = await AsyncStorage.getItem('userInfo');
+    userInfo = userInfo ? JSON.parse(userInfo) : {};
+    
+    if (userInfo && vehicle.plate === userInfo.defaultVehicle) {
+      const error = new Error('VehicleIsDefaultException');
+      error.code = 'VehicleIsDefaultException';
+      throw error;
+    }
     if (isConnected) {
       try {
         const existe = await this.vehicleExists(vehicle.creator, vehicle.plate);
