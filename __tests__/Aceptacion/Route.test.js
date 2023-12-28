@@ -101,7 +101,7 @@ describe('HU15: Como usuario quiero conocer el coste asociado a la realización 
 describe('HU16: Como usuario quiero conocer la ruta más recomendada/rápida/corta/económica entre dos puntos.', () => {
   it('E1: Se muestra la ruta más recomendada/rápida/corta/económica', async () => {
     const creatorEmail = 'usuario@gmail.com';
-    const interestPoint1 = new InterestPoint(creatorEmail, 'Villarreal', 39.9333300, -0.1000000);
+    const interestPoint1 = new InterestPoint(creatorEmail, 'Valencia', 39.4697500, -0.3773900);
     const interestPoint2 = new InterestPoint(creatorEmail, 'Castellón de la Plana', 39.98567, -0.04935);
     const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'electric');
     const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'fastest');
