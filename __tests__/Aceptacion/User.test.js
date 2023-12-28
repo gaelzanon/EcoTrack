@@ -19,7 +19,7 @@ afterEach(async () => {
   await jest.clearAllMocks();
   await AsyncStorage.removeItem('user');
 });
-/*
+
 describe('HU1: Como usuario no registrado en la aplicación quiero poder registrarme en la misma para poder utilizar sus servicios', () => {
   it('E1: Se crea el usuario correctamente con una contraseña válida', async () => {
     const usuario = new User('usuario@example.com', 'Password12');
@@ -213,7 +213,7 @@ describe('HU22: Como usuario quiero establecer un tipo de ruta por defecto a emp
     });
     await userController.register(formularioRegistro.datosFormulario);
 
-    await expect(userController.setDefaultRouteType(usuario.email, 'bike')).resolves.toBeTruthy();
+    await expect(userController.setDefaultRouteType(usuario.email, 'fast')).resolves.toBeTruthy();
     
   });
   it('E2: Intenta establecer un tipo de ruta inexistente por defecto', async () => {
@@ -233,7 +233,7 @@ describe('HU22: Como usuario quiero establecer un tipo de ruta por defecto a emp
 
   });
 });
-*/
+
 describe('HU21: Como usuario quiero establecer un vehículo/modo de transporte por defecto a emplear en las nuevas rutas que calcule para no tener que indicarlo a mano.', () => {
   const creatorEmail = 'usuario@gmail.com';
   const usuario = new User(creatorEmail, 'Password12');
