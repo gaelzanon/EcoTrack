@@ -91,6 +91,10 @@ class UserController {
       const resultDatabase = await this.cloudService.setDefaultRouteType(email, type);
       return resultDatabase;
     } catch (error) {
+      // Reenviar la excepción tal como se recibe
+      throw error;
+    }
+  }
 
   async setDefaultVehicle(vehicle) {
     if (!vehicle) {
