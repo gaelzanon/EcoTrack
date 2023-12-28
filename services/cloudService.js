@@ -532,6 +532,27 @@ class CloudService {
       throw error;
     }
   }
+
+  async setDefaultRouteType(user, type) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+
+    try {
+      let userInfo = await AsyncStorage.getItem('userInfo');
+      userInfo = userInfo ? JSON.parse(userInfo) : {};
+      userInfo = {...userInfo, defaultRouteType: type};
+
+      if (isConnected) {
+        const userQuerySnapshot = await getDocs(this.usersCollection);
+        const userDoc = userQuerySnapshot.docs.find(doc => doc.data().email === user.email);
+
+        await updateDoc(userDoc.ref, {defaultRouteType: {...type}});
+      }
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default CloudService;
