@@ -79,9 +79,10 @@ export default class RouteController {
         return price;
 
       case 'bike':
+        return ''
       case 'walking':
         // Aquí podrías definir un precio o cálculo calórico para 'bike' y 'walking'
-        return 0; // Ejemplo con precio = 0
+        return ''; // Ejemplo con precio = 0
 
       default:
         // Manejar cualquier otro tipo de vehículo no especificado
@@ -89,9 +90,5 @@ export default class RouteController {
         error.code = 'InvalidVehicleException';
         throw error;
     }
-  }
-
-  async getCalories(journey, route) {
-    return '';
   }
 }

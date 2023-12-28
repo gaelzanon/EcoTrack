@@ -78,7 +78,7 @@ describe('HU15: Como usuario quiero conocer el coste asociado a la realización 
     const route = new Route(creatorEmail, interestPoint1, interestPoint2, 'walking', 'fastest');
 
     const journey = await routeController.getRoute(route);
-    const calories = await routeController.getCalories(journey, route);
+    const calories = await routeController.getPrice(journey, route);
     
     // Verifica que se devuelva un valor válido de calorías
     expect(calories).not.toBeNull();
@@ -88,8 +88,7 @@ describe('HU15: Como usuario quiero conocer el coste asociado a la realización 
     const creatorEmail = 'usuario@gmail.com';
     const interestPoint1 = new InterestPoint(creatorEmail, 'Villarreal', 39.9333300, -0.1000000);
     const interestPoint2 = new InterestPoint(creatorEmail, '', undefined, undefined)
-    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'gasoline');
-    const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'shortest');
+    const route = new Route(creatorEmail, interestPoint1, interestPoint2, 'walking', 'shortest');
 
     await expect(routeController.getRoute(route)).rejects.toThrow(
       'InvalidInterestPointException',
