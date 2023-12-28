@@ -79,9 +79,13 @@ export default class RouteController {
         return price;
 
       case 'bike':
+        // Se parte de una média de 6.4 calorías por minuto en bici
+        calories = (journey.duration / 60) * 6.4;
+        return Math.ceil(calories);
       case 'walking':
-        // Aquí podrías definir un precio o cálculo calórico para 'bike' y 'walking'
-        return 0; // Ejemplo con precio = 0
+        // Se parte de una média de 4 calorías por minuto andado
+        calories = (journey.duration / 60) * 4;
+        return Math.ceil(calories);
 
       default:
         // Manejar cualquier otro tipo de vehículo no especificado

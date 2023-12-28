@@ -9,6 +9,7 @@ import {
   updateDoc,
   query,
   where,
+  doc
 } from 'firebase/firestore';
 import NetInfo from '@react-native-community/netinfo';
 const AsyncStorageContext = createContext(null);
@@ -96,10 +97,10 @@ export const AsyncStorageProvider = ({children}) => {
     //Si no existe coleccion local pero si online es que el usuario ha borrado aplicacion y ha vuelto a instalar
     if (!localUserInfo && firebaseUserInfo) {
       //Hacer una copia de firebaseVehicles pero sin incluir el id en cada vehicle
-      const userInfoWithoutId = firebaseUserInfo.map(({id, ...rest}) => rest);
+      
       //guardarlo en asyncstorage y en el state
-      await AsyncStorage.setItem('userInfo', JSON.stringify(userInfoWithoutId));
-      setUserInfo(userInfoWithoutId);
+      await AsyncStorage.setItem('userInfo', JSON.stringify(firebaseUserInfo));
+      setUserInfo(firebaseUserInfo);
     }
     //Si no existe coleccion local pero si online es que el usuario ha borrado aplicacion y ha vuelto a instalar
     if (!localVehicles && firebaseVehicles.length > 0) {
@@ -127,8 +128,8 @@ export const AsyncStorageProvider = ({children}) => {
       // Sincronizar Informacion de usuario
       if (
         localUserInfo.defaultRouteType !== firebaseUserInfo.defaultRouteType ||
-        localUserInfo.defaultVehicle.plate !==
-          firebaseUserInfo.defaultVehicle.plate
+        localUserInfo.defaultVehicle !==
+          firebaseUserInfo.defaultVehicle
       ) {
         // Update Firebase con la información local
         const userDocRef = doc(db, 'production_users', firebaseUserInfo.id);

@@ -80,7 +80,24 @@ class UserController {
     }
   }
 
-  async setDefaultVehicle(vehicle) {
+
+  async setDefaultRouteType(email, type) {
+    if (type !== 'fast' && type !== 'economic') {
+      const error = new Error('InvalidTypeException');
+      error.code = 'InvalidTypeException';
+      throw error;
+    }
+    try {
+      const resultDatabase = await this.cloudService.setDefaultRouteType(email, type);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar la excepción tal como se recibe
+      throw error;
+    }
+  }
+
+  async setDefaultVehicle(email, vehicle) {
+    
     if (!vehicle) {
       const error = new Error('InvalidVehicleException');
       error.code = 'InvalidVehicleException';
@@ -88,7 +105,7 @@ class UserController {
     }
       
     try {
-      const resultDatabase = await this.cloudService.setDefaultVehicle(vehicle);
+      const resultDatabase = await this.cloudService.setDefaultVehicle(email, vehicle);
       return resultDatabase;
     } catch (error) {
       // Reenviar la excepción tal como se recibe
