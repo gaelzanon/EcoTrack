@@ -22,6 +22,10 @@ class CloudService {
     return collection(this.db, `${this.env}_interestPoints`);
   }
 
+  get journeysCollection() {
+    return collection(this.db, `${this.env}_journeys`);
+  }
+
   get usersCollection() {
     return collection(this.db, `${this.env}_users`);
   }
@@ -47,6 +51,13 @@ class CloudService {
   async interestPointExists(creator, name) {
     return this.existsInFirebase(
       this.interestPointsCollection,
+      doc => doc.data().creator === creator && doc.data().name === name,
+    );
+  }
+
+  async journeyExists(creator, name) {
+    return this.existsInFirebase(
+      this.journeysCollection,
       doc => doc.data().creator === creator && doc.data().name === name,
     );
   }
@@ -93,6 +104,54 @@ class CloudService {
       const error = new Error('NoInetConection');
       error.code = 'NoInetConection';
       throw error;
+    }
+  }
+
+  async addJourney(journey) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+    if (isConnected) {
+      try {
+        let journeys = await AsyncStorage.getItem('journeys');
+        journeys = journeys ? JSON.parse(journeys) : [];
+        const existsInFirebase = await this.journeyExists(
+          journey.creator,
+          journey.name,
+        );
+        if (
+          !journeys.some(j => j.name === journey.name) &&
+          !existsInFirebase
+        ) {
+          
+          // Convierte el objeto a un formato que Firestore pueda entender
+          const journeyData = {...journey};
+          await addDoc(this.journeysCollection, journeyData);
+          journeys.push(journeyData);
+          await AsyncStorage.setItem('journeys', JSON.stringify(journeys));
+          return journey;
+        } else {
+          
+          const error = new Error('JourneyAlreadyStoredException');
+          error.code = 'JourneyAlreadyStoredException';
+          throw error;
+        }
+      } catch (error) {
+        throw error;
+      }
+    } else {
+      //No hay internet
+      let journeys = await AsyncStorage.getItem('journeys');
+        journeys = journeys ? JSON.parse(journeys) : [];
+
+      if (!journeys.some(j => j.name === journey.name)) {
+        journeys.push(journey);
+        await AsyncStorage.setItem('journeys', JSON.stringify(journeys));
+        return journey;
+      } else {
+        const error = new Error('JourneyAlreadyStoredException');
+        error.code = 'JourneyAlreadyStoredException';
+        throw error;
+      }
     }
   }
 

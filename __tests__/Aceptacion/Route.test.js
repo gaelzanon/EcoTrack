@@ -7,12 +7,25 @@ import cloudService from '../../services/cloudService';
 import GoogleDirectionsServiceAdapter from '../../patrones/Adapter/GoogleDirectionsServiceAdapter';
 import DatosGobServiceAdapter from '../../patrones/Adapter/DatosGobServiceAdapter';
 import PrecioDeLaLuzServiceAdapter from '../../patrones/Adapter/PrecioDeLaLuzServiceAdapter';
+import AsyncStorage from '@react-native-async-storage/async-storage/jest/async-storage-mock';
+
+
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+);
+
+afterEach(async () => {
+  await CloudService.clearCollection('journeys');
+  await jest.clearAllMocks();
+  await AsyncStorage.removeItem('journeys');
+});
+
 const CloudService = new cloudService('test');
 const routeService = new GoogleDirectionsServiceAdapter();
 const carburanteService = new DatosGobServiceAdapter();
 const precioLuzService = new PrecioDeLaLuzServiceAdapter();
 const routeController = new RouteController(CloudService, routeService, carburanteService, precioLuzService);
-/*
+
 //Estos tests seguramente fallen en github ya que no comiteamos nuestra apiKey al repositorio, es lo que se espera
 describe('HU13: Como usuario, dados dos lugares de interés y un método de movilidad, quiero obtener una ruta entre ambos lugares', () => {
     it('E1: Se obtiene la ruta correctamente', async () => {
@@ -138,7 +151,7 @@ describe('HU16: Como usuario quiero conocer la ruta más recomendada/rápida/cor
 
 
 });
-*/
+
 describe('HU17: Como usuario quiero poder guardar una ruta para visualizarla más adelante.', () => {
   it('E1: La ruta se guarda correctamente', async () => {
     const creatorEmail = 'usuario@gmail.com';
@@ -152,7 +165,8 @@ describe('HU17: Como usuario quiero poder guardar una ruta para visualizarla má
 
     const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia')
     await expect(routeController.storeJourney(journeyToStore)).resolves.toBeTruthy();
-  
+    await expect(AsyncStorage.getItem).toBeCalledWith('journeys');
+    await expect(AsyncStorage.setItem).toBeCalled();
 
   });
 
@@ -171,7 +185,7 @@ describe('HU17: Como usuario quiero poder guardar una ruta para visualizarla má
     await expect(routeController.storeJourney(journeyToStore)).rejects.toThrow(
       'JourneyAlreadyStoredException',
     );
-
+    
   });
 
 
