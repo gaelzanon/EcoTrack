@@ -274,3 +274,51 @@ describe('HU20: Como usuario quiero poder marcar como favorito rutas para que ap
   
   });
 });
+
+
+
+describe('HU19: Como usuario quiero poder eliminar una ruta guardada cuando ya no me resulta de utilidad.', () => {
+  it('E1: Se elimina la ruta exitosamente.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint1 = new InterestPoint(creatorEmail, 'Valencia', 39.4697500, -0.3773900);
+    const interestPoint2 = new InterestPoint(creatorEmail, 'Castellón de la Plana', 39.98567, -0.04935);
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'electric');
+    const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'fastest');
+    
+    const fastJourney = await routeController.getRoute(route)
+    const priceRoute1 = await routeController.getPrice(fastJourney, route)
+
+    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia')
+    await expect(routeController.storeJourney(journeyToStore)).resolves.toBeTruthy();
+    await expect(AsyncStorage.getItem).toBeCalledWith('journeys');
+    await expect(AsyncStorage.setItem).toBeCalled();
+
+    await expect(
+      routeController.removeRoute(journeyToStore),
+    ).resolves.toBeTruthy();
+
+    const storedData = await routeController.getRoutes();
+    expect(storedData).toEqual([]);
+  });
+
+  it('E2: Se intenta eliminar una ruta que no existe.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint1 = new InterestPoint(creatorEmail, 'Valencia', 39.4697500, -0.3773900);
+    const interestPoint2 = new InterestPoint(creatorEmail, 'Castellón de la Plana', 39.98567, -0.04935);
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'electric');
+    const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'fastest');
+    
+    const fastJourney = await routeController.getRoute(route)
+    const priceRoute1 = await routeController.getPrice(fastJourney, route)
+
+    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia')
+
+    await expect(
+      routeController.removeRoute(journeyToStore),
+    ).rejects.toThrow('JourneyNotFoundException');
+  });
+    
+  
+
+
+});

@@ -198,6 +198,59 @@ class CloudService {
     }
   }
 
+  async deleteJourney(journey) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+    let journeys = await AsyncStorage.getItem('journeys');
+    journeys = journeys ? JSON.parse(journeys) : [];
+
+    if (isConnected) {
+      try {
+        const existe = await this.journeyExists(journey.creator, journey.name);
+        if (!existe) {
+          const error = new Error('JourneyNotFoundException');
+          error.code = 'JourneyNotFoundException';
+          throw error;
+        }
+        const journeyQuerySnapshot = await getDocs(this.journeysCollection);
+        const journeyDoc = journeyQuerySnapshot.docs.find(
+          doc =>
+            doc.data().creator === journey.creator &&
+            doc.data().name === journey.name,
+        );
+        if (journeyDoc) {
+          // Eliminar de BBDD
+          await deleteDoc(journeyDoc.ref);
+        }
+        // Eliminar objeto de listado en almacenamiento local
+        let journeys = await AsyncStorage.getItem('journeys');
+        journeys = journeys ? JSON.parse(journeys) : [];
+        const updatedJourneys = journeys.filter(
+          item => item.name !== journey.name,
+        );
+        await AsyncStorage.setItem('journeys', JSON.stringify(updatedJourneys));
+        return true;
+      } catch (error) {
+        throw error;
+      }
+    } else {
+      //No hay internet
+      // Eliminar objeto de listado en almacenamiento local
+      let journeys = await AsyncStorage.getItem('journeys');
+      journeys = journeys ? JSON.parse(journeys) : [];
+      const updatedJourneys = journeys.filter(
+        item => item.name !== journey.name,
+      );
+      if (journeys.length === updatedJourneys.length) {
+        const error = new Error('JourneyNotFoundException');
+        error.code = 'JourneyNotFoundException';
+        throw error;
+      }
+      await AsyncStorage.setItem('journeys', JSON.stringify(updatedJourneys));
+      return true;
+    }
+  }
+
   async deleteVehicle(vehicle) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
@@ -308,15 +361,6 @@ class CloudService {
     }
   }
 
-  async clearCollection(collectionName) {
-    if (this.env === 'test') {
-      const querySnapshot = await getDocs(
-        collection(this.db, `test_${collectionName}`),
-      );
-      const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
-      await Promise.all(deletePromises);
-    }
-  }
 
   async addInterestPoint(interestPoint) {
     const netInfo = await NetInfo.fetch();

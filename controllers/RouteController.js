@@ -127,4 +127,14 @@ export default class RouteController {
       throw error;
     }
   }
+
+  async removeRoute(journey) {
+    try {
+      const resultDatabase = await this.cloudService.deleteJourney(journey);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar excepción recibida
+      throw error;
+    }
+  }
 }
