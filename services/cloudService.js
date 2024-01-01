@@ -99,6 +99,7 @@ class CloudService {
       await AsyncStorage.removeItem('user');
       await AsyncStorage.removeItem('vehicles');
       await AsyncStorage.removeItem('interestPoints');
+      await AsyncStorage.removeItem('journeys');
       return true;
     } else {
       const error = new Error('NoInetConection');
@@ -118,11 +119,7 @@ class CloudService {
           journey.creator,
           journey.name,
         );
-        if (
-          !journeys.some(j => j.name === journey.name) &&
-          !existsInFirebase
-        ) {
-          
+        if (!journeys.some(j => j.name === journey.name) && !existsInFirebase) {
           // Convierte el objeto a un formato que Firestore pueda entender
           const journeyData = {...journey};
           await addDoc(this.journeysCollection, journeyData);
@@ -130,7 +127,6 @@ class CloudService {
           await AsyncStorage.setItem('journeys', JSON.stringify(journeys));
           return journey;
         } else {
-          
           const error = new Error('JourneyAlreadyStoredException');
           error.code = 'JourneyAlreadyStoredException';
           throw error;
@@ -141,7 +137,7 @@ class CloudService {
     } else {
       //No hay internet
       let journeys = await AsyncStorage.getItem('journeys');
-        journeys = journeys ? JSON.parse(journeys) : [];
+      journeys = journeys ? JSON.parse(journeys) : [];
 
       if (!journeys.some(j => j.name === journey.name)) {
         journeys.push(journey);
@@ -207,7 +203,7 @@ class CloudService {
     const isConnected = netInfo.isConnected;
     let userInfo = await AsyncStorage.getItem('userInfo');
     userInfo = userInfo ? JSON.parse(userInfo) : {};
-    
+
     if (userInfo && vehicle.plate === userInfo.defaultVehicle) {
       const error = new Error('VehicleIsDefaultException');
       error.code = 'VehicleIsDefaultException';
@@ -469,6 +465,26 @@ class CloudService {
     return vehicles;
   }
 
+  async getRoutes() {
+    let journeys = await AsyncStorage.getItem('journeys');
+    journeys = journeys ? JSON.parse(journeys) : [];
+    // Ordenar los puntos de interés para que los favoritos aparezcan primero
+    journeys.sort((a, b) => {
+      // Considera los puntos de vehiculos sin el parámetro 'isFavorite' como no favoritos
+      const isFavoriteA = a.isFavorite === true;
+      const isFavoriteB = b.isFavorite === true;
+
+      if (isFavoriteA && !isFavoriteB) {
+        return -1; // 'a' es favorito y 'b' no, 'a' va primero
+      } else if (!isFavoriteA && isFavoriteB) {
+        return 1; // 'b' es favorito y 'a' no, 'b' va primero
+      } else {
+        return 0; // Si ambos son favoritos o no favoritos, se mantienen en el mismo orden
+      }
+    });
+    return journeys;
+  }
+
   async getInterestPoints() {
     let interestPoints = await AsyncStorage.getItem('interestPoints');
     interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
@@ -489,6 +505,57 @@ class CloudService {
     });
 
     return interestPoints;
+  }
+
+  async favoriteJourney(journey) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+
+    try {
+      let journeys = await AsyncStorage.getItem('journeys');
+      journeys = journeys ? JSON.parse(journeys) : [];
+
+      // Buscar el punto de interés en el almacenamiento local
+      const index = journeys.findIndex(
+        j => j.name === journey.name && j.creator === journey.creator,
+      );
+
+      if (index !== -1) {
+        // Invertir el estado de favorito, o establecerlo si no existe
+        journeys[index].isFavorite = !journeys[index].isFavorite;
+      } else {
+        // Si no existe en local , no se puede marcar como favorito
+
+        throw new Error('JourneyNotFoundException');
+      }
+
+      // Actualizar el almacenamiento local
+      await AsyncStorage.setItem('journeys', JSON.stringify(journeys));
+
+      if (isConnected) {
+        // Actualizar el estado de favorito en la base de datos remota
+        const journeysQuerySnapshot = await getDocs(this.journeysCollection);
+        const journeyDoc = journeysQuerySnapshot.docs.find(
+          doc =>
+            doc.data().creator === journey.creator &&
+            doc.data().name === journey.name,
+        );
+
+        if (journeyDoc) {
+          // Actualizar el documento en la base de datos
+          await updateDoc(journeyDoc.ref, {
+            isFavorite: journeys[index].isFavorite,
+          });
+        } else {
+          // Si el documento no existe en la base de datos, crea uno nuevo
+          await addDoc(this.journeysCollection, journey);
+        }
+      }
+
+      return true;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async favoriteInterestPoint(interestPoint) {
@@ -599,7 +666,6 @@ class CloudService {
     }
   }
 
-
   async setDefaultRouteType(email, type) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
@@ -612,10 +678,11 @@ class CloudService {
     try {
       if (isConnected) {
         const userQuerySnapshot = await getDocs(this.usersCollection);
-        const userDoc = userQuerySnapshot.docs.find(doc => doc.data().email === email);
+        const userDoc = userQuerySnapshot.docs.find(
+          doc => doc.data().email === email,
+        );
 
         await updateDoc(userDoc.ref, {defaultRouteType: type});
-
       }
       return true;
     } catch (error) {
@@ -628,7 +695,7 @@ class CloudService {
     const isConnected = netInfo.isConnected;
     let userInfo = await AsyncStorage.getItem('userInfo');
     userInfo = userInfo ? JSON.parse(userInfo) : {};
-    
+
     userInfo = {...userInfo, defaultVehicle: vehicle};
     await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
     try {
@@ -643,7 +710,6 @@ class CloudService {
         await updateDoc(userDoc.ref, {
           defaultVehicle: vehicle,
         });
-
       }
       return true;
     } catch (error) {

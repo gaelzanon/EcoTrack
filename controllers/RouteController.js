@@ -111,4 +111,20 @@ export default class RouteController {
       throw error;
     }
   }
+
+  async getRoutes() {
+    const list = await this.cloudService.getRoutes();
+    return list;
+  }
+
+  async favoriteRoute(journey) {
+    try {
+      const resultDatabase = await this.cloudService.favoriteJourney(journey);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar excepción recibida
+
+      throw error;
+    }
+  }
 }

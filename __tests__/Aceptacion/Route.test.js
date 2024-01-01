@@ -190,3 +190,87 @@ describe('HU17: Como usuario quiero poder guardar una ruta para visualizarla má
 
 
 });
+
+describe('HU18: Como usuario quiero poder consultar el listado de rutas guardadas.', () => {
+  it('E1: Se muestra la lista de rutas disponibles si las hay.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint1 = new InterestPoint(creatorEmail, 'Valencia', 39.4697500, -0.3773900);
+    const interestPoint2 = new InterestPoint(creatorEmail, 'Castellón de la Plana', 39.98567, -0.04935);
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'electric');
+    const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'fastest');
+    
+    const fastJourney = await routeController.getRoute(route)
+    const priceRoute1 = await routeController.getPrice(fastJourney, route)
+
+    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia')
+    await expect(routeController.storeJourney(journeyToStore)).resolves.toBeTruthy();
+    await expect(AsyncStorage.getItem).toBeCalledWith('journeys');
+    await expect(AsyncStorage.setItem).toBeCalled();
+
+    const storedData = await routeController.getRoutes();
+    expect(storedData).toEqual([
+      journeyToStore
+    ]);
+  });
+
+  it('E2: No se muestra la lista de rutas registradas si no las hay.', async () => {
+    
+    const storedData = await routeController.getRoutes();
+    expect(storedData).toEqual([]);
+  });
+    
+  
+
+
+});
+
+describe('HU20: Como usuario quiero poder marcar como favorito rutas para que aparezcan las primeras cuando las listo.', () => {
+  it('E1: Se marca como favorito una ruta existente.', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint1 = new InterestPoint(creatorEmail, 'Valencia', 39.4697500, -0.3773900);
+    const interestPoint2 = new InterestPoint(creatorEmail, 'Castellón de la Plana', 39.98567, -0.04935);
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'electric');
+    const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'fastest');
+    const route2 = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'economic');
+
+    const fastJourney = await routeController.getRoute(route)
+    const economicJourney = await routeController.getRoute(route2)
+
+    const priceRoute1 = await routeController.getPrice(fastJourney, route)
+    const priceRoute2 = await routeController.getPrice(fastJourney, route2)
+
+    const journeyToStore = new Journey(creatorEmail, fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-ValenciaFAST')
+    const journeyToStore2 = new Journey(creatorEmail, economicJourney.coordinates, economicJourney.distance, economicJourney.duration, priceRoute2, 'Cs-ValenciaECO')
+    
+    await expect(routeController.storeJourney(journeyToStore)).resolves.toBeTruthy();
+    await expect(routeController.storeJourney(journeyToStore2)).resolves.toBeTruthy();
+
+    await routeController.favoriteRoute(journeyToStore2)
+
+    const storedData = await routeController.getRoutes();
+    expect(storedData[0]).toEqual(
+      {
+        ...journeyToStore2,
+        isFavorite: true,
+      }
+    );
+  });
+
+  it('E2: Se intenta marcar como favorita una ruta que no existe.', async () => {
+     const creatorEmail = 'usuario@gmail.com';
+    const interestPoint1 = new InterestPoint(creatorEmail, 'Valencia', 39.4697500, -0.3773900);
+    const interestPoint2 = new InterestPoint(creatorEmail, 'Castellón de la Plana', 39.98567, -0.04935);
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'electric');
+    const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'fastest');
+    const fastJourney = await routeController.getRoute(route)
+
+
+    const priceRoute1 = await routeController.getPrice(fastJourney, route)
+    const journeyToStore = new Journey(creatorEmail, fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-ValenciaFAST')
+
+    await expect(
+      routeController.favoriteRoute(journeyToStore),
+    ).rejects.toThrow('JourneyNotFoundException');
+  
+  });
+});
