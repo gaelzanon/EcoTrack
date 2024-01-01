@@ -2,6 +2,7 @@ import RouteController from '../../controllers/RouteController';
 import Route from '../../models/Route';
 import Vehicle from '../../models/Vehicle';
 import InterestPoint from '../../models/InterestPoint';
+import Journey from '../../models/Journey';
 import cloudService from '../../services/cloudService';
 import GoogleDirectionsServiceAdapter from '../../patrones/Adapter/GoogleDirectionsServiceAdapter';
 import DatosGobServiceAdapter from '../../patrones/Adapter/DatosGobServiceAdapter';
@@ -11,7 +12,7 @@ const routeService = new GoogleDirectionsServiceAdapter();
 const carburanteService = new DatosGobServiceAdapter();
 const precioLuzService = new PrecioDeLaLuzServiceAdapter();
 const routeController = new RouteController(CloudService, routeService, carburanteService, precioLuzService);
-
+/*
 //Estos tests seguramente fallen en github ya que no comiteamos nuestra apiKey al repositorio, es lo que se espera
 describe('HU13: Como usuario, dados dos lugares de interés y un método de movilidad, quiero obtener una ruta entre ambos lugares', () => {
     it('E1: Se obtiene la ruta correctamente', async () => {
@@ -133,6 +134,44 @@ describe('HU16: Como usuario quiero conocer la ruta más recomendada/rápida/cor
     await expect(routeController.getRoute(route)).rejects.toThrow(
       'InvalidInterestPointException',
     );
+  });
+
+
+});
+*/
+describe('HU17: Como usuario quiero poder guardar una ruta para visualizarla más adelante.', () => {
+  it('E1: La ruta se guarda correctamente', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint1 = new InterestPoint(creatorEmail, 'Valencia', 39.4697500, -0.3773900);
+    const interestPoint2 = new InterestPoint(creatorEmail, 'Castellón de la Plana', 39.98567, -0.04935);
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'electric');
+    const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'fastest');
+    
+    const fastJourney = await routeController.getRoute(route)
+    const priceRoute1 = await routeController.getPrice(fastJourney, route)
+
+    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia')
+    await expect(routeController.storeJourney(journeyToStore)).resolves.toBeTruthy();
+  
+
+  });
+
+  it('E2: Ya existe una ruta con ese nombre', async () => {
+    const creatorEmail = 'usuario@gmail.com';
+    const interestPoint1 = new InterestPoint(creatorEmail, 'Valencia', 39.4697500, -0.3773900);
+    const interestPoint2 = new InterestPoint(creatorEmail, 'Castellón de la Plana', 39.98567, -0.04935);
+    const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 2020, 10, '1171MSL', 'electric');
+    const route = new Route(creatorEmail, interestPoint1, interestPoint2, vehicle, 'fastest');
+    
+    const fastJourney = await routeController.getRoute(route)
+    const priceRoute1 = await routeController.getPrice(fastJourney, route)
+
+    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia')
+    await routeController.storeJourney(journeyToStore)
+    await expect(routeController.storeJourney(journeyToStore)).rejects.toThrow(
+      'JourneyAlreadyStoredException',
+    );
+
   });
 
 

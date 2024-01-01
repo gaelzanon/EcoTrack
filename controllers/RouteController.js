@@ -94,4 +94,8 @@ export default class RouteController {
         throw error;
     }
   }
+
+  async storeJourney(journey) {
+    return null;
+  }
 }
