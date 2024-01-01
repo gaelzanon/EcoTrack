@@ -94,4 +94,21 @@ export default class RouteController {
         throw error;
     }
   }
+
+  async storeJourney(journey) {
+    // Validación antes de intentar registrar
+    if (journey.name.length < 4) {
+      const error = new Error('InvalidNameException');
+      error.code = 'InvalidNameException';
+      throw error;
+    }
+
+    try {
+      // Usamos cloudService para añadir una journey a la colección 'journeys'
+      const docRef = await this.cloudService.addJourney(journey);
+      return docRef;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
