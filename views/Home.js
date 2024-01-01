@@ -5,7 +5,7 @@ import globalStyles from '../styles';
 import {useAsyncStorage} from '../contexts/AsyncStorageContext';
 const Home = () => {
   const navigation = useNavigation();
-  const {syncData, vehicles, interestPoints, userInfo} = useAsyncStorage();
+  const {syncData, vehicles, interestPoints, userInfo, journeys} = useAsyncStorage();
   const handleNavigateToAddVehicle = () => {
     navigation.navigate('AddVehicle');
   };
@@ -19,7 +19,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    syncData(vehicles, interestPoints, userInfo)
+    syncData(vehicles, interestPoints, userInfo, journeys)
   }, [])
 
   return (

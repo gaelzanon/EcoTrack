@@ -18,6 +18,7 @@ export const AsyncStorageProvider = ({children}) => {
   const [user, setUser] = useState(null);
   const [vehicles, setVehicles] = useState(null);
   const [interestPoints, setInterestPoints] = useState(null);
+  const [journeys, setJourneys] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
   const [loaded, setLoaded] = useState(null);
   const loadInitialData = async () => {
@@ -26,7 +27,7 @@ export const AsyncStorageProvider = ({children}) => {
       const storedVehicles = await AsyncStorage.getItem('vehicles');
       const storedInterestPoints = await AsyncStorage.getItem('interestPoints');
       const storedUserInfo = await AsyncStorage.getItem('userInfo');
-
+      const storedJourneys = await AsyncStorage.getItem('journeys');
       if (storedUser) {
         setUser(JSON.parse(storedUser));
       }
@@ -38,6 +39,9 @@ export const AsyncStorageProvider = ({children}) => {
       }
       if (storedInterestPoints) {
         setInterestPoints(JSON.parse(storedInterestPoints));
+      }
+      if (storedJourneys) {
+        setJourneys(JSON.parse(storedJourneys))
       }
 
       setLoaded(true);
@@ -62,11 +66,19 @@ export const AsyncStorageProvider = ({children}) => {
       collection(db, 'production_interestPoints'),
       where('creator', '==', userEmail),
     );
+    const journeyQuery = query(
+      collection(db, 'production_journeys'),
+      where('creator', '==', userEmail),
+    );
 
     const firebaseVehicles = await getDocs(vehicleQuery).then(querySnapshot =>
       querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})),
     );
     const firebaseInterestPoints = await getDocs(interestPointQuery).then(
+      querySnapshot =>
+        querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})),
+    );
+    const firebaseJourneys = await getDocs(journeyQuery).then(
       querySnapshot =>
         querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})),
     );
@@ -78,20 +90,21 @@ export const AsyncStorageProvider = ({children}) => {
         }
       : null;
 
-    return {firebaseVehicles, firebaseInterestPoints, firebaseUserInfo};
+    return {firebaseVehicles, firebaseInterestPoints, firebaseUserInfo, firebaseJourneys};
   };
 
   const syncData = async (
     localVehicles,
     localInterestPoints,
     localUserInfo,
+    localJourneys
   ) => {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
     if (!isConnected) {
       return;
     }
-    const {firebaseVehicles, firebaseInterestPoints, firebaseUserInfo} =
+    const {firebaseVehicles, firebaseInterestPoints, firebaseUserInfo, firebaseJourneys} =
       await getFirebaseData();
     const db = firebaseInstance.db;
     //Si no existe coleccion local pero si online es que el usuario ha borrado aplicacion y ha vuelto a instalar
@@ -122,6 +135,19 @@ export const AsyncStorageProvider = ({children}) => {
         JSON.stringify(interestPointsWithoutId),
       );
       setInterestPoints(interestPointsWithoutId);
+    }
+    //Si no existe coleccion local pero si online es que el usuario ha borrado aplicacion y ha vuelto a instalar
+    if (!localJourneys && firebaseJourneys.length > 0) {
+      //Hacer una copia de firebaseInterestPoints pero sin incluir el id en cada InterestPoints
+      const journeysWithoutId = firebaseJourneys.map(
+        ({id, ...rest}) => rest,
+      );
+      //guardarlo en asyncstorage y en el state
+      await AsyncStorage.setItem(
+        'journeys',
+        JSON.stringify(journeysWithoutId),
+      );
+      setJourneys(journeysWithoutId);
     }
 
     if (localUserInfo) {
@@ -205,7 +231,37 @@ export const AsyncStorageProvider = ({children}) => {
         }
       }
     }
+
+    if (localJourneys) {
+      // Sincronizar Puntos de Interés (solo añadir o eliminar, sin actualizar)
+      for (const localJourney of localJourneys) {
+        if (
+          !firebaseJourneys.some(
+            j => j.name === localJourney.name,
+          )
+        ) {
+          const journeysData = {...localJourney};
+          addDoc(
+            collection(db, 'production_journeys'),
+            journeysData,
+          );
+        }
+      }
+
+      for (const firebaseJourney of firebaseJourneys) {
+        if (
+          !localJourneys.some(
+            j => j.name === firebaseJourney.name,
+          )
+        ) {
+          deleteDoc(
+            doc(db, 'production_journeys', firebaseJourney.id),
+          );
+        }
+      }
+    }
   };
+
 
   useEffect(() => {
     loadInitialData();
@@ -223,6 +279,10 @@ export const AsyncStorageProvider = ({children}) => {
     interestPoints,
     setInterestPoints: interestPointData => {
       setInterestPoints(interestPointData);
+    },
+    journeys,
+    setJourneys: journeyData => {
+      setJourneys(journeyData);
     },
     userInfo,
     setUserInfo: userInfo => {

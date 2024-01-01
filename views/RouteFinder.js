@@ -6,6 +6,7 @@ import {
   Alert,
   Text,
   ScrollView,
+  Modal,
 } from 'react-native';
 import {TextInput} from 'react-native-paper';
 import MapView, {Marker, Polyline} from 'react-native-maps';
@@ -17,12 +18,18 @@ import {Picker} from '@react-native-picker/picker';
 import InterestPoint from '../models/InterestPoint';
 import Vehicle from '../models/Vehicle';
 import Route from '../models/Route';
+import Journey from '../models/Journey';
 import globalStyles from '../styles';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useRoute } from '@react-navigation/native';
+
 const RouteFinder = () => {
+  const route = useRoute();
   const vehiclesController = useVehicleController();
   const routeController = useRouteController();
   const interestPointController = useInterestPointController();
-  const {vehicles, interestPoints, user, userInfo} = useAsyncStorage();
+  const {vehicles, interestPoints, user, userInfo, journeys, setJourneys} =
+    useAsyncStorage();
   const [localInterestPoints, setLocalInterestPoints] =
     useState(interestPoints);
   const [localVehicles, setLocalVehicles] = useState(vehicles);
@@ -30,10 +37,12 @@ const RouteFinder = () => {
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [duration, setDuration] = useState('');
   const [distance, setDistance] = useState('');
+  const [name, setName] = useState('');
   const [price, setPrice] = useState('');
-
+  const [journey, setJourney] = useState(null);
   const [originName, setOriginName] = useState('');
   const [destinationName, setDestinationName] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
 
   const [selectedRouteOption, setSelectedRouteOption] = useState('fast');
   const [selectedVehicleOption, setSelectedVehicleOption] = useState('generic');
@@ -53,6 +62,22 @@ const RouteFinder = () => {
   const [useCustomDestiny, setuseCustomDestiny] = useState(false);
 
   useEffect(() => {
+    if (route.params && route.params.journey) {
+      const { journey } = route.params;
+      // Establece los datos de la ruta en los estados correspondientes
+      setJourney(journey);
+      setName(journey.name);
+      setRouteCoordinates(journey.coordinates);
+      setDuration(journey.duration);
+      setDistance(journey.distance);
+      setPrice(journey.cost)
+      // Agrega cualquier otro estado que necesites establecer
+      setShowMap(true);
+    }
+  }, [route.params]);
+
+  
+  useEffect(() => {
     async function fetchInterestPoints() {
       const points = await interestPointController.getInterestPoints();
       setLocalInterestPoints(points);
@@ -69,7 +94,7 @@ const RouteFinder = () => {
       if (!userInfo) {
         setSelectedVehicle(vehicles[0].plate);
       } else {
-        setSelectedRouteOption(userInfo.defaultRouteType)
+        setSelectedRouteOption(userInfo.defaultRouteType);
         if (
           ['walking', 'bike', 'diesel', 'electric', 'gasoline'].includes(
             userInfo.defaultVehicle,
@@ -86,8 +111,45 @@ const RouteFinder = () => {
     fetchVehicles();
   }, [vehicles, userInfo]);
 
+  const handleSaveRoute = () => {
+    setModalVisible(true);
+  };
+
+  const handleConfirmSaveRoute = async () => {
+    setModalVisible(false);
+    const userEmail = user ? user.email : null;
+    const j = new Journey(
+      userEmail,
+      journey.coordinates,
+      journey.distance,
+      journey.duration,
+      price,
+      name,
+    );
+
+    try {
+      await routeController.storeJourney(j);
+      setJourneys(journeys ? [...journeys, j] : [j]);
+
+      Alert.alert('Route succesfully added.');
+    } catch (error) {
+      let message = 'An error occurred. Please try again.';
+      switch (error.code) {
+        case 'InvalidNameException':
+          message = 'Please enter a valid name.';
+          break;
+        case 'JourneyAlreadyStoredException':
+          message = 'There is aleady a journey stored with this name.';
+          break;
+        default:
+          console.log(error);
+          break;
+      }
+      Alert.alert('Addition Error', message);
+    }
+  };
+
   const formatDuration = seconds => {
-    
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
@@ -134,7 +196,7 @@ const RouteFinder = () => {
 
       // Obtiene la ruta del RouteController
       const journey = await routeController.getRoute(route);
-
+      setJourney(journey);
       // Actualiza el estado para mostrar la ruta en el mapa
       setRouteCoordinates(journey.coordinates);
       setDuration(formatDuration(journey.duration));
@@ -208,24 +270,46 @@ const RouteFinder = () => {
               ]}>
               Distance: {distance}
             </Text>
-            {price !== '' && selectedGenericVehicleType !== 'walking' && selectedGenericVehicleType !== 'bike' && (
-              <Text
-                style={[
-                  styles.label,
-                  {color: globalStyles.white.backgroundColor},
-                ]}>
-                Estimated fuel price: {price}€
-              </Text>
-            )}
-            {(price !== '' && (selectedGenericVehicleType == 'walking' || selectedGenericVehicleType == 'bike')) && (
-              <Text
-                style={[
-                  styles.label,
-                  {color: globalStyles.white.backgroundColor},
-                ]}>
-                Estimated calories burnt: {price}
-              </Text>
-            )}
+            {price !== '' &&
+              selectedGenericVehicleType !== 'walking' &&
+              selectedGenericVehicleType !== 'bike' && (
+                <>
+                  <Text
+                    style={[
+                      styles.label,
+                      {color: globalStyles.white.backgroundColor},
+                    ]}>
+                    Estimated fuel price: {price}€
+                  </Text>
+                  <Pressable onPress={() => handleSaveRoute()}>
+                    <MaterialCommunityIcons
+                      name={'content-save'}
+                      size={30}
+                      color={'grey'}
+                    />
+                  </Pressable>
+                </>
+              )}
+            {price !== '' &&
+              (selectedGenericVehicleType === 'walking' ||
+                selectedGenericVehicleType === 'bike') && (
+                <>
+                  <Text
+                    style={[
+                      styles.label,
+                      {color: globalStyles.white.backgroundColor},
+                    ]}>
+                    Estimated calories burnt: {price}
+                  </Text>
+                  <Pressable onPress={() => handleSaveRoute()}>
+                    <MaterialCommunityIcons
+                      name={'content-save'}
+                      size={30}
+                      color={'grey'}
+                    />
+                  </Pressable>
+                </>
+              )}
           </View>
         </>
       ) : (
@@ -394,6 +478,35 @@ const RouteFinder = () => {
           </Pressable>
         </ScrollView>
       )}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+          setModalVisible(!modalVisible);
+        }}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TextInput
+              style={styles.modalText}
+              placeholder="Enter Route Name"
+              onChangeText={text => setName(text)}
+              defaultValue={name}
+            />
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => setModalVisible(!modalVisible)}>
+              <Text style={styles.textStyle}>Cancel</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.button, styles.buttonSave]}
+              onPress={handleConfirmSaveRoute}>
+              <Text style={styles.textStyle}>Save Route</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -438,6 +551,44 @@ const styles = StyleSheet.create({
     color: 'black',
     marginBottom: 5,
     fontWeight: 'bold',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  buttonSave: {
+    backgroundColor: '#F194FF',
+    marginTop: 10,
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });
 
