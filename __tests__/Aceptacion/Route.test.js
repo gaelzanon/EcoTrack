@@ -163,7 +163,7 @@ describe('HU17: Como usuario quiero poder guardar una ruta para visualizarla má
     const fastJourney = await routeController.getRoute(route)
     const priceRoute1 = await routeController.getPrice(fastJourney, route)
 
-    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia')
+    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia', 'electric')
     await expect(routeController.storeJourney(journeyToStore)).resolves.toBeTruthy();
     await expect(AsyncStorage.getItem).toBeCalledWith('journeys');
     await expect(AsyncStorage.setItem).toBeCalled();
@@ -180,7 +180,7 @@ describe('HU17: Como usuario quiero poder guardar una ruta para visualizarla má
     const fastJourney = await routeController.getRoute(route)
     const priceRoute1 = await routeController.getPrice(fastJourney, route)
 
-    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia')
+    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia', 'electric')
     await routeController.storeJourney(journeyToStore)
     await expect(routeController.storeJourney(journeyToStore)).rejects.toThrow(
       'JourneyAlreadyStoredException',
@@ -202,7 +202,7 @@ describe('HU18: Como usuario quiero poder consultar el listado de rutas guardada
     const fastJourney = await routeController.getRoute(route)
     const priceRoute1 = await routeController.getPrice(fastJourney, route)
 
-    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia')
+    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia', 'electric')
     await expect(routeController.storeJourney(journeyToStore)).resolves.toBeTruthy();
     await expect(AsyncStorage.getItem).toBeCalledWith('journeys');
     await expect(AsyncStorage.setItem).toBeCalled();
@@ -239,8 +239,8 @@ describe('HU20: Como usuario quiero poder marcar como favorito rutas para que ap
     const priceRoute1 = await routeController.getPrice(fastJourney, route)
     const priceRoute2 = await routeController.getPrice(fastJourney, route2)
 
-    const journeyToStore = new Journey(creatorEmail, fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-ValenciaFAST')
-    const journeyToStore2 = new Journey(creatorEmail, economicJourney.coordinates, economicJourney.distance, economicJourney.duration, priceRoute2, 'Cs-ValenciaECO')
+    const journeyToStore = new Journey(creatorEmail, fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-ValenciaFAST', 'electric')
+    const journeyToStore2 = new Journey(creatorEmail, economicJourney.coordinates, economicJourney.distance, economicJourney.duration, priceRoute2, 'Cs-ValenciaECO', 'electric')
     
     await expect(routeController.storeJourney(journeyToStore)).resolves.toBeTruthy();
     await expect(routeController.storeJourney(journeyToStore2)).resolves.toBeTruthy();
@@ -266,7 +266,7 @@ describe('HU20: Como usuario quiero poder marcar como favorito rutas para que ap
 
 
     const priceRoute1 = await routeController.getPrice(fastJourney, route)
-    const journeyToStore = new Journey(creatorEmail, fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-ValenciaFAST')
+    const journeyToStore = new Journey(creatorEmail, fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-ValenciaFAST', 'electric')
 
     await expect(
       routeController.favoriteRoute(journeyToStore),
@@ -288,7 +288,7 @@ describe('HU19: Como usuario quiero poder eliminar una ruta guardada cuando ya n
     const fastJourney = await routeController.getRoute(route)
     const priceRoute1 = await routeController.getPrice(fastJourney, route)
 
-    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia')
+    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia', 'electric')
     await expect(routeController.storeJourney(journeyToStore)).resolves.toBeTruthy();
     await expect(AsyncStorage.getItem).toBeCalledWith('journeys');
     await expect(AsyncStorage.setItem).toBeCalled();
@@ -311,7 +311,7 @@ describe('HU19: Como usuario quiero poder eliminar una ruta guardada cuando ya n
     const fastJourney = await routeController.getRoute(route)
     const priceRoute1 = await routeController.getPrice(fastJourney, route)
 
-    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia')
+    const journeyToStore = new Journey(creatorEmail,fastJourney.coordinates, fastJourney.distance, fastJourney.duration, priceRoute1, 'Cs-Valencia', 'electric')
 
     await expect(
       routeController.removeRoute(journeyToStore),
