@@ -21,7 +21,7 @@ import Route from '../models/Route';
 import Journey from '../models/Journey';
 import globalStyles from '../styles';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useRoute } from '@react-navigation/native';
+import {useRoute} from '@react-navigation/native';
 
 const RouteFinder = () => {
   const route = useRoute();
@@ -43,7 +43,7 @@ const RouteFinder = () => {
   const [originName, setOriginName] = useState('');
   const [destinationName, setDestinationName] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [journeyVehicleType, setJourneyVehicleType] = useState('');
   const [selectedRouteOption, setSelectedRouteOption] = useState('fast');
   const [selectedVehicleOption, setSelectedVehicleOption] = useState('generic');
   const [selectedOriginOption, setSelectedOriginOption] = useState('custom');
@@ -63,20 +63,20 @@ const RouteFinder = () => {
 
   useEffect(() => {
     if (route.params && route.params.journey) {
-      const { journey } = route.params;
+      const {journey} = route.params;
       // Establece los datos de la ruta en los estados correspondientes
       setJourney(journey);
       setName(journey.name);
       setRouteCoordinates(journey.coordinates);
       setDuration(journey.duration);
       setDistance(journey.distance);
-      setPrice(journey.cost)
+      setPrice(journey.cost);
+      setJourneyVehicleType(journey.vehicleType);
       // Agrega cualquier otro estado que necesites establecer
       setShowMap(true);
     }
   }, [route.params]);
 
-  
   useEffect(() => {
     async function fetchInterestPoints() {
       const points = await interestPointController.getInterestPoints();
@@ -125,6 +125,7 @@ const RouteFinder = () => {
       journey.duration,
       price,
       name,
+      journeyVehicleType,
     );
 
     try {
@@ -203,6 +204,7 @@ const RouteFinder = () => {
       setDistance(formatDistance(journey.distance));
       setShowMap(true);
       const price = await routeController.getPrice(journey, route);
+      setJourneyVehicleType(vehicle.type);
       setPrice(price);
     } catch (error) {
       let message = 'An error occurred. Please try again.';
@@ -271,8 +273,11 @@ const RouteFinder = () => {
               Distance: {distance}
             </Text>
             {price !== '' &&
-              selectedGenericVehicleType !== 'walking' &&
-              selectedGenericVehicleType !== 'bike' && (
+              ((selectedGenericVehicleType !== 'walking' &&
+                selectedGenericVehicleType !== 'bike' &&
+                journeyVehicleType === '') ||
+                (journeyVehicleType !== 'walking' &&
+                  journeyVehicleType !== 'bike')) && (
                 <>
                   <Text
                     style={[
@@ -280,19 +285,25 @@ const RouteFinder = () => {
                       {color: globalStyles.white.backgroundColor},
                     ]}>
                     Estimated fuel price: {price}€
-                  </Text>
+                </Text>
+                {!route.params && (
                   <Pressable onPress={() => handleSaveRoute()}>
-                    <MaterialCommunityIcons
-                      name={'content-save'}
-                      size={30}
-                      color={'grey'}
-                    />
-                  </Pressable>
+                  <MaterialCommunityIcons
+                    name={'content-save'}
+                    size={30}
+                    color={'grey'}
+                  />
+                </Pressable>
+                )}
+                  
                 </>
               )}
             {price !== '' &&
               (selectedGenericVehicleType === 'walking' ||
-                selectedGenericVehicleType === 'bike') && (
+                selectedGenericVehicleType === 'bike' &&
+              journeyVehicleType === '') ||
+              (journeyVehicleType === 'walking' ||
+                journeyVehicleType === 'bike') && (
                 <>
                   <Text
                     style={[
@@ -301,13 +312,15 @@ const RouteFinder = () => {
                     ]}>
                     Estimated calories burnt: {price}
                   </Text>
+                  {!route.params  && (
                   <Pressable onPress={() => handleSaveRoute()}>
-                    <MaterialCommunityIcons
-                      name={'content-save'}
-                      size={30}
-                      color={'grey'}
-                    />
-                  </Pressable>
+                  <MaterialCommunityIcons
+                    name={'content-save'}
+                    size={30}
+                    color={'grey'}
+                  />
+                </Pressable>
+                )}
                 </>
               )}
           </View>
