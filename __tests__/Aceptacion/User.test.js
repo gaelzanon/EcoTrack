@@ -86,7 +86,7 @@ describe('HU2: Como usuario registrado quiero iniciar sesión en la aplicación 
     await AuthService.deleteUser();
   });
 
-  it('E3: No se inicia sesión si la contraseña no es válida', async () => {
+  it('E2: No se inicia sesión si la contraseña no es válida', async () => {
     const usuario = new User('usuario@example.com', 'Password');
     const formularioLoginFactory = new FormularioLoginFactory();
     const formularioLogin = formularioLoginFactory.crearFormulario();

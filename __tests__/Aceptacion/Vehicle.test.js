@@ -37,7 +37,7 @@ describe('HU9: Como usuario quiero poder dar de alta un vehículo para poder emp
     await expect(vehicleController.registerVehicle(vehicle)).rejects.toThrow('DuplicateVehicleException');
   });
 
-  it('E4: No se crea el vehículo si el año no es válido', async () => {
+  it('E3: No se crea el vehículo si el año no es válido', async () => {
     const creatorEmail = 'usuario@gmail.com';
     const vehicle = new Vehicle(creatorEmail, 'Toyota', 'Corolla', 1500, 5, '1171MSL', 'gasoline');
 
