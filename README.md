@@ -68,6 +68,6 @@ Si deseas contribuir a este proyecto, por favor considera los siguientes pasos:
 
 ## Licencia
 
-Este proyecto está licenciado bajo los términos que elijas, usualmente se utiliza MIT o similar.
+Este proyecto está licenciado bajo los términos MIT.
 
 Con estas instrucciones, deberías ser capaz de configurar y ejecutar el proyecto en tu entorno de desarrollo local. Para cualquier duda o aclaración, no dudes en abrir un issue en el repositorio del proyecto.
