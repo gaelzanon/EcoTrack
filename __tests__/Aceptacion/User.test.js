@@ -1,4 +1,5 @@
 import User from '../../models/User';
+import Vehicle from '../../models/Vehicle';
 import UserController from '../../controllers/UserController';
 import authService from '../../services/authService';
 import cloudService from '../../services/cloudService';
@@ -182,5 +183,103 @@ describe('HU3: Como usuario quiero poder cerrar la sesión de mi cuenta para sal
     await userController.login(formularioLogin.datosFormulario);
     await AuthService.deleteUser();
   });
-  
+
+});
+
+describe('HU22: Como usuario quiero establecer un tipo de ruta por defecto a emplear en las nuevas rutas.', () => {
+  const creatorEmail = 'usuario@gmail.com';
+  const usuario = new User(creatorEmail, 'Password12');
+
+  afterEach(async () => {
+    //Ahora lo logueamos para borrarlo del auth
+    const formularioLoginFactory = new FormularioLoginFactory();
+    const formularioLogin = formularioLoginFactory.crearFormulario();
+    formularioLogin.rellenarDatos({
+      email: usuario.email,
+      password: usuario.password,
+    });
+    await userController.login(formularioLogin.datosFormulario);
+    await AuthService.deleteUser();
+  });
+
+  it('E1: Establecer un tipo de ruta por defecto correctamente', async () => {
+    const formularioRegistroFactory = new FormularioRegistroFactory();
+    const formularioRegistro = formularioRegistroFactory.crearFormulario();
+    formularioRegistro.rellenarDatos({
+      user: 'juan',
+      email: usuario.email,
+      password1: usuario.password,
+      password2: usuario.password,
+    });
+    await userController.register(formularioRegistro.datosFormulario);
+
+    await expect(userController.setDefaultRouteType(usuario.email, 'fast')).resolves.toBeTruthy();
+    
+  });
+  it('E2: Intenta establecer un tipo de ruta inexistente por defecto', async () => {
+    const formularioRegistroFactory = new FormularioRegistroFactory();
+    const formularioRegistro = formularioRegistroFactory.crearFormulario();
+    formularioRegistro.rellenarDatos({
+      user: 'juan',
+      email: usuario.email,
+      password1: usuario.password,
+      password2: usuario.password,
+    });
+    await userController.register(formularioRegistro.datosFormulario);
+    
+    await expect(userController.setDefaultRouteType(usuario.email, 'notFound')).rejects.toThrow(
+      'InvalidTypeException',
+    );
+
+  });
+});
+
+describe('HU21: Como usuario quiero establecer un vehículo/modo de transporte por defecto a emplear en las nuevas rutas que calcule para no tener que indicarlo a mano.', () => {
+  const creatorEmail = 'usuario@gmail.com';
+  const usuario = new User(creatorEmail, 'Password12');
+
+  afterEach(async () => {
+    //Ahora lo logueamos para borrarlo del auth
+    const formularioLoginFactory = new FormularioLoginFactory();
+    const formularioLogin = formularioLoginFactory.crearFormulario();
+    formularioLogin.rellenarDatos({
+      email: usuario.email,
+      password: usuario.password,
+    });
+    await userController.login(formularioLogin.datosFormulario);
+    await AuthService.deleteUser();
+  });
+  it('E1: Se establece un vehículo por defecto correctamente', async () => {
+    const formularioRegistroFactory = new FormularioRegistroFactory();
+    const formularioRegistro = formularioRegistroFactory.crearFormulario();
+    formularioRegistro.rellenarDatos({
+      user: 'juan',
+      email: usuario.email,
+      password1: usuario.password,
+      password2: usuario.password,
+    });
+    await userController.register(formularioRegistro.datosFormulario);
+
+    await expect(
+      userController.setDefaultVehicle(usuario.email, '1171MSL'),
+    ).resolves.toBeTruthy();
+  });
+
+  it('E2: Se intenta establecer un vehículo inexistente por defecto', async () => {
+    const formularioRegistroFactory = new FormularioRegistroFactory();
+    const formularioRegistro = formularioRegistroFactory.crearFormulario();
+    formularioRegistro.rellenarDatos({
+      user: 'juan',
+      email: usuario.email,
+      password1: usuario.password,
+      password2: usuario.password,
+    });
+    await userController.register(formularioRegistro.datosFormulario);
+
+    const vehicle = null;
+
+    await expect(userController.setDefaultVehicle(usuario.email, vehicle)).rejects.toThrow(
+      'InvalidVehicleException',
+    );
+  });
 });

@@ -79,6 +79,39 @@ class UserController {
       throw error;
     }
   }
+
+
+  async setDefaultRouteType(email, type) {
+    if (type !== 'fast' && type !== 'economic') {
+      const error = new Error('InvalidTypeException');
+      error.code = 'InvalidTypeException';
+      throw error;
+    }
+    try {
+      const resultDatabase = await this.cloudService.setDefaultRouteType(email, type);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar la excepción tal como se recibe
+      throw error;
+    }
+  }
+
+  async setDefaultVehicle(email, vehicle) {
+    
+    if (!vehicle) {
+      const error = new Error('InvalidVehicleException');
+      error.code = 'InvalidVehicleException';
+      throw error;
+    }
+      
+    try {
+      const resultDatabase = await this.cloudService.setDefaultVehicle(email, vehicle);
+      return resultDatabase;
+    } catch (error) {
+      // Reenviar la excepción tal como se recibe
+      throw error;
+    }
+  }
 }
 
 export default UserController;

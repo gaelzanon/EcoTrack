@@ -14,9 +14,14 @@ const HeaderDropdown = () => {
   const {user, setUser, setVehicles, setInterestPoints} = useAsyncStorage();
 
   const dropdownMenu = [
+    {label: 'Preferences', value: 'preferences'},
     {label: 'Delete User', value: 'delete'},
     {label: 'Logout', value: 'logout'},
   ];
+
+  const navigateToPreferences = () => {
+    navigation.navigate('Preferences');
+  }
 
   // Eliminar usuario
   const deleteUser = () => {
@@ -93,9 +98,13 @@ const HeaderDropdown = () => {
       },
     ]);
   };
+
   // Menú en cabecera
   const handleMenu = value => {
     switch (value) {
+      case 'preferences':
+        navigateToPreferences();
+        break;
       case 'delete':
         deleteUser();
         break;

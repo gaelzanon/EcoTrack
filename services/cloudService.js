@@ -22,6 +22,10 @@ class CloudService {
     return collection(this.db, `${this.env}_interestPoints`);
   }
 
+  get journeysCollection() {
+    return collection(this.db, `${this.env}_journeys`);
+  }
+
   get usersCollection() {
     return collection(this.db, `${this.env}_users`);
   }
@@ -47,6 +51,13 @@ class CloudService {
   async interestPointExists(creator, name) {
     return this.existsInFirebase(
       this.interestPointsCollection,
+      doc => doc.data().creator === creator && doc.data().name === name,
+    );
+  }
+
+  async journeyExists(creator, name) {
+    return this.existsInFirebase(
+      this.journeysCollection,
       doc => doc.data().creator === creator && doc.data().name === name,
     );
   }
@@ -88,11 +99,55 @@ class CloudService {
       await AsyncStorage.removeItem('user');
       await AsyncStorage.removeItem('vehicles');
       await AsyncStorage.removeItem('interestPoints');
+      await AsyncStorage.removeItem('journeys');
       return true;
     } else {
       const error = new Error('NoInetConection');
       error.code = 'NoInetConection';
       throw error;
+    }
+  }
+
+  async addJourney(journey) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+    if (isConnected) {
+      try {
+        let journeys = await AsyncStorage.getItem('journeys');
+        journeys = journeys ? JSON.parse(journeys) : [];
+        const existsInFirebase = await this.journeyExists(
+          journey.creator,
+          journey.name,
+        );
+        if (!journeys.some(j => j.name === journey.name) && !existsInFirebase) {
+          // Convierte el objeto a un formato que Firestore pueda entender
+          const journeyData = {...journey};
+          await addDoc(this.journeysCollection, journeyData);
+          journeys.push(journeyData);
+          await AsyncStorage.setItem('journeys', JSON.stringify(journeys));
+          return journey;
+        } else {
+          const error = new Error('JourneyAlreadyStoredException');
+          error.code = 'JourneyAlreadyStoredException';
+          throw error;
+        }
+      } catch (error) {
+        throw error;
+      }
+    } else {
+      //No hay internet
+      let journeys = await AsyncStorage.getItem('journeys');
+      journeys = journeys ? JSON.parse(journeys) : [];
+
+      if (!journeys.some(j => j.name === journey.name)) {
+        journeys.push(journey);
+        await AsyncStorage.setItem('journeys', JSON.stringify(journeys));
+        return journey;
+      } else {
+        const error = new Error('JourneyAlreadyStoredException');
+        error.code = 'JourneyAlreadyStoredException';
+        throw error;
+      }
     }
   }
 
@@ -143,10 +198,70 @@ class CloudService {
     }
   }
 
+  async deleteJourney(journey) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+    let journeys = await AsyncStorage.getItem('journeys');
+    journeys = journeys ? JSON.parse(journeys) : [];
+
+    if (isConnected) {
+      try {
+        const existe = await this.journeyExists(journey.creator, journey.name);
+        if (!existe) {
+          const error = new Error('JourneyNotFoundException');
+          error.code = 'JourneyNotFoundException';
+          throw error;
+        }
+        const journeyQuerySnapshot = await getDocs(this.journeysCollection);
+        const journeyDoc = journeyQuerySnapshot.docs.find(
+          doc =>
+            doc.data().creator === journey.creator &&
+            doc.data().name === journey.name,
+        );
+        if (journeyDoc) {
+          // Eliminar de BBDD
+          await deleteDoc(journeyDoc.ref);
+        }
+        // Eliminar objeto de listado en almacenamiento local
+        let journeys = await AsyncStorage.getItem('journeys');
+        journeys = journeys ? JSON.parse(journeys) : [];
+        const updatedJourneys = journeys.filter(
+          item => item.name !== journey.name,
+        );
+        await AsyncStorage.setItem('journeys', JSON.stringify(updatedJourneys));
+        return true;
+      } catch (error) {
+        throw error;
+      }
+    } else {
+      //No hay internet
+      // Eliminar objeto de listado en almacenamiento local
+      let journeys = await AsyncStorage.getItem('journeys');
+      journeys = journeys ? JSON.parse(journeys) : [];
+      const updatedJourneys = journeys.filter(
+        item => item.name !== journey.name,
+      );
+      if (journeys.length === updatedJourneys.length) {
+        const error = new Error('JourneyNotFoundException');
+        error.code = 'JourneyNotFoundException';
+        throw error;
+      }
+      await AsyncStorage.setItem('journeys', JSON.stringify(updatedJourneys));
+      return true;
+    }
+  }
+
   async deleteVehicle(vehicle) {
     const netInfo = await NetInfo.fetch();
     const isConnected = netInfo.isConnected;
+    let userInfo = await AsyncStorage.getItem('userInfo');
+    userInfo = userInfo ? JSON.parse(userInfo) : {};
 
+    if (userInfo && vehicle.plate === userInfo.defaultVehicle) {
+      const error = new Error('VehicleIsDefaultException');
+      error.code = 'VehicleIsDefaultException';
+      throw error;
+    }
     if (isConnected) {
       try {
         const existe = await this.vehicleExists(vehicle.creator, vehicle.plate);
@@ -246,15 +361,6 @@ class CloudService {
     }
   }
 
-  async clearCollection(collectionName) {
-    if (this.env === 'test') {
-      const querySnapshot = await getDocs(
-        collection(this.db, `test_${collectionName}`),
-      );
-      const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
-      await Promise.all(deletePromises);
-    }
-  }
 
   async addInterestPoint(interestPoint) {
     const netInfo = await NetInfo.fetch();
@@ -403,6 +509,26 @@ class CloudService {
     return vehicles;
   }
 
+  async getRoutes() {
+    let journeys = await AsyncStorage.getItem('journeys');
+    journeys = journeys ? JSON.parse(journeys) : [];
+    // Ordenar los puntos de interés para que los favoritos aparezcan primero
+    journeys.sort((a, b) => {
+      // Considera los puntos de vehiculos sin el parámetro 'isFavorite' como no favoritos
+      const isFavoriteA = a.isFavorite === true;
+      const isFavoriteB = b.isFavorite === true;
+
+      if (isFavoriteA && !isFavoriteB) {
+        return -1; // 'a' es favorito y 'b' no, 'a' va primero
+      } else if (!isFavoriteA && isFavoriteB) {
+        return 1; // 'b' es favorito y 'a' no, 'b' va primero
+      } else {
+        return 0; // Si ambos son favoritos o no favoritos, se mantienen en el mismo orden
+      }
+    });
+    return journeys;
+  }
+
   async getInterestPoints() {
     let interestPoints = await AsyncStorage.getItem('interestPoints');
     interestPoints = interestPoints ? JSON.parse(interestPoints) : [];
@@ -423,6 +549,57 @@ class CloudService {
     });
 
     return interestPoints;
+  }
+
+  async favoriteJourney(journey) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+
+    try {
+      let journeys = await AsyncStorage.getItem('journeys');
+      journeys = journeys ? JSON.parse(journeys) : [];
+
+      // Buscar el punto de interés en el almacenamiento local
+      const index = journeys.findIndex(
+        j => j.name === journey.name && j.creator === journey.creator,
+      );
+
+      if (index !== -1) {
+        // Invertir el estado de favorito, o establecerlo si no existe
+        journeys[index].isFavorite = !journeys[index].isFavorite;
+      } else {
+        // Si no existe en local , no se puede marcar como favorito
+
+        throw new Error('JourneyNotFoundException');
+      }
+
+      // Actualizar el almacenamiento local
+      await AsyncStorage.setItem('journeys', JSON.stringify(journeys));
+
+      if (isConnected) {
+        // Actualizar el estado de favorito en la base de datos remota
+        const journeysQuerySnapshot = await getDocs(this.journeysCollection);
+        const journeyDoc = journeysQuerySnapshot.docs.find(
+          doc =>
+            doc.data().creator === journey.creator &&
+            doc.data().name === journey.name,
+        );
+
+        if (journeyDoc) {
+          // Actualizar el documento en la base de datos
+          await updateDoc(journeyDoc.ref, {
+            isFavorite: journeys[index].isFavorite,
+          });
+        } else {
+          // Si el documento no existe en la base de datos, crea uno nuevo
+          await addDoc(this.journeysCollection, journey);
+        }
+      }
+
+      return true;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async favoriteInterestPoint(interestPoint) {
@@ -527,6 +704,57 @@ class CloudService {
         }
       }
 
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async setDefaultRouteType(email, type) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+
+    let userInfo = await AsyncStorage.getItem('userInfo');
+    userInfo = userInfo ? JSON.parse(userInfo) : {};
+    userInfo = {...userInfo, defaultRouteType: type};
+    await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+
+    try {
+      if (isConnected) {
+        const userQuerySnapshot = await getDocs(this.usersCollection);
+        const userDoc = userQuerySnapshot.docs.find(
+          doc => doc.data().email === email,
+        );
+
+        await updateDoc(userDoc.ref, {defaultRouteType: type});
+      }
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async setDefaultVehicle(email, vehicle) {
+    const netInfo = await NetInfo.fetch();
+    const isConnected = netInfo.isConnected;
+    let userInfo = await AsyncStorage.getItem('userInfo');
+    userInfo = userInfo ? JSON.parse(userInfo) : {};
+
+    userInfo = {...userInfo, defaultVehicle: vehicle};
+    await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+    try {
+      if (isConnected) {
+        // Actualizar el estado de vehiculo default en la base de datos remota
+        const userQuerySnapshot = await getDocs(this.usersCollection);
+        const userDoc = userQuerySnapshot.docs.find(
+          doc => doc.data().email === email,
+        );
+
+        // Actualizar el documento en la base de datos
+        await updateDoc(userDoc.ref, {
+          defaultVehicle: vehicle,
+        });
+      }
       return true;
     } catch (error) {
       throw error;
