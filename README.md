@@ -4,6 +4,8 @@
 
 Este proyecto consiste en una aplicación Android desarrollada en React Native. La aplicación está diseñada para ofrecer funcionalidades de mapeo y rutas, integrando diversas APIs y servicios externos. Es un proyecto integral que combina modernas prácticas de desarrollo de software con un enfoque en la usabilidad y la experiencia del usuario.
 
+El proyecto ha sido realizado por los alumnos Daniel Gauchía Alba y Gael Zanón Rives para las asignaturas EI1039 y EI1048 en el curso 2023/2024.
+
 ## Configuración Inicial
 Para configurar y ejecutar el proyecto correctamente, es necesario establecer algunas configuraciones iniciales relacionadas con las API Keys y la configuración de Firebase.
 
