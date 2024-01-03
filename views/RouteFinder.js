@@ -274,7 +274,9 @@ const RouteFinder = () => {
               {
                 position: 'fixed',
                 bottom: 0,
+                padding: 5,
                 borderRadius: 15,
+                backgroundColor: '#17766b',
                 width: '100%',
                 alignItems: 'center',
               },
@@ -312,7 +314,7 @@ const RouteFinder = () => {
                       <MaterialCommunityIcons
                         name={'content-save'}
                         size={30}
-                        color={'grey'}
+                        color={'#013437'}
                       />
                     </Pressable>
                   )}
@@ -337,7 +339,7 @@ const RouteFinder = () => {
                       <MaterialCommunityIcons
                         name={'content-save'}
                         size={30}
-                        color={'grey'}
+                        color={'#013437'}
                       />
                     </Pressable>
                   )}
@@ -505,7 +507,7 @@ const RouteFinder = () => {
                 searchOptions={{types: ['(cities)']}}
                 onPress={(details = null) => {
                   // Formateamos los datos para enviar solamente el nombre de la ciudad (Sin el país)
-                  setDestinationName(details.structured_formatting.main_text);
+                  setDestinationName(details.description);
                 }}
                 query={{
                   key: Config.GOOGLE_MAPS_API_KEY,
@@ -570,22 +572,41 @@ const RouteFinder = () => {
         }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
+            <View
+              style={{
+                flexDirection: 'row',
+                position: 'absolute',
+                right: 10,
+                top: 10
+              }}>
+              <Pressable
+                onPress={() => setModalVisible(!modalVisible)}
+                style={{marginLeft: 10}}>
+                <MaterialCommunityIcons
+                  name={'close'}
+                  size={24}
+                  color="white"
+                />
+              </Pressable>
+            </View>
             <TextInput
               style={styles.modalText}
-              placeholder="Enter Route Name"
+              placeholder="Route Name"
               onChangeText={text => setName(text)}
               defaultValue={name}
             />
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}>
-              <Text style={styles.textStyle}>Cancel</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.button, styles.buttonSave]}
-              onPress={handleConfirmSaveRoute}>
-              <Text style={styles.textStyle}>Save Route</Text>
-            </Pressable>
+            <View style={styles.flexContainer}>
+              <Pressable
+                style={[styles.button, styles.buttonSave]}
+                onPress={handleConfirmSaveRoute}>
+                <Text style={styles.textStyle}>Save Route</Text>
+              </Pressable>
+              {/* <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => setModalVisible(!modalVisible)}>
+                <Text style={styles.textStyle}>Cancel</Text>
+              </Pressable> */}
+            </View>
           </View>
         </View>
       </Modal>
@@ -647,9 +668,10 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: '#003639',
     borderRadius: 20,
     padding: 35,
+    height: 200,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -662,11 +684,10 @@ const styles = StyleSheet.create({
   },
 
   buttonClose: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#17766b',
   },
   buttonSave: {
-    backgroundColor: '#F194FF',
-    marginTop: 10,
+    backgroundColor: '#2f9f82',
   },
   textStyle: {
     color: 'white',
@@ -675,7 +696,15 @@ const styles = StyleSheet.create({
   },
   modalText: {
     marginBottom: 15,
+    width: 250,
+    backgroundColor: 'white',
     textAlign: 'center',
+  },
+  flexContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
 });
 
