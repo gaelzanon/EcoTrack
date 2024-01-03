@@ -23,7 +23,7 @@ const Preferences = () => {
   const [localVehicles, setLocalVehicles] = useState(vehicles);
   const [selectedVehicleOption, setSelectedVehicleOption] = useState('generic');
   const [selectedVehicle, setSelectedVehicle] = useState(
-    vehicles ? vehicles[0].plate : null,
+    (vehicles && vehicles.length>0) ? vehicles[0].plate : null,
   );
   const [selectedGenericVehicleType, setSelectedGenericVehicleType] =
     useState('walking');
@@ -110,7 +110,7 @@ const Preferences = () => {
           },
         ]}>
         <Text style={styles.label}>Default Vehicle</Text>
-        {vehicles && (
+        {vehicles && vehicles.length>0 && (
           <View style={styles.pickerContainer}>
             <Picker
               selectedValue={selectedVehicleOption}

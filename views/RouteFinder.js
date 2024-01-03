@@ -351,7 +351,7 @@ const RouteFinder = () => {
           </View>
 
           <Text style={styles.label}>Vehicle</Text>
-          {vehicles && (
+          {vehicles && vehicles.length>0 && (
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={selectedVehicleOption}

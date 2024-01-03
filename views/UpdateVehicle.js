@@ -139,7 +139,6 @@ const UpdateVehicle = () => {
           <Picker
             selectedValue={type}
             onValueChange={(itemValue, itemIndex) => setType(itemValue)}>
-            <Picker.Item label="Bike" value="bike" />
             <Picker.Item label="Electric" value="electric" />
             <Picker.Item label="Gasoline" value="gasoline" />
             <Picker.Item label="Diesel" value="diesel" />

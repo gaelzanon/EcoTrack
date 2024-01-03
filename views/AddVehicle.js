@@ -23,7 +23,7 @@ const AddVehicle = () => {
   const [year, setYear] = useState('');
   const [averageConsumption, setAverageConsumption] = useState('');
   const [plate, setPlate] = useState('');
-  const [type, setType] = useState('bike');
+  const [type, setType] = useState('electric');
 
   const {user, setVehicles, vehicles} = useAsyncStorage(); // Obtener el usuario del contexto de AsyncStorage
 
@@ -141,7 +141,6 @@ const AddVehicle = () => {
           <Picker
             selectedValue={type}
             onValueChange={(itemValue, itemIndex) => setType(itemValue)}>
-            <Picker.Item label="Bike" value="bike" />
             <Picker.Item label="Electric" value="electric" />
             <Picker.Item label="Gasoline" value="gasoline" />
             <Picker.Item label="Diesel" value="diesel" />
