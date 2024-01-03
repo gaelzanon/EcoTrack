@@ -88,9 +88,6 @@ const InterestPointsScreen = () => {
     <View
       style={[
         styles.card,
-        {
-          flexDirection: 'row',
-        },
       ]}>
       <View style={{flex: 1}}>
         <Text style={styles.name}>{ip.name}</Text>
@@ -100,9 +97,7 @@ const InterestPointsScreen = () => {
       <View
         style={{
           flexDirection: 'row',
-          position: 'absolute',
-          right: 13,
-          top: 13,
+          
         }}>
         <Pressable onPress={() => handleFavoriteInterestPoint(ip)}>
           <MaterialCommunityIcons
