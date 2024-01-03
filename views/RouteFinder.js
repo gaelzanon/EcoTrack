@@ -212,7 +212,9 @@ const RouteFinder = () => {
       setDuration(formatDuration(journey.duration));
       setDistance(formatDistance(journey.distance));
       setShowMap(true);
+
       const price = await routeController.getPrice(journey, route);
+     
       setJourneyVehicleType(vehicle.type);
       setPrice(price);
     } catch (error) {
@@ -308,8 +310,8 @@ const RouteFinder = () => {
               )}
             {(price !== '' &&
               (selectedGenericVehicleType === 'walking' ||
-                (selectedGenericVehicleType === 'bike' &&
-                  journeyVehicleType === ''))) ||
+                selectedGenericVehicleType === 'bike') &&
+                  journeyVehicleType === '') ||
               ((journeyVehicleType === 'walking' ||
                 journeyVehicleType === 'bike') && (
                 <>
