@@ -91,7 +91,7 @@ const VehiclesScreen = () => {
       style={[
         styles.card,
         {
-          flexDirection: 'row',
+          flexDirection: 'column',
         },
       ]}>
       <View style={{flex: 1}}>
@@ -107,9 +107,7 @@ const VehiclesScreen = () => {
       <View
         style={{
           flexDirection: 'row',
-          position: 'absolute',
-          right: 13,
-          top: 13,
+
         }}>
         <Pressable onPress={() => handleFavoriteVehicle(vehicle)}>
           <MaterialCommunityIcons

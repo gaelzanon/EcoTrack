@@ -100,7 +100,7 @@ const RoutesScreen = () => {
         style={[
           styles.card,
           {
-            flexDirection: 'row',
+            flexDirection: 'column',
           },
         ]}>
         <View style={{flex: 1}}>
@@ -112,9 +112,8 @@ const RoutesScreen = () => {
         <View
           style={{
             flexDirection: 'row',
-            position: 'absolute',
-            right: 13,
-            top: 13,
+            
+
           }}>
           <Pressable onPress={() => handleFavoriteRoute(j)}>
             <MaterialCommunityIcons
