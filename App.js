@@ -113,27 +113,27 @@ const App = () => {
                   <Stack.Screen
                     name="AddVehicle"
                     component={AddVehicle}
-                    options={{headerShown: true, title:''}}
+                    options={{headerShown: true, title:'New Vehicle', headerRight: () => <HeaderDropdown/>}}
                   />
                   <Stack.Screen
                     name="UpdateVehicle"
                     component={UpdateVehicle}
-                    options={{headerShown: true, title:''}}
+                    options={{headerShown: true, title:'Modify Vehicle', headerRight: () => <HeaderDropdown/>}}
                   />
                   <Stack.Screen
                     name="AddInterestPoint"
                     component={AddInterestPoint}
-                    options={{headerShown: true, title:''}}
+                    options={{headerShown: true, title:'New Interest Point', headerRight: () => <HeaderDropdown/>}}
                   />
                   <Stack.Screen
                     name="Preferences"
                     component={Preferences}
-                    options={{headerShown: true, title:''}}
+                    options={{headerShown: true, title:'Preferences', headerRight: () => <HeaderDropdown/>}}
                   />
                   <Stack.Screen
                     name="RouteFinder"
                     component={RouteFinder}
-                    options={{headerShown: true, title:''}}
+                    options={{headerShown: true, title:'Search Route', headerRight: () => <HeaderDropdown/>}}
                   />
                 </Stack.Navigator>
               </NavigationContainer>

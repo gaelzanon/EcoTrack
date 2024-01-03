@@ -82,7 +82,6 @@ const Preferences = () => {
       style={[globalStyles.primary, {flex: 1, padding: 20}]}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}>
-      <Text style={globalStyles.mainText}>Preferences</Text>
 
       <View
         style={[
@@ -127,19 +126,21 @@ const Preferences = () => {
         {selectedVehicleOption === 'custom' ? (
           <>
             {localVehicles && localVehicles.length > 0 ? (
-              <Picker
-                selectedValue={selectedVehicle}
-                onValueChange={(itemValue, itemIndex) => {
-                  setSelectedVehicle(itemValue);
-                }}>
-                {localVehicles.map(v => (
-                  <Picker.Item
-                    key={v.plate}
-                    label={`${v.plate} | ${v.brand} | ${v.model}`}
-                    value={v.plate}
-                  />
-                ))}
-              </Picker>
+              <View style={styles.pickerContainer2}>
+                <Picker
+                  selectedValue={selectedVehicle}
+                  onValueChange={(itemValue, itemIndex) => {
+                    setSelectedVehicle(itemValue);
+                  }}>
+                  {localVehicles.map(v => (
+                    <Picker.Item
+                      key={v.plate}
+                      label={`${v.plate} | ${v.brand} | ${v.model}`}
+                      value={v.plate}
+                    />
+                  ))}
+                </Picker>
+              </View>
             ) : (
               <Text>No custom vehicles created yet</Text>
             )}
@@ -205,6 +206,11 @@ const styles = StyleSheet.create({
   pickerContainer: {
     borderWidth: 1,
     borderColor: 'black',
+    marginBottom: 10,
+  },
+  pickerContainer2: {
+    borderWidth: 1,
+    borderColor: '#5c6e61',
     marginBottom: 10,
   },
   label: {

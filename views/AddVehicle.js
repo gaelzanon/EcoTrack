@@ -84,7 +84,6 @@ const AddVehicle = () => {
     <ScrollView style={[globalStyles.primary, { flex: 1, padding: 20 }]}
     showsVerticalScrollIndicator={false} keyboardShouldPersistTaps='handled'>
       <View>
-        <Text style={globalStyles.mainText}>New Vehicle</Text>
 
         <TextInput
           cursorColor="black"

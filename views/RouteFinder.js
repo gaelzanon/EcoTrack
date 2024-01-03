@@ -16,6 +16,8 @@ import {useInterestPointController} from '../contexts/InterestPointControllerCon
 import {useAsyncStorage} from '../contexts/AsyncStorageContext';
 import {Picker} from '@react-native-picker/picker';
 import InterestPoint from '../models/InterestPoint';
+import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
+import Config from 'react-native-config';
 import Vehicle from '../models/Vehicle';
 import Route from '../models/Route';
 import Journey from '../models/Journey';
@@ -244,7 +246,7 @@ const RouteFinder = () => {
   };
 
   return (
-    <View style={[globalStyles.primary, {flex: 1, padding: 20}]}>
+    <View style={[globalStyles.primary, {flex: 1, padding: 10}]}>
       {showMap ? (
         <>
           <MapView
@@ -376,35 +378,39 @@ const RouteFinder = () => {
           {selectedVehicleOption === 'custom' ? (
             <>
               {localVehicles && localVehicles.length > 0 ? (
-                <Picker
-                  selectedValue={selectedVehicle}
-                  onValueChange={(itemValue, itemIndex) => {
-                    setSelectedVehicle(itemValue);
-                  }}>
-                  {localVehicles.map(v => (
-                    <Picker.Item
-                      key={v.plate}
-                      label={`${v.plate} | ${v.brand} | ${v.model}`}
-                      value={v.plate}
-                    />
-                  ))}
-                </Picker>
+                <View style={styles.pickerContainer2}>
+                  <Picker
+                    selectedValue={selectedVehicle}
+                    onValueChange={(itemValue, itemIndex) => {
+                      setSelectedVehicle(itemValue);
+                    }}>
+                    {localVehicles.map(v => (
+                      <Picker.Item
+                        key={v.plate}
+                        label={`${v.plate} | ${v.brand} | ${v.model}`}
+                        value={v.plate}
+                      />
+                    ))}
+                  </Picker>
+                </View>
               ) : (
                 <Text>No custom vehicles created yet</Text>
               )}
             </>
           ) : (
-            <Picker
-              selectedValue={selectedGenericVehicleType}
-              onValueChange={(itemValue, itemIndex) => {
-                setSelectedGenericVehicleType(itemValue);
-              }}>
-              <Picker.Item label="Walk" value="walking" />
-              <Picker.Item label="Bycicle" value="bike" />
-              <Picker.Item label="Diesel car" value="diesel" />
-              <Picker.Item label="Electric car" value="electric" />
-              <Picker.Item label="Gasoline car" value="gasoline" />
-            </Picker>
+            <View style={styles.pickerContainer2}>
+              <Picker
+                selectedValue={selectedGenericVehicleType}
+                onValueChange={(itemValue, itemIndex) => {
+                  setSelectedGenericVehicleType(itemValue);
+                }}>
+                <Picker.Item label="Walk" value="walking" />
+                <Picker.Item label="Bycicle" value="bike" />
+                <Picker.Item label="Diesel car" value="diesel" />
+                <Picker.Item label="Electric car" value="electric" />
+                <Picker.Item label="Gasoline car" value="gasoline" />
+              </Picker>
+            </View>
           )}
           <Text style={styles.label}>Origin</Text>
           {localInterestPoints && (
@@ -422,14 +428,37 @@ const RouteFinder = () => {
           )}
 
           {selectedOriginOption === 'custom' ? (
-            <TextInput
-              cursorColor="black"
-              mode="flat"
-              label="Origin Toponym"
-              style={styles.input}
-              value={originName}
-              onChangeText={text => setOriginName(text)}
+            <View>
+              <GooglePlacesAutocomplete
+              placeholder="Toponym"
+              fetchDetails={false}
+              disableScroll={true}
+              searchOptions={{types: ['(cities)']}}
+              onPress={(details = null) => {
+                // Formateamos los datos para enviar solamente el nombre de la ciudad (Sin el país)
+                setOriginName(details.structured_formatting.main_text);
+              }}
+              query={{
+                key: Config.GOOGLE_MAPS_API_KEY,
+                language: 'es',
+              }}
+              styles={{
+                textInputContainer: {
+                  padding: 13,
+                  marginBottom: 10,
+                  ...globalStyles.white,
+                  borderWidth: 1,
+                  borderColor: 'black',
+                },
+                textInput: {
+                  marginTop: 2,
+                  marginLeft: 2,
+                  fontSize: 16,
+                  color: '#011a1b',
+                },
+              }}
             />
+          </View>
           ) : (
             <>
               {localInterestPoints && localInterestPoints.length > 0 ? (
@@ -467,14 +496,37 @@ const RouteFinder = () => {
           )}
 
           {selectedDestinationOption === 'custom' ? (
-            <TextInput
-              cursorColor="black"
-              mode="flat"
-              label="Destination Toponym"
-              style={styles.input}
-              value={destinationName}
-              onChangeText={text => setDestinationName(text)}
-            />
+            <View>
+            <GooglePlacesAutocomplete
+            placeholder="Toponym"
+            fetchDetails={false}
+            disableScroll={true}
+            searchOptions={{types: ['(cities)']}}
+            onPress={(details = null) => {
+              // Formateamos los datos para enviar solamente el nombre de la ciudad (Sin el país)
+              setDestinationName(details.structured_formatting.main_text);
+            }}
+            query={{
+              key: Config.GOOGLE_MAPS_API_KEY,
+              language: 'es',
+            }}
+            styles={{
+              textInputContainer: {
+                padding: 13,
+                marginBottom: 10,
+                ...globalStyles.white,
+                borderWidth: 1,
+                borderColor: 'black',
+              },
+              textInput: {
+                marginTop: 2,
+                marginLeft: 2,
+                fontSize: 16,
+                color: '#011a1b',
+              },
+            }}
+          />
+        </View>
           ) : (
             <>
               {localInterestPoints && localInterestPoints.length > 0 ? (
@@ -573,6 +625,11 @@ const styles = StyleSheet.create({
   pickerContainer: {
     borderWidth: 1,
     borderColor: 'black',
+    marginBottom: 10,
+  },
+  pickerContainer2: {
+    borderWidth: 1,
+    borderColor: '#5c6e61',
     marginBottom: 10,
   },
   label: {

@@ -19,8 +19,8 @@ import Config from 'react-native-config';
 import NetInfo from '@react-native-community/netinfo';
 const AddInterestPoint = () => {
   const navigation = useNavigation();
-  const [showCoordinateInput, setCoordinateInput] = useState(true);
-  const [showToponymInput, setToponymInput] = useState(false);
+  const [showCoordinateInput, setCoordinateInput] = useState(false);
+  const [showToponymInput, setToponymInput] = useState(true);
   const interestPointController = useInterestPointController();
   const {user, interestPoints, setInterestPoints} = useAsyncStorage(); // Obtener el usuario del contexto de AsyncStorage
 
@@ -140,9 +140,18 @@ const AddInterestPoint = () => {
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}>
       <View>
-        <Text style={globalStyles.mainText}>New Interest Point</Text>
         {connected && (
           <View style={styles.container}>
+            <View style={styles.buttonContainer}>
+              <Pressable
+                style={[
+                  showToponymInput ? styles.selectedButton : styles.buttonTab,
+                  {marginTop: 0, marginBottom: 30},
+                ]}
+                onPress={swapToponymView}>
+                <Text style={styles.buttonText}>TOPONYM</Text>
+              </Pressable>
+            </View>
             <View style={styles.buttonContainer}>
               <Pressable
                 style={[
@@ -153,16 +162,6 @@ const AddInterestPoint = () => {
                 ]}
                 onPress={swapCoordinateView}>
                 <Text style={styles.buttonText}>COORDINATES</Text>
-              </Pressable>
-            </View>
-            <View style={styles.buttonContainer}>
-              <Pressable
-                style={[
-                  showToponymInput ? styles.selectedButton : styles.buttonTab,
-                  {marginTop: 0, marginBottom: 30},
-                ]}
-                onPress={swapToponymView}>
-                <Text style={styles.buttonText}>TOPONYM</Text>
               </Pressable>
             </View>
           </View>
