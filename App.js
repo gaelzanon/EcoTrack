@@ -1,13 +1,13 @@
 import 'react-native-gesture-handler';
 import React, {useRef, useEffect} from 'react';
-import { BackHandler } from 'react-native';
+import { BackHandler , Image} from 'react-native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {PaperProvider, DefaultTheme} from 'react-native-paper';
 import {NavigationContainer} from '@react-navigation/native';
 import globalStyles from './styles';
 import RNBootSplash from 'react-native-bootsplash';
 import HeaderDropdown from './components/HeaderDropdown';
-
+import logo from './assets/bootsplash_logo.png';
 //Views
 import Login from './views/Login';
 import Register from './views/Register';
@@ -83,6 +83,7 @@ const App = () => {
                     headerTintColor: globalStyles.white.backgroundColor,
                     animationEnabled: false, // Deshabilita la animación de transición
                     headerShown: true,
+
                   }}>
                   <Stack.Screen
                     name="Login"
@@ -99,7 +100,12 @@ const App = () => {
                     component={TabStack}
                     options={{
                       title: 'EcoTrack',
-                      headerLeft: () => null,
+                      headerLeft: () => (
+                        <Image
+                          source={logo}
+                          style={{ width: 100, height: 100}} // Ajusta el tamaño y el margen según tus necesidades
+                        />
+                      ),
                       headerRight: () => <HeaderDropdown />,
                     }}
                   />

@@ -53,7 +53,7 @@ const RouteFinder = () => {
   const [selectedGenericVehicleType, setSelectedGenericVehicleType] =
     useState('walking');
 
-  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [selectedVehicle, setSelectedVehicle] = useState(localVehicles[0].plate);
   const [selectedOrigin, setSelectedOrigin] = useState(null);
   const [selectedDestination, setSelectedDestination] = useState(null);
 
@@ -110,6 +110,7 @@ const RouteFinder = () => {
             setSelectedGenericVehicleType(userInfo.defaultVehicle);
           } else {
             setSelectedVehicleOption('custom');
+            setUseCustomVehicle(true)
             setSelectedVehicle(userInfo.defaultVehicle);
           }
         }
