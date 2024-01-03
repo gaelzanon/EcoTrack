@@ -107,27 +107,27 @@ const App = () => {
                   <Stack.Screen
                     name="AddVehicle"
                     component={AddVehicle}
-                    options={{headerShown: false}}
+                    options={{headerShown: true, title:''}}
                   />
                   <Stack.Screen
                     name="UpdateVehicle"
                     component={UpdateVehicle}
-                    options={{headerShown: false}}
+                    options={{headerShown: true, title:''}}
                   />
                   <Stack.Screen
                     name="AddInterestPoint"
                     component={AddInterestPoint}
-                    options={{headerShown: false}}
+                    options={{headerShown: true, title:''}}
                   />
                   <Stack.Screen
                     name="Preferences"
                     component={Preferences}
-                    options={{headerShown: false}}
+                    options={{headerShown: true, title:''}}
                   />
                   <Stack.Screen
                     name="RouteFinder"
                     component={RouteFinder}
-                    options={{headerShown: false}}
+                    options={{headerShown: true, title:''}}
                   />
                 </Stack.Navigator>
               </NavigationContainer>

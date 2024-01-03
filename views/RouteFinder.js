@@ -144,16 +144,21 @@ const RouteFinder = () => {
       Alert.alert('Route succesfully added.');
     } catch (error) {
       let message = 'An error occurred. Please try again.';
-      switch (error.code) {
-        case 'InvalidNameException':
-          message = 'Please enter a valid name.';
-          break;
-        case 'JourneyAlreadyStoredException':
-          message = 'There is aleady a journey stored with this name.';
-          break;
-        default:
-          console.log(error);
-          break;
+      
+      if (error.message.includes('too many index entries for entity')) {
+        message = 'Cannot store a route this large.';
+      } else {
+        switch (error.code) {
+          case 'InvalidNameException':
+            message = 'Please enter a valid name.';
+            break;
+          case 'JourneyAlreadyStoredException':
+            message = 'There is aleady a journey stored with this name.';
+            break;
+          default:
+            console.log(error);
+            break;
+        }
       }
       Alert.alert('Addition Error', message);
     }
