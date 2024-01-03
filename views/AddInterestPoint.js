@@ -227,7 +227,8 @@ const AddInterestPoint = () => {
                 disableScroll={true}
                 searchOptions={{types: ['(cities)']}}
                 onPress={(details = null) => {
-                  setToponym(details.details.description);
+
+                  setToponym(details.description);
                 }}
                 query={{
                   key: Config.GOOGLE_MAPS_API_KEY,
