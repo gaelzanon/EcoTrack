@@ -227,8 +227,8 @@ const AddInterestPoint = () => {
                 disableScroll={true}
                 searchOptions={{types: ['(cities)']}}
                 onPress={(details = null) => {
-                  // Formateamos los datos para enviar solamente el nombre de la ciudad (Sin el país)
-                  setToponym(details.structured_formatting.main_text);
+
+                  setToponym(details.description);
                 }}
                 query={{
                   key: Config.GOOGLE_MAPS_API_KEY,

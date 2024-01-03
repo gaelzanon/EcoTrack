@@ -55,7 +55,9 @@ const RouteFinder = () => {
   const [selectedGenericVehicleType, setSelectedGenericVehicleType] =
     useState('walking');
 
-  const [selectedVehicle, setSelectedVehicle] = useState(localVehicles[0].plate);
+  const [selectedVehicle, setSelectedVehicle] = useState(
+    localVehicles[0].plate,
+  );
   const [selectedOrigin, setSelectedOrigin] = useState(null);
   const [selectedDestination, setSelectedDestination] = useState(null);
 
@@ -112,11 +114,10 @@ const RouteFinder = () => {
             setSelectedGenericVehicleType(userInfo.defaultVehicle);
           } else {
             setSelectedVehicleOption('custom');
-            setUseCustomVehicle(true)
+            setUseCustomVehicle(true);
             setSelectedVehicle(userInfo.defaultVehicle);
           }
         }
-        
       }
     }
 
@@ -147,7 +148,7 @@ const RouteFinder = () => {
       Alert.alert('Route succesfully added.');
     } catch (error) {
       let message = 'An error occurred. Please try again.';
-      
+
       if (error.message.includes('too many index entries for entity')) {
         message = 'Cannot store a route this large.';
       } else {
@@ -222,7 +223,7 @@ const RouteFinder = () => {
       setShowMap(true);
 
       const price = await routeController.getPrice(journey, route);
-     
+
       setJourneyVehicleType(vehicle.type);
       setPrice(price);
     } catch (error) {
@@ -320,7 +321,7 @@ const RouteFinder = () => {
             {(price !== '' &&
               (selectedGenericVehicleType === 'walking' ||
                 selectedGenericVehicleType === 'bike') &&
-                  journeyVehicleType === '') ||
+              journeyVehicleType === '') ||
               ((journeyVehicleType === 'walking' ||
                 journeyVehicleType === 'bike') && (
                 <>
@@ -362,7 +363,7 @@ const RouteFinder = () => {
           </View>
 
           <Text style={styles.label}>Vehicle</Text>
-          {vehicles && vehicles.length>0 && (
+          {vehicles && vehicles.length > 0 && (
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={selectedVehicleOption}
@@ -431,37 +432,34 @@ const RouteFinder = () => {
           {selectedOriginOption === 'custom' ? (
             <View>
               <GooglePlacesAutocomplete
-              placeholder="Toponym"
-              fetchDetails={false}
-              disableScroll={true}
-              searchOptions={{types: ['(cities)']}}
-              onPress={(details = null) => {
-                // Formateamos los datos para enviar solamente el nombre de la ciudad (Sin el país)
-                direccion = details.structured_formatting.main_text + ', ' + details.structured_formatting.secondary_text
-                setOriginName(direccion);
-                console.log(originName)
-              }}
-              query={{
-                key: Config.GOOGLE_MAPS_API_KEY,
-                language: 'es',
-              }}
-              styles={{
-                textInputContainer: {
-                  padding: 13,
-                  marginBottom: 10,
-                  ...globalStyles.white,
-                  borderWidth: 1,
-                  borderColor: 'black',
-                },
-                textInput: {
-                  marginTop: 2,
-                  marginLeft: 2,
-                  fontSize: 16,
-                  color: '#011a1b',
-                },
-              }}
-            />
-          </View>
+                placeholder="Toponym"
+                fetchDetails={false}
+                disableScroll={true}
+                searchOptions={{types: ['(cities)']}}
+                onPress={(details = null) => {
+                  setOriginName(details.description);
+                }}
+                query={{
+                  key: Config.GOOGLE_MAPS_API_KEY,
+                  language: 'es',
+                }}
+                styles={{
+                  textInputContainer: {
+                    padding: 13,
+                    marginBottom: 10,
+                    ...globalStyles.white,
+                    borderWidth: 1,
+                    borderColor: 'black',
+                  },
+                  textInput: {
+                    marginTop: 2,
+                    marginLeft: 2,
+                    fontSize: 16,
+                    color: '#011a1b',
+                  },
+                }}
+              />
+            </View>
           ) : (
             <>
               {localInterestPoints && localInterestPoints.length > 0 ? (
@@ -500,35 +498,36 @@ const RouteFinder = () => {
 
           {selectedDestinationOption === 'custom' ? (
             <View>
-            <GooglePlacesAutocomplete
-            placeholder="Toponym"
-            fetchDetails={false}
-            disableScroll={true}
-            onPress={(details = null) => {
-              // Formateamos los datos para enviar solamente el nombre de la ciudad (Sin el país)
-              setDestinationName(details.structured_formatting.main_text);
-            }}
-            query={{
-              key: Config.GOOGLE_MAPS_API_KEY,
-              language: 'es',
-            }}
-            styles={{
-              textInputContainer: {
-                padding: 13,
-                marginBottom: 10,
-                ...globalStyles.white,
-                borderWidth: 1,
-                borderColor: 'black',
-              },
-              textInput: {
-                marginTop: 2,
-                marginLeft: 2,
-                fontSize: 16,
-                color: '#011a1b',
-              },
-            }}
-          />
-        </View>
+              <GooglePlacesAutocomplete
+                placeholder="Toponym"
+                fetchDetails={false}
+                disableScroll={true}
+                searchOptions={{types: ['(cities)']}}
+                onPress={(details = null) => {
+                  // Formateamos los datos para enviar solamente el nombre de la ciudad (Sin el país)
+                  setDestinationName(details.structured_formatting.main_text);
+                }}
+                query={{
+                  key: Config.GOOGLE_MAPS_API_KEY,
+                  language: 'es',
+                }}
+                styles={{
+                  textInputContainer: {
+                    padding: 13,
+                    marginBottom: 10,
+                    ...globalStyles.white,
+                    borderWidth: 1,
+                    borderColor: 'black',
+                  },
+                  textInput: {
+                    marginTop: 2,
+                    marginLeft: 2,
+                    fontSize: 16,
+                    color: '#011a1b',
+                  },
+                }}
+              />
+            </View>
           ) : (
             <>
               {localInterestPoints && localInterestPoints.length > 0 ? (
