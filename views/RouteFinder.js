@@ -271,8 +271,9 @@ const RouteFinder = () => {
             style={[
               globalStyles.black,
               {
-                position: 'absolute',
+                position: 'fixed',
                 bottom: 0,
+                borderRadius: 15,
                 width: '100%',
                 alignItems: 'center',
               },
@@ -436,7 +437,9 @@ const RouteFinder = () => {
               searchOptions={{types: ['(cities)']}}
               onPress={(details = null) => {
                 // Formateamos los datos para enviar solamente el nombre de la ciudad (Sin el país)
-                setOriginName(details.structured_formatting.main_text);
+                direccion = details.structured_formatting.main_text + ', ' + details.structured_formatting.secondary_text
+                setOriginName(direccion);
+                console.log(originName)
               }}
               query={{
                 key: Config.GOOGLE_MAPS_API_KEY,
@@ -501,7 +504,6 @@ const RouteFinder = () => {
             placeholder="Toponym"
             fetchDetails={false}
             disableScroll={true}
-            searchOptions={{types: ['(cities)']}}
             onPress={(details = null) => {
               // Formateamos los datos para enviar solamente el nombre de la ciudad (Sin el país)
               setDestinationName(details.structured_formatting.main_text);
