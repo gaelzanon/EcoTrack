@@ -68,8 +68,8 @@ const RouteFinder = () => {
       setJourney(journey);
       setName(journey.name);
       setRouteCoordinates(journey.coordinates);
-      setDuration(journey.duration);
-      setDistance(journey.distance);
+      setDuration(formatDuration(journey.duration));
+      setDistance(formatDistance(journey.distance));
       setPrice(journey.cost);
       setJourneyVehicleType(journey.vehicleType);
       // Agrega cualquier otro estado que necesites establecer

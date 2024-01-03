@@ -185,9 +185,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 8,
+    color: 'black',
   },
   details: {
     fontSize: 16,
+    color: 'black',
   },
 });
 

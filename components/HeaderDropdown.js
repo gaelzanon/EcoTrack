@@ -122,9 +122,6 @@ const HeaderDropdown = () => {
     return (
       <View style={styles.item}>
         <Text style={styles.textItem}>{item.label}</Text>
-        {item.value === value && (
-          <Pressable onPress={deleteUser} style={{marginRight: 10}}></Pressable>
-        )}
       </View>
     );
   };
@@ -179,6 +176,7 @@ const styles = StyleSheet.create({
   textItem: {
     flex: 1,
     fontSize: 16,
+    color: 'black',
   },
   placeholder: {
     color: 'white',

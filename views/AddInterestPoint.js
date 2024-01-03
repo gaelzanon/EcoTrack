@@ -223,7 +223,7 @@ const AddInterestPoint = () => {
           <View>
             <View>
               <GooglePlacesAutocomplete
-                placeholder="Name"
+                placeholder="Toponym"
                 fetchDetails={false}
                 disableScroll={true}
                 searchOptions={{types: ['(cities)']}}
