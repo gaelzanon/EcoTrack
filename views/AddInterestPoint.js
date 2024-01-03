@@ -248,6 +248,10 @@ const AddInterestPoint = () => {
                     fontSize: 16,
                     color: '#011a1b',
                   },
+                  description: {
+                    color: '#011a1b',
+                  },
+                  
                 }}
               />
             </View>
