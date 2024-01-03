@@ -81,8 +81,10 @@ const RouteFinder = () => {
     async function fetchInterestPoints() {
       const points = await interestPointController.getInterestPoints();
       setLocalInterestPoints(points);
-      setSelectedOrigin(points[0].name);
-      setSelectedDestination(points[0].name);
+      if (points.length > 0) {
+        setSelectedOrigin(points[0].name);
+        setSelectedDestination(points[0].name);
+      }
     }
     fetchInterestPoints();
   }, [interestPoints]);
@@ -92,19 +94,26 @@ const RouteFinder = () => {
       const vehicles = await vehiclesController.getVehicles();
       setLocalVehicles(vehicles);
       if (!userInfo) {
-        setSelectedVehicle(vehicles[0].plate);
-      } else {
-        setSelectedRouteOption(userInfo.defaultRouteType);
-        if (
-          ['walking', 'bike', 'diesel', 'electric', 'gasoline'].includes(
-            userInfo.defaultVehicle,
-          )
-        ) {
-          setSelectedGenericVehicleType(userInfo.defaultVehicle);
-        } else {
-          setSelectedVehicleOption('custom');
-          setSelectedVehicle(userInfo.defaultVehicle);
+        if (vehicles.length > 0) {
+          setSelectedVehicle(vehicles[0].plate);
         }
+      } else {
+        if (userInfo.defaultRouteType) {
+          setSelectedRouteOption(userInfo.defaultRouteType);
+        }
+        if (userInfo.defaultVehicle) {
+          if (
+            ['walking', 'bike', 'diesel', 'electric', 'gasoline'].includes(
+              userInfo.defaultVehicle,
+            )
+          ) {
+            setSelectedGenericVehicleType(userInfo.defaultVehicle);
+          } else {
+            setSelectedVehicleOption('custom');
+            setSelectedVehicle(userInfo.defaultVehicle);
+          }
+        }
+        
       }
     }
 
@@ -285,24 +294,23 @@ const RouteFinder = () => {
                       {color: globalStyles.white.backgroundColor},
                     ]}>
                     Estimated fuel price: {price}€
-                </Text>
-                {!route.params && (
-                  <Pressable onPress={() => handleSaveRoute()}>
-                  <MaterialCommunityIcons
-                    name={'content-save'}
-                    size={30}
-                    color={'grey'}
-                  />
-                </Pressable>
-                )}
-                  
+                  </Text>
+                  {!route.params && (
+                    <Pressable onPress={() => handleSaveRoute()}>
+                      <MaterialCommunityIcons
+                        name={'content-save'}
+                        size={30}
+                        color={'grey'}
+                      />
+                    </Pressable>
+                  )}
                 </>
               )}
-            {price !== '' &&
+            {(price !== '' &&
               (selectedGenericVehicleType === 'walking' ||
-                selectedGenericVehicleType === 'bike' &&
-              journeyVehicleType === '') ||
-              (journeyVehicleType === 'walking' ||
+                (selectedGenericVehicleType === 'bike' &&
+                  journeyVehicleType === ''))) ||
+              ((journeyVehicleType === 'walking' ||
                 journeyVehicleType === 'bike') && (
                 <>
                   <Text
@@ -312,17 +320,17 @@ const RouteFinder = () => {
                     ]}>
                     Estimated calories burnt: {price}
                   </Text>
-                  {!route.params  && (
-                  <Pressable onPress={() => handleSaveRoute()}>
-                  <MaterialCommunityIcons
-                    name={'content-save'}
-                    size={30}
-                    color={'grey'}
-                  />
-                </Pressable>
-                )}
+                  {!route.params && (
+                    <Pressable onPress={() => handleSaveRoute()}>
+                      <MaterialCommunityIcons
+                        name={'content-save'}
+                        size={30}
+                        color={'grey'}
+                      />
+                    </Pressable>
+                  )}
                 </>
-              )}
+              ))}
           </View>
         </>
       ) : (

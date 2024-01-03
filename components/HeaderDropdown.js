@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {StyleSheet, View, Text, Alert, Pressable} from 'react-native';
+import {StyleSheet, View, Text, Alert} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useUserController} from '../contexts/UserControllerContext';
 import {useNavigation} from '@react-navigation/native';
@@ -11,7 +11,7 @@ const HeaderDropdown = () => {
   const navigation = useNavigation();
   const userController = useUserController();
   const [value, setValue] = useState(null);
-  const {user, setUser, setVehicles, setInterestPoints} = useAsyncStorage();
+  const {user, setUser, setVehicles, setInterestPoints, setJourneys, setUserInfo} = useAsyncStorage();
 
   const dropdownMenu = [
     {label: 'Preferences', value: 'preferences'},
@@ -38,6 +38,8 @@ const HeaderDropdown = () => {
             setInterestPoints(null);
             setUser(null);
             setVehicles(null);
+            setJourneys(null);
+            setUserInfo(null);
             Alert.alert('Account succesfully deleted.');
             navigation.navigate('Login');
           } catch (error) {
@@ -76,6 +78,8 @@ const HeaderDropdown = () => {
             setInterestPoints(null);
             setUser(null);
             setVehicles(null);
+            setJourneys(null);
+            setUserInfo(null);
             Alert.alert('Logged out succesfully.');
             navigation.navigate('Login');
           } catch (error) {

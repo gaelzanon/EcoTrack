@@ -22,7 +22,9 @@ const Preferences = () => {
   const {vehicles, user, userInfo, setUserInfo} = useAsyncStorage();
   const [localVehicles, setLocalVehicles] = useState(vehicles);
   const [selectedVehicleOption, setSelectedVehicleOption] = useState('generic');
-  const [selectedVehicle, setSelectedVehicle] = useState(vehicles[0].plate);
+  const [selectedVehicle, setSelectedVehicle] = useState(
+    vehicles ? vehicles[0].plate : null,
+  );
   const [selectedGenericVehicleType, setSelectedGenericVehicleType] =
     useState('walking');
   const [useCustomVehicle, setUseCustomVehicle] = useState(false);
@@ -32,19 +34,26 @@ const Preferences = () => {
       const vehicles = await vehiclesController.getVehicles();
       setLocalVehicles(vehicles);
       if (!userInfo) {
-        setSelectedVehicle(vehicles[0].plate);
-      } else {
-        setSelectedRouteOption(userInfo.defaultRouteType)
-        if (
-          ['walking', 'bike', 'diesel', 'electric', 'gasoline'].includes(
-            userInfo.defaultVehicle,
-          )
-        ) {
-          setSelectedGenericVehicleType(userInfo.defaultVehicle);
-        } else {
-          setSelectedVehicleOption('custom');
-          setSelectedVehicle(userInfo.defaultVehicle);
+        if (vehicles.length > 0) {
+          setSelectedVehicle(vehicles[0].plate);
         }
+      } else {
+        if (userInfo.defaultRouteType) {
+          setSelectedRouteOption(userInfo.defaultRouteType);
+        }
+        if (userInfo.defaultVehicle) {
+          if (
+            ['walking', 'bike', 'diesel', 'electric', 'gasoline'].includes(
+              userInfo.defaultVehicle,
+            )
+          ) {
+            setSelectedGenericVehicleType(userInfo.defaultVehicle);
+          } else {
+            setSelectedVehicleOption('custom');
+            setSelectedVehicle(userInfo.defaultVehicle);
+          }
+        }
+        
       }
     }
 
