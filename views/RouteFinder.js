@@ -150,7 +150,7 @@ const RouteFinder = () => {
       let message = 'An error occurred. Please try again.';
 
       if (error.message.includes('too many index entries for entity')) {
-        message = 'Cannot store a route this large.';
+        message = 'Cannot store a route this long.';
       } else {
         switch (error.code) {
           case 'InvalidNameException':
@@ -236,7 +236,7 @@ const RouteFinder = () => {
           message = 'There is an invalid interest point.';
           break;
         case 'RouteNotAvailableException':
-          message = `There wansn't a route found.`;
+          message = 'No route available.';
           break;
         default:
           console.log(error);

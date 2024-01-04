@@ -88,7 +88,7 @@ const AddInterestPoint = () => {
 
   const handleAddInterestPointByToponym = async () => {
     if (toponym === '') {
-      Alert.alert('Please fill in all the parameters');
+      Alert.alert('Please input a valid toponym');
     } else {
       try {
         const userEmail = user ? user.email : null;
