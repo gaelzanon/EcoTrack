@@ -65,6 +65,7 @@ class CloudService {
     await AsyncStorage.removeItem('user');
     await AsyncStorage.removeItem('vehicles');
     await AsyncStorage.removeItem('interestPoints');
+    await AsyncStorage.removeItem('journeys');
     return true;
   }
   async deleteUserInfo(email) {
